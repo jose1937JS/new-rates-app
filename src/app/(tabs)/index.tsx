@@ -95,11 +95,6 @@ export default function ConverterScreen() {
         </View>
         <View className="items-end gap-1">
           <OfflineBadge isOnline={isOnline} />
-          {dataUpdatedAt > 0 && (
-            <Text className="text-xs text-text-muted">
-              Actualizado {formatRelativeTime(new Date(dataUpdatedAt))}
-            </Text>
-          )}
         </View>
       </Animated.View>
 
@@ -123,6 +118,19 @@ export default function ConverterScreen() {
               onChangeText={setAmount}
             />
           </Animated.View>
+
+          <View className="flex-row justify-between items-center">
+            <Text className="text-lg font-medium text-primary">
+              Conversiones
+            </Text>
+            <View className="flex-row items-center gap-1">
+              {dataUpdatedAt > 0 && (
+                <Text className="text-xs text-text-muted">
+                  Actualizado {formatRelativeTime(new Date(dataUpdatedAt))}
+                </Text>
+              )}
+            </View>
+          </View>
 
           {/* Conversion cards */}
           <View className="gap-3">

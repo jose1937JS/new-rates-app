@@ -43,6 +43,25 @@ export function formatFullDate(date: string): string {
   return format(parseISO(date), 'dd/MM/yyyy');
 }
 
+/** "07 Sep 2026" — for history list display */
+export function formatHistoryDate(date: string): string {
+  try {
+    return format(parseISO(date), 'dd MMM yyyy', { locale: es });
+  } catch {
+    return date;
+  }
+}
+
+/** "Lunes" — capitalized day name */
+export function formatDayOfWeek(date: string): string {
+  try {
+    const day = format(parseISO(date), 'EEEE', { locale: es });
+    return day.charAt(0).toUpperCase() + day.slice(1);
+  } catch {
+    return '';
+  }
+}
+
 /** Format percentage change: "+2.3%" or "-1.5%" */
 export function formatPercentage(value: number): string {
   const sign = value >= 0 ? '+' : '';

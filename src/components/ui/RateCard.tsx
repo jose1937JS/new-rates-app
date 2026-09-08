@@ -66,7 +66,7 @@ export function RateCard({
       <View className="mb-2 flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
           <Text className="text-xl">{CURRENCY_FLAGS[currency]}</Text>
-          <Text className="text-lg font-medium text-text-primary">
+          <Text className="text-xl font-medium text-text-primary">
             {currency}
           </Text>
         </View>
@@ -96,9 +96,9 @@ export function RateCard({
       </Text>
 
       {/* Rate info */}
-      <Text className="text-sm text-text-secondary">
+      {currency !== 'VES' && <Text className="text-sm text-text-secondary">
         1 {currency} = {formatNumber(rate, 2)} VES
-      </Text>
+      </Text>}
     </AnimatedPressable>
   </Animated.View>
   );

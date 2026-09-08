@@ -8,6 +8,7 @@ import {
   PeriodSelector,
 } from '@/components/ui/CurrencyTabSelector';
 import { PriceChart } from '@/components/ui/PriceChart';
+import { PriceHistoryList } from '@/components/ui/PriceHistoryList';
 import { StatsRow } from '@/components/ui/StatsRow';
 import { useHistoricalRates } from '@/hooks/useHistoricalRates';
 import { useThemeColors } from '@/hooks/useThemeColors';
@@ -95,6 +96,13 @@ export default function HistoryScreen() {
           min={stats.min}
           change={stats.change}
         />
+      )}
+
+      {/* Price list */}
+      {!isLoading && data.length > 0 && (
+        <Animated.View entering={FadeInUp.delay(300).duration(400)}>
+          <PriceHistoryList data={data} currency={selectedCurrency} />
+        </Animated.View>
       )}
 
       {/* Info */}

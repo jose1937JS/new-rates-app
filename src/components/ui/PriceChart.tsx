@@ -17,7 +17,7 @@ export function PriceChart({ data, isLoading }: PriceChartProps) {
   if (isLoading) {
     return (
       <View
-        className="h-52 items-center justify-center rounded-2xl bg-surface-card"
+        className="h-64 items-center justify-center rounded-2xl bg-surface-card"
         style={{ borderCurve: 'continuous' }}
       >
         <Text className="text-sm text-text-muted">Cargando gráfico...</Text>
@@ -28,7 +28,7 @@ export function PriceChart({ data, isLoading }: PriceChartProps) {
   if (data.length === 0) {
     return (
       <View
-        className="h-52 items-center justify-center rounded-2xl bg-surface-card"
+        className="h-64 items-center justify-center rounded-2xl bg-surface-card"
         style={{ borderCurve: 'continuous' }}
       >
         <Text className="text-sm text-text-muted">Sin datos disponibles</Text>
@@ -39,23 +39,16 @@ export function PriceChart({ data, isLoading }: PriceChartProps) {
   // Available chart width: screen minus container padding (32) minus card padding (32) minus Y-axis width (42)
   const chartWidth = Math.max(240, screenWidth - 106);
 
-  // Distribute at most 4 evenly spaced labels to eliminate clutter in 7d and 30d
+  // Spacing per point allowing horizontal scroll for larger sets while spanning card for smaller sets
   const totalPoints = data.length;
-  const targetLabelCount = Math.min(4, totalPoints);
-  const labelIndices = new Set<number>();
+  const minPointSpacing = 68;
+  const autoSpacing =
+    totalPoints > 1 ? (chartWidth - 40) / (totalPoints - 1) : chartWidth;
+  const spacing = Math.max(minPointSpacing, autoSpacing);
 
-  if (totalPoints <= 4) {
-    for (let i = 0; i < totalPoints; i++) labelIndices.add(i);
-  } else {
-    for (let i = 0; i < targetLabelCount; i++) {
-      const idx = Math.round((i * (totalPoints - 1)) / (targetLabelCount - 1));
-      labelIndices.add(idx);
-    }
-  }
-
-  const labelledData = data.map((point, i) => ({
+  const labelledData = data.map((point) => ({
     value: point.value,
-    label: labelIndices.has(i) ? formatChartDate(point.date) : '',
+    label: formatChartDate(point.date),
     labelTextStyle: {
       color: COLORS.textMuted,
       fontSize: 10,
@@ -78,19 +71,25 @@ export function PriceChart({ data, isLoading }: PriceChartProps) {
       <LineChart
         data={labelledData}
         width={chartWidth}
-        height={180}
+        height={220}
+        spacing={spacing}
+        initialSpacing={18}
+        endSpacing={24}
+        nestedScrollEnabled
+        scrollToEnd
+        scrollAnimation={false}
         color={COLORS.primary}
         thickness={2.5}
-        hideDataPoints={totalPoints > 5}
+        hideDataPoints={false}
         dataPointsColor={COLORS.primary}
-        dataPointsRadius={3.5}
+        dataPointsRadius={3}
         startFillColor={`${COLORS.primary}35`}
         endFillColor={`${COLORS.primary}02`}
         areaChart
         curved
         yAxisOffset={yAxisOffset}
         maxValue={maxVal + padding}
-        noOfSections={3}
+        noOfSections={4}
         yAxisColor="transparent"
         xAxisColor={COLORS.border}
         yAxisLabelWidth={42}
@@ -110,7 +109,6 @@ export function PriceChart({ data, isLoading }: PriceChartProps) {
         }}
         rulesType="dashed"
         rulesColor={`${COLORS.border}60`}
-        adjustToWidth
         isAnimated
         animationDuration={600}
         pointerConfig={{

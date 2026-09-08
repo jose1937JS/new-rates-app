@@ -1,20 +1,20 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
-
 import {
-  Smartphone,
-  Tag,
-  Moon,
-  Sun,
-  Laptop,
-  RefreshCw,
-  Trash2,
-  Landmark,
   Coins,
+  Globe,
+  Landmark,
+  Laptop,
+  Moon,
+  RefreshCw,
+  Sun,
+  Tag,
+  Trash2,
+  User
 } from 'lucide-react-native';
+import { Alert, Linking, Pressable, ScrollView, Text, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { useCurrencyStore } from '@/store/currencyStore';
@@ -164,9 +164,15 @@ export default function SettingsScreen() {
       {/* App info */}
       <SettingsGroup title="Aplicación" index={0}>
         <SettingsRow
-          icon={<Smartphone size={18} color={COLORS.textMuted} />}
-          label="Nombre"
-          value={APP_NAME}
+          icon={<User size={18} color={COLORS.textMuted} />}
+          label="Autor"
+          value="DevLopez"
+        />
+        <SettingsRow
+          icon={<Globe size={18} color={COLORS.textMuted} />}
+          label="Sitio Web"
+          value="devlopez.vercel.app"
+          onPress={() => Linking.openURL('https://devlopez.vercel.app')}
         />
         <SettingsRow
           icon={<Tag size={18} color={COLORS.textMuted} />}

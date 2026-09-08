@@ -46,3 +46,132 @@
     --expo-log-color-background: #111113;
   }
 }
+
+@layer utilities {
+  /* Ensure all text sizes default to Poppins Regular */
+  .text-xs,
+  .text-sm,
+  .text-base,
+  .text-lg,
+  .text-xl,
+  .text-2xl,
+  .text-3xl,
+  .text-4xl,
+  .text-5xl,
+  .text-6xl,
+  .text-7xl,
+  .text-8xl,
+  .text-9xl,
+  .text-\[10px\],
+  .text-\[11px\],
+  .text-\[12px\],
+  .text-\[13px\],
+  .text-\[14px\],
+  .text-\[15px\],
+  .text-\[16px\],
+  .text-\[18px\],
+  .text-\[20px\],
+  .text-\[22px\],
+  .text-\[24px\],
+  .text-\[28px\],
+  .text-\[32px\] {
+    font-family: Poppins_400Regular;
+  }
+
+  /* Font weights: map to specific Poppins font and set font-weight: normal to prevent Android font synthesis issues */
+  .font-thin {
+    font-family: Poppins_100Thin;
+    font-weight: normal;
+  }
+  .font-extralight {
+    font-family: Poppins_200ExtraLight;
+    font-weight: normal;
+  }
+  .font-light {
+    font-family: Poppins_300Light;
+    font-weight: normal;
+  }
+  .font-normal,
+  .font-regular {
+    font-family: Poppins_400Regular;
+    font-weight: normal;
+  }
+  .font-medium {
+    font-family: Poppins_500Medium;
+    font-weight: normal;
+  }
+  .font-semibold {
+    font-family: Poppins_600SemiBold;
+    font-weight: normal;
+  }
+  .font-bold {
+    font-family: Poppins_700Bold;
+    font-weight: normal;
+  }
+  .font-extrabold {
+    font-family: Poppins_800ExtraBold;
+    font-weight: normal;
+  }
+  .font-black {
+    font-family: Poppins_900Black;
+    font-weight: normal;
+  }
+
+  /* Italic variants */
+  .font-thin.italic,
+  .font-thin-italic {
+    font-family: Poppins_100Thin_Italic;
+    font-weight: normal;
+    font-style: normal;
+  }
+  .font-extralight.italic,
+  .font-extralight-italic {
+    font-family: Poppins_200ExtraLight_Italic;
+    font-weight: normal;
+    font-style: normal;
+  }
+  .font-light.italic,
+  .font-light-italic {
+    font-family: Poppins_300Light_Italic;
+    font-weight: normal;
+    font-style: normal;
+  }
+  .font-normal.italic,
+  .font-regular.italic,
+  .font-regular-italic,
+  .italic {
+    font-family: Poppins_400Regular_Italic;
+    font-weight: normal;
+    font-style: normal;
+  }
+  .font-medium.italic,
+  .font-medium-italic {
+    font-family: Poppins_500Medium_Italic;
+    font-weight: normal;
+    font-style: normal;
+  }
+  .font-semibold.italic,
+  .font-semibold-italic {
+    font-family: Poppins_600SemiBold_Italic;
+    font-weight: normal;
+    font-style: normal;
+  }
+  .font-bold.italic,
+  .font-bold-italic {
+    font-family: Poppins_700Bold_Italic;
+    font-weight: normal;
+    font-style: normal;
+  }
+  .font-extrabold.italic,
+  .font-extrabold-italic {
+    font-family: Poppins_800ExtraBold_Italic;
+    font-weight: normal;
+    font-style: normal;
+  }
+  .font-black.italic,
+  .font-black-italic {
+    font-family: Poppins_900Black_Italic;
+    font-weight: normal;
+    font-style: normal;
+  }
+}
