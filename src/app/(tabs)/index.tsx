@@ -1,24 +1,26 @@
-import { ScrollView, Text, View, ActivityIndicator } from 'react-native';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
-
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import { OfflineBadge } from '@/components/ui/OfflineBadge';
 import { RateCard } from '@/components/ui/RateCard';
 import { useConversion } from '@/hooks/useConversion';
 import { useCurrencyRates } from '@/hooks/useCurrencyRates';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { useCurrencyStore } from '@/store/currencyStore';
 import type { CurrencyCode } from '@/types/currency.types';
-import { APP_NAME, COLORS } from '@/utils/constants';
 import { formatRelativeTime, parseFormattedNumber } from '@/utils/formatters';
+import { ActivityIndicator, Platform, ScrollView, Text, View } from 'react-native';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const DISPLAY_CURRENCIES: CurrencyCode[] = ['USD', 'EUR', 'USDT'];
 
 export default function ConverterScreen() {
-  const { selectedCurrency, amount, setSelectedCurrency, setAmount } =
-    useCurrencyStore();
+  const { selectedCurrency, amount, setSelectedCurrency, setAmount } = useCurrencyStore();
   const { rates, isLoading, isFetching, dataUpdatedAt } = useCurrencyRates();
   const { isOnline } = useOfflineStatus();
+  const COLORS = useThemeColors();
+  const insets = useSafeAreaInsets();
+  const isAndroid = Platform.OS === 'android';
 
   const numericAmount = amount ? parseFormattedNumber(amount) : 0;
   const conversions = useConversion(numericAmount, selectedCurrency, rates);
@@ -68,7 +70,13 @@ export default function ConverterScreen() {
   return (
     <ScrollView
       className="flex-1 bg-surface"
-      contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 32 }}
+      style={{ backgroundColor: COLORS.surface }}
+      contentContainerStyle={{
+        padding: 16,
+        gap: 16,
+        paddingBottom: 32,
+        paddingTop: isAndroid ? insets.top : 0
+      }}
       contentInsetAdjustmentBehavior="automatic"
       keyboardShouldPersistTaps="handled"
     >
@@ -78,8 +86,8 @@ export default function ConverterScreen() {
         className="flex-row items-center justify-between"
       >
         <View className="flex-row items-center gap-2">
-          <Text className="text-2xl font-extrabold text-primary">
-            {APP_NAME}
+          <Text className="text-2xl font-bold text-primary">
+            Cambio Digital
           </Text>
           {isFetching && (
             <ActivityIndicator size="small" color={COLORS.primary} />
@@ -89,7 +97,7 @@ export default function ConverterScreen() {
           <OfflineBadge isOnline={isOnline} />
           {dataUpdatedAt > 0 && (
             <Text className="text-xs text-text-muted">
-              {formatRelativeTime(new Date(dataUpdatedAt))}
+              Actualizado {formatRelativeTime(new Date(dataUpdatedAt))}
             </Text>
           )}
         </View>

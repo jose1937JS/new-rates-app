@@ -83,4 +83,4 @@ export interface ChartDataPoint {
 
 export type ThemeMode = 'dark' | 'light' | 'system';
 
-export type ChartPeriod = '7d' | '30d';
+export type ChartPeriod = '1d' | '3d' | '7d' | '30d';

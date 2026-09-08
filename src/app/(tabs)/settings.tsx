@@ -1,12 +1,25 @@
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
+import {
+  Smartphone,
+  Tag,
+  Moon,
+  Sun,
+  Laptop,
+  RefreshCw,
+  Trash2,
+  Landmark,
+  Coins,
+} from 'lucide-react-native';
+
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { useCurrencyStore } from '@/store/currencyStore';
 import type { ThemeMode } from '@/types/currency.types';
-import { APP_NAME, APP_VERSION, COLORS } from '@/utils/constants';
+import { APP_NAME, APP_VERSION } from '@/utils/constants';
 
 function SettingsGroup({
   title,
@@ -36,11 +49,13 @@ function SettingsGroup({
 }
 
 function SettingsRow({
+  icon,
   label,
   value,
   onPress,
   destructive,
 }: {
+  icon?: React.ReactNode;
   label: string;
   value?: string;
   onPress?: () => void;
@@ -50,24 +65,29 @@ function SettingsRow({
     <Pressable
       onPress={onPress}
       disabled={!onPress}
-      className="flex-row items-center justify-between border-b border-border/30 px-4 py-3.5 active:bg-surface-elevated"
+      className="flex-row items-center justify-between border-b border-border px-4 py-3.5 active:bg-surface-elevated"
     >
-      <Text
-        className={`text-base ${destructive ? 'text-danger' : 'text-text-primary'}`}
-      >
-        {label}
-      </Text>
+      <View className="flex-row items-center gap-3">
+        {icon}
+        <Text
+          className={`text-base ${destructive ? 'text-danger' : 'text-text-primary'}`}
+        >
+          {label}
+        </Text>
+      </View>
       {value && <Text className="text-sm text-text-muted">{value}</Text>}
     </Pressable>
   );
 }
 
 function ThemeOption({
+  icon,
   mode,
   label,
   currentMode,
   onPress,
 }: {
+  icon?: React.ReactNode;
   mode: ThemeMode;
   label: string;
   currentMode: ThemeMode;
@@ -77,9 +97,12 @@ function ThemeOption({
   return (
     <Pressable
       onPress={onPress}
-      className="flex-row items-center justify-between border-b border-border/30 px-4 py-3.5 active:bg-surface-elevated"
+      className="flex-row items-center justify-between border-b border-border px-4 py-3.5 active:bg-surface-elevated"
     >
-      <Text className="text-base text-text-primary">{label}</Text>
+      <View className="flex-row items-center gap-3">
+        {icon}
+        <Text className="text-base text-text-primary">{label}</Text>
+      </View>
       <View
         className={`h-5 w-5 items-center justify-center rounded-full border-2 ${
           isActive ? 'border-primary' : 'border-text-muted'
@@ -95,6 +118,7 @@ function ThemeOption({
 
 export default function SettingsScreen() {
   const queryClient = useQueryClient();
+  const COLORS = useThemeColors();
   const { themeMode, setThemeMode } = useCurrencyStore();
 
   const handleForceRefresh = async () => {
@@ -133,32 +157,44 @@ export default function SettingsScreen() {
   return (
     <ScrollView
       className="flex-1 bg-surface"
+      style={{ backgroundColor: COLORS.surface }}
       contentContainerStyle={{ padding: 16, gap: 20, paddingBottom: 40 }}
       contentInsetAdjustmentBehavior="automatic"
     >
       {/* App info */}
       <SettingsGroup title="Aplicación" index={0}>
-        <SettingsRow label="Nombre" value={APP_NAME} />
-        <SettingsRow label="Versión" value={APP_VERSION} />
+        <SettingsRow
+          icon={<Smartphone size={18} color={COLORS.textMuted} />}
+          label="Nombre"
+          value={APP_NAME}
+        />
+        <SettingsRow
+          icon={<Tag size={18} color={COLORS.textMuted} />}
+          label="Versión"
+          value={APP_VERSION}
+        />
       </SettingsGroup>
 
       {/* Theme */}
       <SettingsGroup title="Apariencia" index={1}>
         <ThemeOption
+          icon={<Moon size={18} color={themeMode === 'dark' ? COLORS.primary : COLORS.textMuted} />}
           mode="dark"
-          label="🌙  Oscuro"
+          label="Oscuro"
           currentMode={themeMode}
           onPress={() => handleThemeChange('dark')}
         />
         <ThemeOption
+          icon={<Sun size={18} color={themeMode === 'light' ? COLORS.primary : COLORS.textMuted} />}
           mode="light"
-          label="☀️  Claro"
+          label="Claro"
           currentMode={themeMode}
           onPress={() => handleThemeChange('light')}
         />
         <ThemeOption
+          icon={<Laptop size={18} color={themeMode === 'system' ? COLORS.primary : COLORS.textMuted} />}
           mode="system"
-          label="📱  Automático"
+          label="Automático (Sistema)"
           currentMode={themeMode}
           onPress={() => handleThemeChange('system')}
         />
@@ -167,10 +203,12 @@ export default function SettingsScreen() {
       {/* Data */}
       <SettingsGroup title="Datos" index={2}>
         <SettingsRow
+          icon={<RefreshCw size={18} color={COLORS.primary} />}
           label="Forzar actualización"
           onPress={handleForceRefresh}
         />
         <SettingsRow
+          icon={<Trash2 size={18} color={COLORS.danger} />}
           label="Limpiar caché"
           onPress={handleClearCache}
           destructive
@@ -179,8 +217,16 @@ export default function SettingsScreen() {
 
       {/* About */}
       <SettingsGroup title="Fuentes de datos" index={3}>
-        <SettingsRow label="BCV" value="USD, EUR" />
-        <SettingsRow label="Binance P2P" value="USDT" />
+        <SettingsRow
+          icon={<Landmark size={18} color={COLORS.textMuted} />}
+          label="BCV"
+          value="USD, EUR"
+        />
+        <SettingsRow
+          icon={<Coins size={18} color={COLORS.textMuted} />}
+          label="Binance P2P"
+          value="USDT"
+        />
       </SettingsGroup>
 
       {/* Footer */}

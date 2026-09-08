@@ -11,11 +11,11 @@ export function formatUSD(value: number): string {
   return `$${formatNumber(value, 2)}`;
 }
 
-/** Format exchange rate with 4 decimal places */
+/** Format exchange rate with 2 decimal places */
 export function formatRate(value: number): string {
   return value.toLocaleString('es-VE', {
     minimumFractionDigits: 2,
-    maximumFractionDigits: 4,
+    maximumFractionDigits: 2,
   });
 }
 

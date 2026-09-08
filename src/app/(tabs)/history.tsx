@@ -1,3 +1,4 @@
+import { Calendar, TrendingUp } from 'lucide-react-native';
 import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
@@ -9,24 +10,40 @@ import {
 import { PriceChart } from '@/components/ui/PriceChart';
 import { StatsRow } from '@/components/ui/StatsRow';
 import { useHistoricalRates } from '@/hooks/useHistoricalRates';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import type { ChartPeriod, CurrencyCode } from '@/types/currency.types';
 import { CURRENCY_NAMES } from '@/utils/constants';
 
 const CHART_CURRENCIES: CurrencyCode[] = ['USD', 'EUR', 'USDT'];
-const PERIODS: ChartPeriod[] = ['7d', '30d'];
+const PERIODS: ChartPeriod[] = ['1d', '3d', '7d', '30d'];
 
 export default function HistoryScreen() {
+  const COLORS = useThemeColors();
   const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode>('USD');
-  const [period, setPeriod] = useState<ChartPeriod>('30d');
+  const [period, setPeriod] = useState<ChartPeriod>('1d');
 
   const { data, stats, isLoading } = useHistoricalRates(
     selectedCurrency,
     period,
   );
 
+  const getPeriodLabel = (p: ChartPeriod) => {
+    switch (p) {
+      case '1d':
+        return 'Datos de las últimas 24 horas';
+      case '3d':
+        return 'Datos de los últimos 3 días';
+      case '7d':
+        return 'Datos de los últimos 7 días';
+      case '30d':
+        return 'Datos de los últimos 30 días';
+    }
+  };
+
   return (
     <ScrollView
       className="flex-1 bg-surface"
+      style={{ backgroundColor: COLORS.surface }}
       contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 32 }}
       contentInsetAdjustmentBehavior="automatic"
     >
@@ -44,12 +61,18 @@ export default function HistoryScreen() {
         entering={FadeInUp.delay(100).duration(300)}
         className="flex-row items-center justify-between"
       >
-        <View>
-          <Text className="text-lg font-bold text-text-primary">
-            {CURRENCY_NAMES[selectedCurrency]}
-          </Text>
-          <Text className="text-sm text-text-secondary">
-            Evolución del precio en VES
+        <View className="flex-1 pr-2">
+          <View className="flex-row items-center gap-1.5">
+            <TrendingUp size={18} color={COLORS.primary} />
+            <Text
+              className="text-lg font-semibold text-text-primary"
+              numberOfLines={1}
+            >
+              {CURRENCY_NAMES[selectedCurrency]}
+            </Text>
+          </View>
+          <Text className="text-xs text-text-secondary">
+            Evolución en VES
           </Text>
         </View>
         <PeriodSelector
@@ -77,10 +100,11 @@ export default function HistoryScreen() {
       {/* Info */}
       <Animated.View
         entering={FadeInUp.delay(400).duration(300)}
-        className="items-center pt-2"
+        className="flex-row items-center justify-center gap-1.5 pt-2"
       >
+        <Calendar size={13} color={COLORS.textMuted} />
         <Text className="text-xs text-text-muted">
-          Datos de los últimos {period === '7d' ? '7' : '30'} días
+          {getPeriodLabel(period)}
         </Text>
       </Animated.View>
     </ScrollView>

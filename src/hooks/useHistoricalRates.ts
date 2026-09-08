@@ -11,7 +11,11 @@ import { queryKeys, STALE_TIME, GC_TIME } from '@/utils/constants';
 
 function getDateRange(period: ChartPeriod) {
   const to = new Date();
-  const days = period === '7d' ? 7 : 30;
+  let days = 30;
+  if (period === '1d') days = 1;
+  else if (period === '3d') days = 3;
+  else if (period === '7d') days = 7;
+
   const from = subDays(to, days);
   return {
     from: format(from, 'yyyy-MM-dd'),
@@ -23,7 +27,7 @@ function getDateRange(period: ChartPeriod) {
 
 export function useHistoricalRates(
   currency: CurrencyCode,
-  period: ChartPeriod = '30d',
+  period: ChartPeriod = '1d',
 ) {
   const { from, to, fromDate, toDate } = getDateRange(period);
 
@@ -80,13 +84,22 @@ export function useHistoricalRates(
     ];
 
     const field = currency === 'USD' ? 'usd' : 'eur';
-    data = allRates
-      .filter((r) => r.date >= from && r.date <= to)
-      .map((r) => ({
-        date: r.date,
-        value: r[field],
-      }))
+    const sortedRates = allRates
+      .filter((r) => r[field] != null)
       .sort((a, b) => a.date.localeCompare(b.date));
+
+    let filtered = sortedRates.filter((r) => r.date >= from && r.date <= to);
+
+    // If filtered points are insufficient (e.g. on weekends for 1d/3d), fallback to the last N points
+    const minPoints = period === '1d' ? 2 : period === '3d' ? 3 : 2;
+    if (filtered.length < minPoints && sortedRates.length >= 2) {
+      filtered = sortedRates.slice(-minPoints);
+    }
+
+    data = filtered.map((r) => ({
+      date: r.date,
+      value: r[field],
+    }));
   }
 
   // Compute stats

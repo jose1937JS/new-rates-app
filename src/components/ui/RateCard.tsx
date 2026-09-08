@@ -48,23 +48,25 @@ export function RateCard({
   const isPositive = changePercentage >= 0;
 
   return (
-    <AnimatedPressable
-      onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
+    <Animated.View
       entering={FadeInDown.delay(index * 80).duration(400).springify()}
-      style={[animatedStyle, { borderCurve: 'continuous' }]}
-      className={`rounded-2xl p-4 ${
-        isSelected
-          ? 'border-2 border-primary bg-primary/10'
-          : 'border border-border bg-surface-card'
-      }`}
     >
-      {/* Header row */}
+      <AnimatedPressable
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={[animatedStyle, { borderCurve: 'continuous' }]}
+        className={`rounded-2xl p-4 ${
+          isSelected
+            ? 'border-2 border-primary bg-primary/10'
+            : 'border border-border bg-surface-card'
+        }`}
+      >
+        {/* Header row */}
       <View className="mb-2 flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
           <Text className="text-xl">{CURRENCY_FLAGS[currency]}</Text>
-          <Text className="text-lg font-bold text-text-primary">
+          <Text className="text-lg font-medium text-text-primary">
             {currency}
           </Text>
         </View>
@@ -86,7 +88,7 @@ export function RateCard({
 
       {/* Converted amount */}
       <Text
-        className="mb-1 text-2xl font-bold text-text-primary"
+        className="mb-1 text-2xl font-medium text-text-primary"
         style={{ fontVariant: ['tabular-nums'] }}
         selectable
       >
@@ -95,8 +97,9 @@ export function RateCard({
 
       {/* Rate info */}
       <Text className="text-sm text-text-secondary">
-        1 {currency} = {formatNumber(rate, 4)} VES
+        1 {currency} = {formatNumber(rate, 2)} VES
       </Text>
     </AnimatedPressable>
+  </Animated.View>
   );
 }

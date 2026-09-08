@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import type { CurrencyCode, ThemeMode } from '@/types/currency.types';
 
@@ -15,12 +17,25 @@ interface CurrencyState {
   setThemeMode: (mode: ThemeMode) => void;
 }
 
-export const useCurrencyStore = create<CurrencyState>((set) => ({
-  selectedCurrency: 'VES',
-  amount: '',
-  themeMode: 'dark',
+export const useCurrencyStore = create<CurrencyState>()(
+  persist(
+    (set) => ({
+      selectedCurrency: 'USD',
+      amount: '1',
+      themeMode: 'system',
 
-  setSelectedCurrency: (code) => set({ selectedCurrency: code }),
-  setAmount: (value) => set({ amount: value }),
-  setThemeMode: (mode) => set({ themeMode: mode }),
-}));
+      setSelectedCurrency: (code) => set({ selectedCurrency: code }),
+      setAmount: (value) => set({ amount: value }),
+      setThemeMode: (mode) => set({ themeMode: mode }),
+    }),
+    {
+      name: 'ratesvenapp_theme_store',
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({
+        themeMode: state.themeMode,
+        selectedCurrency: state.selectedCurrency,
+      }),
+    },
+  ),
+);
+

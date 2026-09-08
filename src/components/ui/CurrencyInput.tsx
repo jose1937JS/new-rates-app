@@ -1,7 +1,8 @@
 import { useCallback } from 'react';
-import { TextInput, View, Text, Pressable } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
+import { useThemeColors } from '@/hooks/useThemeColors';
 import type { CurrencyCode } from '@/types/currency.types';
 import {
   CURRENCY_FLAGS,
@@ -23,6 +24,7 @@ export function CurrencyInput({
   onChangeText,
   onCurrencyPress,
 }: CurrencyInputProps) {
+  const COLORS = useThemeColors();
   const handleChange = useCallback(
     (text: string) => {
       // Allow only digits and a single decimal point
@@ -64,18 +66,19 @@ export function CurrencyInput({
 
       {/* Input row */}
       <View className="flex-row items-center gap-2">
-        <Text className="text-2xl font-bold text-primary">
+        <Text className="text-2xl font-medium text-primary">
           {CURRENCY_SYMBOLS[currency]}
         </Text>
         <TextInput
           value={displayValue}
           onChangeText={handleChange}
           placeholder="0.00"
-          placeholderTextColor="#666666"
+          placeholderTextColor={COLORS.textMuted}
           keyboardType="decimal-pad"
+          autoFocus={true}
           className="flex-1 text-3xl font-bold text-text-primary"
           style={{ fontVariant: ['tabular-nums'] }}
-          selectionColor="#ff6b26"
+          selectionColor={COLORS.primary}
         />
       </View>
     </View>

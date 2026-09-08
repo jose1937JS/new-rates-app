@@ -1,13 +1,15 @@
 import { Pressable, Text, View } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
+import { DollarSign, Euro, Coins, Banknote } from 'lucide-react-native';
 
 import type { CurrencyCode } from '@/types/currency.types';
-import { COLORS } from '@/utils/constants';
+
+const CURRENCY_ICONS: Partial<Record<CurrencyCode, React.ComponentType<{ size?: number; color?: string }>>> = {
+  USD: DollarSign,
+  EUR: Euro,
+  USDT: Coins,
+  VES: Banknote,
+};
 
 interface CurrencyTabSelectorProps {
   currencies: CurrencyCode[];
@@ -31,15 +33,19 @@ export function CurrencyTabSelector({
     <View className="flex-row gap-2 rounded-xl bg-surface-card p-1" style={{ borderCurve: 'continuous' }}>
       {currencies.map((currency) => {
         const isActive = currency === selected;
+        const IconComponent = CURRENCY_ICONS[currency];
         return (
           <Pressable
             key={currency}
             onPress={() => handlePress(currency)}
-            className={`flex-1 items-center rounded-lg py-2 ${
+            className={`flex-1 flex-row items-center justify-center gap-1.5 rounded-lg py-2 ${
               isActive ? 'bg-primary' : ''
             }`}
             style={isActive ? { borderCurve: 'continuous' } : undefined}
           >
+            {IconComponent && (
+              <IconComponent size={14} color={isActive ? '#FFFFFF' : '#94A3B8'} />
+            )}
             <Text
               className={`text-sm font-semibold ${
                 isActive ? 'text-white' : 'text-text-muted'
@@ -68,7 +74,10 @@ export function PeriodSelector({
   onSelect,
 }: PeriodSelectorProps) {
   return (
-    <View className="flex-row gap-2">
+    <View
+      className="flex-row items-center gap-1 rounded-xl bg-surface-card p-1"
+      style={{ borderCurve: 'continuous' }}
+    >
       {periods.map((period) => {
         const isActive = period === selected;
         return (
@@ -80,13 +89,14 @@ export function PeriodSelector({
                 onSelect(period);
               }
             }}
-            className={`rounded-lg px-4 py-1.5 ${
-              isActive ? 'bg-primary/15' : 'bg-surface-elevated'
+            className={`rounded-lg px-2.5 py-1 ${
+              isActive ? 'bg-primary' : 'bg-transparent'
             }`}
+            style={isActive ? { borderCurve: 'continuous' } : undefined}
           >
             <Text
               className={`text-xs font-semibold ${
-                isActive ? 'text-primary' : 'text-text-muted'
+                isActive ? 'text-white' : 'text-text-muted'
               }`}
             >
               {period}

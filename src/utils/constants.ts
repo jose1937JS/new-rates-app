@@ -61,19 +61,35 @@ export const CURRENCY_NAMES: Record<CurrencyCode, string> = {
 
 // ----- Theme -----
 
-export const COLORS = {
-  primary: '#ff6b26',
-  primaryLight: '#ff8f5a',
-  primaryDark: '#cc5520',
-  surface: '#1a1a1a',
-  surfaceCard: '#242424',
-  surfaceElevated: '#2e2e2e',
-  textPrimary: '#f5f5f5',
-  textSecondary: '#a0a0a0',
-  textMuted: '#666666',
-  success: '#22c55e',
-  danger: '#ef4444',
-  border: '#333333',
+export const THEME_COLORS = {
+  light: {
+    primary: '#ff6b26',
+    primaryLight: '#ff8f5a',
+    primaryDark: '#cc5520',
+    surface: '#f9fafb',
+    surfaceCard: '#ffffff',
+    surfaceElevated: '#f3f4f6',
+    textPrimary: '#111827',
+    textSecondary: '#4b5563',
+    textMuted: '#6b7280',
+    success: '#22c55e',
+    danger: '#ef4444',
+    border: '#e5e7eb',
+  },
+  dark: {
+    primary: '#ff6b26',
+    primaryLight: '#ff8f5a',
+    primaryDark: '#cc5520',
+    surface: '#1a1a1a',
+    surfaceCard: '#242424',
+    surfaceElevated: '#2e2e2e',
+    textPrimary: '#f5f5f5',
+    textSecondary: '#a0a0a0',
+    textMuted: '#666666',
+    success: '#22c55e',
+    danger: '#ef4444',
+    border: '#333333',
+  }
 } as const;
 
 // ----- App -----
