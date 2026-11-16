@@ -5,6 +5,7 @@ import { Text, View } from 'react-native';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { ChartDataPoint, CurrencyCode } from '@/types/currency.types';
 import {
+  formatChartTime,
   formatDayOfWeek,
   formatHistoryDate,
   formatNumber,
@@ -17,16 +18,17 @@ interface PriceHistoryListProps {
 }
 
 interface ProcessedHistoryItem {
+  key: string;
   date: string;
   formattedDate: string;
-  dayOfWeek: string;
+  subtitle: string;
   value: number;
   diff: number;
   changePct: number;
   hasPrev: boolean;
 }
 
-export function PriceHistoryList({ data }: PriceHistoryListProps) {
+export function PriceHistoryList({ data, currency }: PriceHistoryListProps) {
   const COLORS = useThemeColors();
 
   const historyItems = useMemo<ProcessedHistoryItem[]>(() => {
@@ -37,10 +39,16 @@ export function PriceHistoryList({ data }: PriceHistoryListProps) {
         const changePct =
           prevItem && prevItem.value > 0 ? (diff / prevItem.value) * 100 : 0;
 
+        const day = formatDayOfWeek(item.date);
+        const time = currency === 'USDT' ? formatChartTime(item.date) : '';
+        const subtitle =
+          day && time ? `${day} • ${time}` : day || time;
+
         return {
+          key: item.id !== undefined ? String(item.id) : `${item.date}-${index}`,
           date: item.date,
           formattedDate: formatHistoryDate(item.date),
-          dayOfWeek: formatDayOfWeek(item.date),
+          subtitle,
           value: item.value,
           diff,
           changePct,
@@ -48,7 +56,7 @@ export function PriceHistoryList({ data }: PriceHistoryListProps) {
         };
       })
       .reverse();
-  }, [data]);
+  }, [data, currency]);
 
   if (historyItems.length === 0) {
     return null;
@@ -84,19 +92,19 @@ export function PriceHistoryList({ data }: PriceHistoryListProps) {
 
           return (
             <View
-              key={item.date}
+              key={item.key}
               className={`flex-row items-center justify-between py-2.5 ${
                 !isLast ? 'border-b border-border/40' : ''
               }`}
             >
-              {/* Date & Day of Week */}
+              {/* Date & Day/Time */}
               <View className="gap-0.5">
                 <Text className="text-sm font-medium text-text-primary">
                   {item.formattedDate}
                 </Text>
-                {item.dayOfWeek ? (
+                {item.subtitle ? (
                   <Text className="text-xs text-text-muted">
-                    {item.dayOfWeek}
+                    {item.subtitle}
                   </Text>
                 ) : null}
               </View>

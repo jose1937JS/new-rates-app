@@ -35,12 +35,38 @@ export function formatRelativeTime(date: Date | string): string {
 
 /** "07 Sep" — for chart X axis */
 export function formatChartDate(date: string): string {
-  return format(parseISO(date), 'dd MMM', { locale: es });
+  try {
+    return format(parseISO(date), 'dd MMM', { locale: es });
+  } catch {
+    return date;
+  }
+}
+
+/** "14:30" — for intraday chart X axis and history items */
+export function formatChartTime(date: string): string {
+  try {
+    return format(parseISO(date), 'HH:mm', { locale: es });
+  } catch {
+    return '';
+  }
 }
 
 /** "07/09/2026" — for display */
 export function formatFullDate(date: string): string {
-  return format(parseISO(date), 'dd/MM/yyyy');
+  try {
+    return format(parseISO(date), 'dd/MM/yyyy');
+  } catch {
+    return date;
+  }
+}
+
+/** "07/09/2026 14:30" — for intraday chart pointer display */
+export function formatFullDateTime(date: string): string {
+  try {
+    return format(parseISO(date), 'dd/MM/yyyy HH:mm');
+  } catch {
+    return date;
+  }
 }
 
 /** "07 Sep 2026" — for history list display */
@@ -68,25 +94,40 @@ export function formatPercentage(value: number): string {
   return `${sign}${value.toFixed(2)}%`;
 }
 
-/** Parse a formatted number string back to a number */
+/** Parse an input or formatted number string back to a number */
 export function parseFormattedNumber(text: string): number {
-  // Remove everything except digits, dots, and commas
   const cleaned = text.replace(/[^\d.,]/g, '');
-  // Handle Venezuelan format (dot as thousands, comma as decimal)
-  const normalized = cleaned.replace(/\./g, '').replace(',', '.');
+  if (!cleaned) return 0;
+
+  const lastDot = cleaned.lastIndexOf('.');
+  const lastComma = cleaned.lastIndexOf(',');
+
+  let normalized = cleaned;
+  if (lastDot !== -1 && lastComma !== -1) {
+    normalized =
+      lastDot > lastComma
+        ? cleaned.replace(/,/g, '')
+        : cleaned.replace(/\./g, '').replace(',', '.');
+  } else if (lastComma !== -1) {
+    const commaCount = (cleaned.match(/,/g) ?? []).length;
+    normalized =
+      commaCount === 1 ? cleaned.replace(',', '.') : cleaned.replace(/,/g, '');
+  } else if (lastDot !== -1) {
+    const dotCount = (cleaned.match(/\./g) ?? []).length;
+    normalized = dotCount === 1 ? cleaned : cleaned.replace(/\./g, '');
+  }
+
   const result = parseFloat(normalized);
-  return isNaN(result) ? 0 : result;
+  return Number.isFinite(result) ? result : 0;
 }
 
 /** Format input for display while typing (thousands separator) */
 export function formatInputValue(text: string): string {
-  // Allow only digits and one decimal separator
   const cleaned = text.replace(/[^\d.]/g, '');
   const parts = cleaned.split('.');
   const intPart = parts[0] ?? '';
   const decPart = parts.length > 1 ? `.${parts[1]?.slice(0, 2) ?? ''}` : '';
 
-  // Add thousands separators
   const formatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   return `${formatted}${decPart}`;
 }

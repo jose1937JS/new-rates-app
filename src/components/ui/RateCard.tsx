@@ -7,7 +7,11 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import type { CurrencyCode } from '@/types/currency.types';
-import { CURRENCY_FLAGS, CURRENCY_SYMBOLS } from '@/utils/constants';
+import {
+  CURRENCY_FLAGS,
+  CURRENCY_NAMES,
+  CURRENCY_SYMBOLS,
+} from '@/utils/constants';
 import { formatNumber, formatPercentage } from '@/utils/formatters';
 
 interface RateCardProps {
@@ -63,43 +67,52 @@ export function RateCard({
         }`}
       >
         {/* Header row */}
-      <View className="mb-2 flex-row items-center justify-between">
-        <View className="flex-row items-center gap-2">
-          <Text className="text-xl">{CURRENCY_FLAGS[currency]}</Text>
-          <Text className="text-xl font-medium text-text-primary">
-            {currency}
-          </Text>
+        <View className="mb-2 flex-row items-center justify-between">
+          <View className="flex-row items-center gap-2">
+            <Text className="text-xl">{CURRENCY_FLAGS[currency]}</Text>
+            <Text className="text-xl font-medium text-text-primary">
+              {currency}
+            </Text>
+            <Text className="text-xs text-text-muted">
+              {CURRENCY_NAMES[currency]}
+            </Text>
+          </View>
+          {currency !== 'VES' && (
+            <View
+              className={`rounded-full px-2 py-0.5 ${
+                isPositive ? 'bg-success/15' : 'bg-danger/15'
+              }`}
+            >
+              <Text
+                className={`text-xs font-semibold ${
+                  isPositive ? 'text-success' : 'text-danger'
+                }`}
+                style={{ fontVariant: ['tabular-nums'] }}
+              >
+                {formatPercentage(changePercentage)}
+              </Text>
+            </View>
+          )}
         </View>
-        <View
-          className={`rounded-full px-2 py-0.5 ${
-            isPositive ? 'bg-success/15' : 'bg-danger/15'
-          }`}
+
+        {/* Converted amount */}
+        <Text
+          className="mb-1 text-2xl font-medium text-text-primary"
+          style={{ fontVariant: ['tabular-nums'] }}
+          selectable
         >
-          <Text
-            className={`text-xs font-semibold ${
-              isPositive ? 'text-success' : 'text-danger'
-            }`}
-            style={{ fontVariant: ['tabular-nums'] }}
-          >
-            {formatPercentage(changePercentage)}
+          {CURRENCY_SYMBOLS[currency]} {formatNumber(convertedAmount)}
+        </Text>
+
+        {/* Rate info */}
+        {currency !== 'VES' && (
+          <Text className="text-sm text-text-secondary">
+            {rate > 0
+              ? `1 ${currency} = ${formatNumber(rate, 2)} VES`
+              : 'Tasa no disponible'}
           </Text>
-        </View>
-      </View>
-
-      {/* Converted amount */}
-      <Text
-        className="mb-1 text-2xl font-medium text-text-primary"
-        style={{ fontVariant: ['tabular-nums'] }}
-        selectable
-      >
-        {CURRENCY_SYMBOLS[currency]} {formatNumber(convertedAmount)}
-      </Text>
-
-      {/* Rate info */}
-      {currency !== 'VES' && <Text className="text-sm text-text-secondary">
-        1 {currency} = {formatNumber(rate, 2)} VES
-      </Text>}
-    </AnimatedPressable>
-  </Animated.View>
+        )}
+      </AnimatedPressable>
+    </Animated.View>
   );
 }

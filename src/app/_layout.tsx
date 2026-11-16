@@ -1,8 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
-import {
-  QueryClient,
-} from '@tanstack/react-query';
+import { QueryClient, onlineManager } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -59,6 +58,13 @@ if ((TextInput as any).defaultProps == null) {
 }
 (TextInput as any).defaultProps.style = { fontFamily: 'Poppins_400Regular' };
 
+// Wire React Query onlineManager to NetInfo so offline fallback triggers cleanly
+onlineManager.setEventListener((setOnline) =>
+  NetInfo.addEventListener((state) => {
+    setOnline(Boolean(state.isConnected) && state.isInternetReachable !== false);
+  }),
+);
+
 const asyncStoragePersister = createAsyncStoragePersister({
   storage: AsyncStorage,
   key: PERSIST_KEY,
@@ -88,17 +94,20 @@ export default function RootLayout() {
   });
 
   const [queryClient] = useState(
-    () => new QueryClient({
-      defaultOptions: {
-        queries: {
-          gcTime: GC_TIME,
-          staleTime: STALE_TIME,
-          refetchOnReconnect: true,
-          refetchOnMount: true,
-          retry: 2,
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            gcTime: GC_TIME,
+            staleTime: STALE_TIME,
+            networkMode: 'offlineFirst',
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: true,
+            refetchOnMount: true,
+            retry: 1,
+          },
         },
-      },
-    }),
+      }),
   );
 
   const COLORS = useThemeColors();

@@ -31,11 +31,10 @@ export const useCurrencyStore = create<CurrencyState>()(
     {
       name: 'ratesvenapp_theme_store',
       storage: createJSONStorage(() => AsyncStorage),
+      // Always boot with selectedCurrency = 'USD' and amount = '1'
       partialize: (state) => ({
         themeMode: state.themeMode,
-        selectedCurrency: state.selectedCurrency,
       }),
     },
   ),
 );
-

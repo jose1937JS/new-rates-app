@@ -1,16 +1,18 @@
 import { Calendar, TrendingUp } from 'lucide-react-native';
 import { useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 
 import {
   CurrencyTabSelector,
   PeriodSelector,
 } from '@/components/ui/CurrencyTabSelector';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { PriceChart } from '@/components/ui/PriceChart';
 import { PriceHistoryList } from '@/components/ui/PriceHistoryList';
 import { StatsRow } from '@/components/ui/StatsRow';
 import { useHistoricalRates } from '@/hooks/useHistoricalRates';
+import { useOfflineStatus } from '@/hooks/useOfflineStatus';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { ChartPeriod, CurrencyCode } from '@/types/currency.types';
 import { CURRENCY_NAMES } from '@/utils/constants';
@@ -20,13 +22,12 @@ const PERIODS: ChartPeriod[] = ['1d', '3d', '7d', '30d'];
 
 export default function HistoryScreen() {
   const COLORS = useThemeColors();
+  const { isOnline } = useOfflineStatus();
   const [selectedCurrency, setSelectedCurrency] = useState<CurrencyCode>('USD');
   const [period, setPeriod] = useState<ChartPeriod>('1d');
 
-  const { data, stats, isLoading } = useHistoricalRates(
-    selectedCurrency,
-    period,
-  );
+  const { data, stats, isLoading, isFetching, isError, refetch } =
+    useHistoricalRates(selectedCurrency, period);
 
   const getPeriodLabel = (p: ChartPeriod) => {
     switch (p) {
@@ -47,6 +48,14 @@ export default function HistoryScreen() {
       style={{ backgroundColor: COLORS.surface }}
       contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 32 }}
       contentInsetAdjustmentBehavior="automatic"
+      refreshControl={
+        <RefreshControl
+          refreshing={isFetching && !isLoading}
+          onRefresh={refetch}
+          tintColor={COLORS.primary}
+          colors={[COLORS.primary]}
+        />
+      }
     >
       {/* Currency tabs */}
       <Animated.View entering={FadeIn.duration(300)}>
@@ -83,26 +92,43 @@ export default function HistoryScreen() {
         />
       </Animated.View>
 
-      {/* Chart */}
-      <Animated.View entering={FadeInUp.delay(200).duration(400)}>
-        <PriceChart data={data} isLoading={isLoading} />
-      </Animated.View>
-
-      {/* Stats */}
-      {!isLoading && data.length > 0 && (
-        <StatsRow
-          current={stats.current}
-          max={stats.max}
-          min={stats.min}
-          change={stats.change}
+      {/* Error / Offline empty state */}
+      {!isLoading && data.length === 0 && isError ? (
+        <EmptyState
+          isError={isError}
+          isRetrying={isFetching}
+          onRetry={refetch}
+          title="No pudimos cargar el historial"
+          message={
+            !isOnline
+              ? 'No tienes conexión a internet y no hay historial guardado para esta moneda.'
+              : 'Ocurrió un problema al consultar el historial. Inténtalo de nuevo.'
+          }
         />
-      )}
+      ) : (
+        <>
+          {/* Chart */}
+          <Animated.View entering={FadeInUp.delay(200).duration(400)}>
+            <PriceChart data={data} isLoading={isLoading} />
+          </Animated.View>
 
-      {/* Price list */}
-      {!isLoading && data.length > 0 && (
-        <Animated.View entering={FadeInUp.delay(300).duration(400)}>
-          <PriceHistoryList data={data} currency={selectedCurrency} />
-        </Animated.View>
+          {/* Stats */}
+          {!isLoading && data.length > 0 && (
+            <StatsRow
+              current={stats.current}
+              max={stats.max}
+              min={stats.min}
+              change={stats.change}
+            />
+          )}
+
+          {/* Price list */}
+          {!isLoading && data.length > 0 && (
+            <Animated.View entering={FadeInUp.delay(300).duration(400)}>
+              <PriceHistoryList data={data} currency={selectedCurrency} />
+            </Animated.View>
+          )}
+        </>
       )}
 
       {/* Info */}

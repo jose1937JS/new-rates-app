@@ -1,118 +1,110 @@
 import { useQuery } from '@tanstack/react-query';
-import { format, subDays } from 'date-fns';
+import { useCallback, useMemo } from 'react';
 
-import { fetchBcvMonthly, fetchUsdtHistory } from '@/services/dolarVzlaApi';
+import { expireApiCache, fetchCurrencyHistory } from '@/services/ratesApi';
 import type {
   ChartDataPoint,
   ChartPeriod,
   CurrencyCode,
 } from '@/types/currency.types';
-import { queryKeys, STALE_TIME, GC_TIME } from '@/utils/constants';
+import {
+  CURRENCY_TO_API,
+  GC_TIME,
+  queryKeys,
+  STALE_TIME,
+} from '@/utils/constants';
+import { formatChartDate, formatChartTime } from '@/utils/formatters';
 
-function getDateRange(period: ChartPeriod) {
-  const to = new Date();
-  let days = 30;
-  if (period === '1d') days = 1;
-  else if (period === '3d') days = 3;
-  else if (period === '7d') days = 7;
-
-  const from = subDays(to, days);
-  return {
-    from: format(from, 'yyyy-MM-dd'),
-    to: format(to, 'yyyy-MM-dd'),
-    fromDate: from,
-    toDate: to,
-  };
+function getPeriodDays(period: ChartPeriod): number {
+  switch (period) {
+    case '1d':
+      return 1;
+    case '3d':
+      return 3;
+    case '7d':
+      return 7;
+    case '30d':
+      return 30;
+  }
 }
 
 export function useHistoricalRates(
   currency: CurrencyCode,
   period: ChartPeriod = '1d',
 ) {
-  const { from, to, fromDate, toDate } = getDateRange(period);
+  const apiCurrency = CURRENCY_TO_API[currency];
 
-  // BCV historical — fetch monthly data for the months in range
-  const bcvQuery = useQuery({
-    queryKey: queryKeys.bcvMonthly(toDate.getFullYear(), toDate.getMonth() + 1),
-    queryFn: () =>
-      fetchBcvMonthly(toDate.getFullYear(), toDate.getMonth() + 1),
+  const historyQuery = useQuery({
+    queryKey: queryKeys.history(currency),
+    queryFn: () => fetchCurrencyHistory(apiCurrency!, 30),
     staleTime: STALE_TIME,
     gcTime: GC_TIME,
-    enabled: currency === 'USD' || currency === 'EUR',
+    enabled: Boolean(apiCurrency),
   });
 
-  // Also fetch previous month if the range crosses month boundary
-  const needsPrevMonth = fromDate.getMonth() !== toDate.getMonth();
-  const prevMonthQuery = useQuery({
-    queryKey: queryKeys.bcvMonthly(
-      fromDate.getFullYear(),
-      fromDate.getMonth() + 1,
-    ),
-    queryFn: () =>
-      fetchBcvMonthly(fromDate.getFullYear(), fromDate.getMonth() + 1),
-    staleTime: STALE_TIME,
-    gcTime: GC_TIME,
-    enabled: needsPrevMonth && (currency === 'USD' || currency === 'EUR'),
-  });
-
-  // USDT historical
-  const usdtQuery = useQuery({
-    queryKey: queryKeys.usdtHistory(from, to),
-    queryFn: () => fetchUsdtHistory(from, to),
-    staleTime: STALE_TIME,
-    gcTime: GC_TIME,
-    enabled: currency === 'USDT',
-  });
-
-  const isLoading =
-    (currency === 'USDT' && usdtQuery.isLoading) ||
-    ((currency === 'USD' || currency === 'EUR') && bcvQuery.isLoading);
-
-  let data: ChartDataPoint[] = [];
-
-  if (currency === 'USDT' && usdtQuery.data) {
-    data = usdtQuery.data.rates
-      .map((r) => ({
-        date: r.date,
-        value: r.average,
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date));
-  } else if ((currency === 'USD' || currency === 'EUR') && bcvQuery.data) {
-    const allRates = [
-      ...bcvQuery.data,
-      ...(needsPrevMonth && prevMonthQuery.data ? prevMonthQuery.data : []),
-    ];
-
-    const field = currency === 'USD' ? 'usd' : 'eur';
-    const sortedRates = allRates
-      .filter((r) => r[field] != null)
-      .sort((a, b) => a.date.localeCompare(b.date));
-
-    let filtered = sortedRates.filter((r) => r.date >= from && r.date <= to);
-
-    // If filtered points are insufficient (e.g. on weekends for 1d/3d), fallback to the last N points
-    const minPoints = period === '1d' ? 2 : period === '3d' ? 3 : 2;
-    if (filtered.length < minPoints && sortedRates.length >= 2) {
-      filtered = sortedRates.slice(-minPoints);
+  const { data, stats } = useMemo(() => {
+    const records = historyQuery.data ?? [];
+    if (records.length === 0) {
+      return {
+        data: [] as ChartDataPoint[],
+        stats: { current: 0, max: 0, min: 0, change: 0 },
+      };
     }
 
-    data = filtered.map((r) => ({
-      date: r.date,
-      value: r[field],
+    const sorted = [...records].sort((a, b) =>
+      a.created_at.localeCompare(b.created_at),
+    );
+
+    const days = getPeriodDays(period);
+    const cutoffMs = Date.now() - days * 86_400_000;
+    let filtered = sorted.filter(
+      (r) => new Date(r.created_at).getTime() >= cutoffMs,
+    );
+
+    // Fallback for sparse data (e.g. BCV on weekends/holidays)
+    const minPoints = period === '1d' ? 2 : period === '3d' ? 3 : 2;
+    if (filtered.length < minPoints && sorted.length >= 2) {
+      filtered = sorted.slice(-minPoints);
+    }
+
+    const useTimeLabel = period === '1d' && currency === 'USDT';
+
+    const points: ChartDataPoint[] = filtered.map((r) => ({
+      id: r.id,
+      date: r.created_at,
+      value: Number(r.rate),
+      label: useTimeLabel
+        ? formatChartTime(r.created_at)
+        : formatChartDate(r.created_at),
     }));
-  }
 
-  // Compute stats
-  const values = data.map((d) => d.value);
-  const stats = {
-    current: values.at(-1) ?? 0,
-    max: values.length ? Math.max(...values) : 0,
-    min: values.length ? Math.min(...values) : 0,
-    change:
-      values.length >= 2
-        ? (((values.at(-1)! - values[0]!) / values[0]!) * 100)
-        : 0,
+    const values = points.map((d) => d.value);
+    const first = values[0] ?? 0;
+    const last = values.at(-1) ?? 0;
+
+    return {
+      data: points,
+      stats: {
+        current: last,
+        max: values.length ? Math.max(...values) : 0,
+        min: values.length ? Math.min(...values) : 0,
+        change: first > 0 ? ((last - first) / first) * 100 : 0,
+      },
+    };
+  }, [historyQuery.data, period, currency]);
+
+  const { refetch: queryRefetch } = historyQuery;
+  const refetch = useCallback(async () => {
+    await expireApiCache();
+    return queryRefetch();
+  }, [queryRefetch]);
+
+  return {
+    data,
+    stats,
+    isLoading: historyQuery.isLoading && !historyQuery.data,
+    isFetching: historyQuery.isFetching,
+    isError: historyQuery.isError && !historyQuery.data,
+    refetch,
   };
-
-  return { data, stats, isLoading };
 }

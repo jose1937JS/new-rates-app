@@ -1,4 +1,6 @@
-import { useCallback } from 'react';
+import * as Haptics from 'expo-haptics';
+import { X } from 'lucide-react-native';
+import { useCallback, useRef, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
@@ -15,6 +17,7 @@ interface CurrencyInputProps {
   value: string;
   currency: CurrencyCode;
   onChangeText: (text: string) => void;
+  onClear?: () => void;
   onCurrencyPress?: () => void;
 }
 
@@ -22,30 +25,57 @@ export function CurrencyInput({
   value,
   currency,
   onChangeText,
+  onClear,
   onCurrencyPress,
 }: CurrencyInputProps) {
   const COLORS = useThemeColors();
+  const inputRef = useRef<TextInput>(null);
+  const [isFocused, setIsFocused] = useState(false);
+
   const handleChange = useCallback(
     (text: string) => {
-      // Allow only digits and a single decimal point
-      const cleaned = text.replace(/[^0-9.]/g, '');
+      // Allow locale decimal keyboards that emit ',' instead of '.'
+      const commaNormalized =
+        !value.includes('.') && text.endsWith(',')
+          ? `${text.slice(0, -1)}.`
+          : text;
+      const cleaned = commaNormalized.replace(/[^0-9.]/g, '');
       const parts = cleaned.split('.');
       const sanitized =
         parts.length > 2
-          ? `${parts[0]}.${parts.slice(1).join('')}`
-          : cleaned;
+          ? `${parts[0]}.${parts.slice(1).join('').slice(0, 2)}`
+          : parts.length === 2
+            ? `${parts[0]}.${parts[1].slice(0, 2)}`
+            : cleaned;
       onChangeText(sanitized);
     },
-    [onChangeText],
+    [onChangeText, value],
   );
 
+  const handleClear = useCallback(() => {
+    void Haptics.selectionAsync();
+    if (onClear) {
+      onClear();
+    } else {
+      onChangeText('1');
+    }
+    inputRef.current?.focus();
+  }, [onChangeText, onClear]);
+
   const displayValue = value ? formatInputValue(value) : '';
+  const showClearButton = value.length > 0 && value !== '1';
 
   return (
-    <View className="rounded-2xl bg-surface-card p-4" style={{ borderCurve: 'continuous' }}>
-      {/* Currency selector row */}
+    <View
+      className="rounded-2xl border bg-surface-card p-4 border-4"
+      style={{
+        borderCurve: 'continuous',
+        borderColor: isFocused ? COLORS.primary : COLORS.border,
+      }}
+    >
+      {/* Currency header row */}
       <Pressable
-        onPress={onCurrencyPress}
+        onPress={onCurrencyPress ?? (() => inputRef.current?.focus())}
         className="mb-3 flex-row items-center gap-2 active:opacity-70"
       >
         <Animated.Text
@@ -64,23 +94,54 @@ export function CurrencyInput({
         </Text>
       </Pressable>
 
-      {/* Input row */}
-      <View className="flex-row items-center gap-2">
-        <Text className="text-2xl font-medium text-primary">
+      {/* Input row with fixed height so empty "0.00" placeholder never clips or shifts */}
+      <Pressable
+        onPress={() => inputRef.current?.focus()}
+        className="flex-row items-center gap-2"
+        style={{ minHeight: 52 }}
+      >
+        <Text
+          className="text-2xl font-medium text-primary"
+          style={{ includeFontPadding: false }}
+        >
           {CURRENCY_SYMBOLS[currency]}
         </Text>
         <TextInput
+          ref={inputRef}
           value={displayValue}
           onChangeText={handleChange}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           placeholder="0.00"
           placeholderTextColor={COLORS.textMuted}
           keyboardType="decimal-pad"
           autoFocus={true}
-          className="flex-1 text-3xl font-bold text-text-primary"
-          style={{ fontVariant: ['tabular-nums'] }}
+          multiline={false}
+          className="flex-1"
+          style={{
+            color: COLORS.textPrimary,
+            fontFamily: 'Poppins_700Bold',
+            fontSize: 30,
+            height: 52,
+            paddingVertical: 0,
+            textAlignVertical: 'center',
+            includeFontPadding: false,
+            fontVariant: ['tabular-nums'],
+          }}
           selectionColor={COLORS.primary}
         />
-      </View>
+        {showClearButton && (
+          <Pressable
+            onPress={handleClear}
+            hitSlop={8}
+            accessibilityLabel="Restablecer a 1"
+            className="h-8 w-8 items-center justify-center rounded-full active:opacity-70"
+            style={{ backgroundColor: COLORS.surfaceElevated }}
+          >
+            <X size={16} color={COLORS.textSecondary} />
+          </Pressable>
+        )}
+      </Pressable>
     </View>
   );
 }

@@ -3,7 +3,11 @@ import { LineChart } from 'react-native-gifted-charts';
 
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { ChartDataPoint } from '@/types/currency.types';
-import { formatChartDate, formatFullDate } from '@/utils/formatters';
+import {
+  formatChartDate,
+  formatFullDate,
+  formatFullDateTime,
+} from '@/utils/formatters';
 
 interface PriceChartProps {
   data: ChartDataPoint[];
@@ -48,7 +52,7 @@ export function PriceChart({ data, isLoading }: PriceChartProps) {
 
   const labelledData = data.map((point) => ({
     value: point.value,
-    label: formatChartDate(point.date),
+    label: point.label ?? formatChartDate(point.date),
     labelTextStyle: {
       color: COLORS.textMuted,
       fontSize: 10,
@@ -116,7 +120,7 @@ export function PriceChart({ data, isLoading }: PriceChartProps) {
           pointerStripWidth: 1.5,
           pointerColor: COLORS.primary,
           radius: 5,
-          pointerLabelWidth: 110,
+          pointerLabelWidth: 120,
           pointerLabelHeight: 46,
           autoAdjustPointerLabelPosition: true,
           pointerLabelComponent: (
@@ -125,17 +129,20 @@ export function PriceChart({ data, isLoading }: PriceChartProps) {
             pointerIndex: number,
           ) => {
             const point = data[pointerIndex];
+            const isIntraday = Boolean(point?.label?.includes(':'));
             return (
               <View
                 className="items-center rounded-xl bg-surface-elevated px-2.5 py-1.5 shadow-md border border-border"
-                style={{ borderCurve: 'continuous', minWidth: 95 }}
+                style={{ borderCurve: 'continuous', minWidth: 105 }}
               >
                 <Text className="text-xs font-semibold text-primary">
                   {items[0]?.value.toFixed(2)} VES
                 </Text>
                 {point && (
                   <Text className="text-[10px] text-text-muted">
-                    {formatFullDate(point.date)}
+                    {isIntraday
+                      ? formatFullDateTime(point.date)
+                      : formatFullDate(point.date)}
                   </Text>
                 )}
               </View>

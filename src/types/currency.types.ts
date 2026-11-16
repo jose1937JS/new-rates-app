@@ -1,51 +1,54 @@
-// ----- API Response Types -----
+// ----- Rates Cloudflare API Types -----
 
-/** Single BCV rate row from CDN */
-export interface BcvRate {
-  usd: number;
-  eur: number;
-  date: string; // ISO yyyy-mm-dd
+export type ApiCurrency = 'BCV_USD' | 'BCV_EUR' | 'YD_USD';
+export type RateSource = 'BCV' | 'YADIO';
+export type SyncSource = 'all' | 'bcv' | 'yadio';
+
+export interface ApiRateRecord {
+  id: number;
+  rate: number;
+  currency: ApiCurrency;
+  name: string;
+  source: RateSource;
+  created_at: string;
 }
 
-/** GET /bcv/current.json */
-export interface BcvCurrentResponse {
-  current: BcvRate;
-  previous: BcvRate;
-  changePercentage: {
-    usd: number;
-    eur: number;
-  };
+export interface ApiTodayRateRecord extends ApiRateRecord {
+  isFallback: boolean;
 }
 
-/** Single USDT exchange rate */
-export interface UsdtExchangeRate {
-  buy: number;
-  sell: number;
-  average: number;
-  date: string;
+export interface ApiPaginationMeta {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
 }
 
-/** GET /public/usdt/exchange-rate */
-export interface UsdtExchangeRateResponse {
-  current: UsdtExchangeRate;
-  previous?: UsdtExchangeRate;
-  changePercentage: {
-    buy: number;
-    sell: number;
-    average: number;
-  };
+export interface ApiTodayRatesResponse {
+  rates: ApiTodayRateRecord[];
 }
 
-/** GET /public/usdt/exchange-rate/list */
-export interface UsdtHistoricalRatesResponse {
-  rates: UsdtHistoricalRate[];
+export interface ApiPaginatedRatesResponse {
+  rates: ApiRateRecord[];
+  pagination: ApiPaginationMeta;
 }
 
-export interface UsdtHistoricalRate {
-  buy: number;
-  sell: number;
-  average: number;
-  date: string;
+export interface ApiSingleRateResponse {
+  rate: ApiRateRecord;
+}
+
+export interface ApiSyncRateItem {
+  rate: number;
+  currency: ApiCurrency;
+  name: string;
+  source: RateSource;
+}
+
+export interface ApiSyncResponse {
+  source: SyncSource;
+  syncedCount: number;
+  rates: ApiSyncRateItem[];
+  durationMs: number;
 }
 
 // ----- App Domain Types -----
@@ -57,6 +60,7 @@ export interface CurrencyRate {
   rateToVes: number;
   changePercentage: number;
   lastUpdated: string;
+  isFallback?: boolean;
 }
 
 export interface UnifiedRates {
@@ -76,6 +80,7 @@ export interface ConversionResult {
 
 /** Normalized data point for charts */
 export interface ChartDataPoint {
+  id?: number;
   date: string;
   value: number;
   label?: string;

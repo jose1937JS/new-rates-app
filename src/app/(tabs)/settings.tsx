@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import {
@@ -11,12 +10,17 @@ import {
   Sun,
   Tag,
   Trash2,
-  User
+  User,
 } from 'lucide-react-native';
 import { Alert, Linking, Pressable, ScrollView, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { useThemeColors } from '@/hooks/useThemeColors';
+import {
+  clearApiCache,
+  expireApiCache,
+  isNetworkOnline,
+} from '@/services/ratesApi';
 import { useCurrencyStore } from '@/store/currencyStore';
 import type { ThemeMode } from '@/types/currency.types';
 import { APP_NAME, APP_VERSION } from '@/utils/constants';
@@ -123,6 +127,16 @@ export default function SettingsScreen() {
 
   const handleForceRefresh = async () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const online = await isNetworkOnline();
+    if (!online) {
+      Alert.alert(
+        'Sin conexión',
+        'No hay conexión a internet. Se mantendrán las tasas guardadas en caché.',
+      );
+      return;
+    }
+
+    await expireApiCache();
     await queryClient.invalidateQueries();
     Alert.alert('Actualizado', 'Las tasas se han actualizado correctamente.');
   };
@@ -130,7 +144,7 @@ export default function SettingsScreen() {
   const handleClearCache = () => {
     Alert.alert(
       'Limpiar caché',
-      '¿Estás seguro? Se eliminarán todos los datos almacenados localmente.',
+      '¿Estás seguro? Se eliminarán las tasas almacenadas localmente.',
       [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -141,7 +155,7 @@ export default function SettingsScreen() {
               Haptics.NotificationFeedbackType.Warning,
             );
             queryClient.clear();
-            await AsyncStorage.clear();
+            await clearApiCache();
             Alert.alert('Listo', 'La caché ha sido limpiada.');
           },
         },
@@ -230,7 +244,7 @@ export default function SettingsScreen() {
         />
         <SettingsRow
           icon={<Coins size={18} color={COLORS.textMuted} />}
-          label="Binance P2P"
+          label="Yadio"
           value="USDT"
         />
       </SettingsGroup>
@@ -244,7 +258,7 @@ export default function SettingsScreen() {
           {APP_NAME} v{APP_VERSION}
         </Text>
         <Text className="mt-1 text-xs text-text-muted">
-          Datos proporcionados por DolarVZLA
+          Datos desde Rates Cloudflare API
         </Text>
       </Animated.View>
     </ScrollView>

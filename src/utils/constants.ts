@@ -1,32 +1,28 @@
-import type { CurrencyCode } from '@/types/currency.types';
+import type { ApiCurrency, CurrencyCode } from '@/types/currency.types';
 
 // ----- API Configuration -----
 
-export const RATES_CDN_URL =
-  process.env.EXPO_PUBLIC_RATES_CDN_URL ?? 'https://rates.dolarvzla.com';
+export const RATES_API_URL = (
+  process.env.EXPO_PUBLIC_RATES_API_URL ??
+  'https://rates-api.dev-lopezjose.workers.dev'
+).replace(/\/+$/, '');
 
-export const API_BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL ?? 'https://api.dolarvzla.com';
+export const RATES_API_KEY = process.env.EXPO_PUBLIC_RATES_API_KEY ?? '';
 
-export const API_KEY =
-  process.env.EXPO_PUBLIC_DOLARVZLA_API_KEY ?? '';
-
-export const AUTH_HEADERS = {
-  'x-dolarvzla-key': API_KEY,
-} as const;
+export const CURRENCY_TO_API: Partial<Record<CurrencyCode, ApiCurrency>> = {
+  USD: 'BCV_USD',
+  EUR: 'BCV_EUR',
+  USDT: 'YD_USD',
+};
 
 // ----- Query Keys -----
 
 export const queryKeys = {
   all: ['currency'] as const,
-  bcv: () => [...queryKeys.all, 'bcv'] as const,
-  bcvCurrent: () => [...queryKeys.bcv(), 'current'] as const,
-  bcvMonthly: (year: number, month: number) =>
-    [...queryKeys.bcv(), 'monthly', year, month] as const,
-  usdt: () => [...queryKeys.all, 'usdt'] as const,
-  usdtCurrent: () => [...queryKeys.usdt(), 'current'] as const,
-  usdtHistory: (from: string, to: string) =>
-    [...queryKeys.usdt(), 'history', from, to] as const,
+  today: () => [...queryKeys.all, 'today'] as const,
+  recent: () => [...queryKeys.all, 'recent'] as const,
+  history: (currency: CurrencyCode) =>
+    [...queryKeys.all, 'history', currency] as const,
 } as const;
 
 // ----- Cache Configuration -----
@@ -35,6 +31,8 @@ export const STALE_TIME = 1000 * 60 * 5; // 5 minutes
 export const GC_TIME = 1000 * 60 * 60 * 24 * 7; // 7 days
 export const PERSIST_KEY = 'ratesvenapp_cache';
 export const PERSIST_THROTTLE = 1000; // 1 second
+export const API_CACHE_PREFIX = '@ratesvenapp/api_cache:';
+export const API_CACHE_TTL_MS = 1000 * 60 * 5; // 5 minutes
 
 // ----- Currency Metadata -----
 
@@ -55,7 +53,7 @@ export const CURRENCY_FLAGS: Record<CurrencyCode, string> = {
 export const CURRENCY_NAMES: Record<CurrencyCode, string> = {
   USD: 'Dólar americano',
   EUR: 'Euro',
-  USDT: 'Tether (USDT)',
+  USDT: 'USDT (Yadio)',
   VES: 'Bolívar',
 };
 
@@ -89,7 +87,7 @@ export const THEME_COLORS = {
     success: '#22c55e',
     danger: '#ef4444',
     border: '#333333',
-  }
+  },
 } as const;
 
 // ----- App -----
