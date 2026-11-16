@@ -68,8 +68,8 @@ export function RatesHero({
       {/* Header row */}
       <View className="mb-4 flex-row items-center justify-between">
         <View className="flex-row items-center gap-2 mb-2">
-          <Text className="text-2xl font-medium text-white">
-            Cambio Digital
+          <Text className="text-3xl font-bold text-white">
+            RATES VENAPP
           </Text>
           {isFetching && <ActivityIndicator size="small" color="#ffffff" />}
         </View>

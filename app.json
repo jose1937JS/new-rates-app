@@ -8,12 +8,15 @@
     "scheme": "ratesvenapp",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "com.devlopez.ratesvenapp",
       "icon": "./assets/expo.icon",
       "infoPlist": {
         "CADisableMinimumFrameDurationOnPhone": true
       }
     },
     "android": {
+      "package": "com.devlopez.ratesvenapp",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#1a1a1a",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -40,6 +43,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f397f00a-1106-4649-89cc-dc82879462ad"
+      }
     }
   }
 }
