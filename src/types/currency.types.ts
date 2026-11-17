@@ -88,4 +88,23 @@ export interface ChartDataPoint {
 
 export type ThemeMode = 'dark' | 'light' | 'system';
 
+export type PrimaryColorId =
+  | 'orange'
+  | 'blue'
+  | 'emerald'
+  | 'violet'
+  | 'rose'
+  | 'teal';
+
+export interface PrimaryColorOption {
+  id: PrimaryColorId;
+  label: string;
+  primary: string;
+  primaryLight: string;
+  primaryDark: string;
+  rgb: string;
+  rgbLight: string;
+  rgbDark: string;
+}
+
 export type ChartPeriod = '1d' | '3d' | '7d' | '30d';

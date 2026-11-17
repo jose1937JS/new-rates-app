@@ -104,7 +104,7 @@ export function PriceChart({ data, isLoading }: PriceChartProps) {
           fontFamily: 'Poppins_400Regular',
         }}
         rulesType="dashed"
-        rulesColor={`${COLORS.border}60`}
+        rulesColor={COLORS.isDark ? `${COLORS.border.slice(0, 7)}80` : '#e5e7eb'}
         isAnimated
         animationDuration={600}
         pointerConfig={{
@@ -127,7 +127,10 @@ export function PriceChart({ data, isLoading }: PriceChartProps) {
                 className="items-center rounded-xl bg-surface-elevated px-2.5 py-1.5 shadow-md border border-border"
                 style={{ borderCurve: 'continuous', minWidth: 105 }}
               >
-                <Text className="text-xs font-semibold text-primary">
+                <Text
+                  className="text-xs font-semibold"
+                  style={{ color: COLORS.primary }}
+                >
                   {items[0]?.value.toFixed(2)} VES
                 </Text>
                 {point && (

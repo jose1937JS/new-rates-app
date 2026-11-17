@@ -29,18 +29,18 @@ stack:
 
 <file_map>
 entry_and_routes:
-  src/app/_layout.tsx: Root layout, Poppins font loading, QueryClient + AsyncStorage persister, NetInfo -> React Query `onlineManager`, theme sync
+  src/app/_layout.tsx: Root layout, Poppins font loading, NativeWind primary `vars()`, `AnimatedSplashOverlay`, QueryClient + AsyncStorage persister, NetInfo -> React Query `onlineManager`, theme sync
   src/app/(tabs)/_layout.tsx: Bottom tabs with `CustomTabBar` (`headerShown: false` across tabs; left: `history`, center FAB: `index`, right: `settings`)
-  src/app/(tabs)/index.tsx: Main screen — `RatesHero` + active `CurrencyInput` + 3 `RateCard`s (all 4 currencies always visible), 300ms input debounce, immediate card swap
-  src/app/(tabs)/history.tsx: Compact `ScreenHero` with embedded `CurrencyTabSelector`, animated `PeriodSelector` (`1d|3d|7d|30d`), sliding content transitions, chart, stats row, chronological price list
-  src/app/(tabs)/settings.tsx: Compact `ScreenHero`, bordered grouped cards with header accents and inset row dividers, theme mode (`dark|light|system`), force refresh, cache clear
+  src/app/(tabs)/index.tsx: Main screen — fixed `RatesHero` + active `CurrencyInput` + 3 `RateCard`s (all 4 currencies always visible), 300ms input debounce, immediate card swap
+  src/app/(tabs)/history.tsx: Fixed compact `ScreenHero` with embedded `CurrencyTabSelector`, animated `PeriodSelector` (`1d|3d|7d|30d`), sliding content transitions, chart, stats row, chronological price list
+  src/app/(tabs)/settings.tsx: Fixed compact `ScreenHero`, flat `Card` groups, theme mode (`dark|light|system`), primary accent color picker, force refresh, cache clear, `AppModal` dialogs
 
 services_and_data:
   src/services/ratesApi.ts: Cloudflare API client, `X-API-Key` auth, NetInfo pre-check, AsyncStorage fallback cache, in-flight dedupe, 10s AbortController timeout
   src/types/currency.types.ts: API DTOs (`ApiCurrency`, `ApiRateRecord`, `ApiTodayRateRecord`, etc.) and app domain types (`CurrencyCode`, `UnifiedRates`, `ChartDataPoint`)
-  src/utils/constants.ts: Env config (`RATES_API_URL`, `RATES_API_KEY`), `CURRENCY_TO_API`, React Query keys, cache TTLs (`5m` stale / `7d` GC), currency metadata, `THEME_COLORS`
+  src/utils/constants.ts: Env config (`RATES_API_URL`, `RATES_API_KEY`), `CURRENCY_TO_API`, React Query keys, cache TTLs (`5m` stale / `7d` GC), currency metadata, `PRIMARY_COLOR_OPTIONS`, `THEME_COLORS`, `expo-constants` `APP_VERSION`
   src/utils/formatters.ts: `es-VE` number formatters, `date-fns` Spanish formatters, `formatInputValue`, `parseFormattedNumber`
-  src/store/currencyStore.ts: Zustand store (`selectedCurrency`, `amount`, `themeMode`)
+  src/store/currencyStore.ts: Zustand store (`selectedCurrency`, `amount`, `themeMode`, `primaryColor`)
 
 hooks:
   src/hooks/useCurrencyRates.ts: Fetches `today` + `recent` rates, computes `UnifiedRates`, `%` variation (`pctChange`), `hasFallback`, `refetch` (expires cache TTL first)
@@ -52,6 +52,9 @@ hooks:
 components_ui:
   src/components/ui/RatesHero.tsx: Edge-to-edge fixed orange (`COLORS.primary`) rounded-bottom (`28px`) Hero with `OfflineBadge` and 3 quick-verify cards (USD, EUR, USDT)
   src/components/ui/ScreenHero.tsx: Compact fixed edge-to-edge orange (`COLORS.primary`) rounded-bottom (`26px`) Hero with icon, title, subtitle, and optional children (used in `history` and `settings`)
+  src/components/ui/CurrencyIcon.tsx: Renders `assets/images/usdt-icon.png` for `USDT` and flag emojis for `USD`/`EUR`/`VES`
+  src/components/ui/AppModal.tsx: Custom themed confirmation/info modal replacing `Alert.alert`
+  src/components/ui/AnimatedSplashOverlay.tsx: Orange (`#ff6b26`) animated splash overlay with logo pulse and loading indicator
   src/components/ui/Card.tsx: Shared flat card container (`rounded-2xl bg-surface-card p-4`, no shadow) with optional header (`title`, `icon`, `headerRight`) used across `history`, `settings`, and `CurrencyInput`
   src/components/ui/CustomTabBar.tsx: Curved SVG (`#ff6b26`) bottom tab bar with center concave notch, white circular FAB (`index`) with `withTiming` scale-90->100 press animation, and `useSafeAreaInsets().bottom` handling
   src/components/ui/CurrencyInput.tsx: Active currency input, fixed `52px` height, right-side reset-to-1 (`X`) button, comma-to-dot normalization
@@ -64,8 +67,9 @@ components_ui:
   src/components/ui/StatsRow.tsx: Actual / Max / Min / Variation summary card
 
 config:
-  app.json: Expo config (`android.package: com.devlopez.ratesvenapp`, `ios.bundleIdentifier: com.devlopez.ratesvenapp`)
+  app.json: Expo config (`android.package: com.devlopez.ratesvenapp`, `ios.bundleIdentifier: com.devlopez.ratesvenapp`, orange splash `#ff6b26`)
   eas.json: EAS build profiles (`development`, `preview` [APK], `production` [APK], `production-aab` [AAB])
+  android/: Native Android config (R8 minify + resource shrinking + compressed `.so` + `arm64-v8a,armeabi-v7a`, Android 14+ 3-button nav bar contrast fix in `MainActivity.kt`/`styles.xml`, local release signing via gitignored `android/keystore.properties` + root `.jks`)
   tailwind.config.js & src/global.css: Theme tokens + Poppins weight-to-fontFamily mapping
 </file_map>
 
@@ -86,7 +90,7 @@ endpoints:
 <invariants_and_gotchas>
 startup_state:
   rule: App MUST always launch with `selectedCurrency: 'USD'` and `amount: '1'`.
-  detail: `currencyStore.ts` `partialize` persists ONLY `themeMode`. Do NOT persist `selectedCurrency` or `amount`.
+  detail: `currencyStore.ts` `partialize` persists ONLY `themeMode` and `primaryColor`. Do NOT persist `selectedCurrency` or `amount`.
 
 all_currencies_visible:
   rule: Converter screen MUST always render all 4 currencies (`USD`, `EUR`, `USDT`, `VES`) — 1 in `CurrencyInput` + 3 `RateCard`s below (`VES` first when not selected). Never filter out `USD`/`EUR` if a rate is `0`; show `"--"` / `"Tasa no disponible"`.

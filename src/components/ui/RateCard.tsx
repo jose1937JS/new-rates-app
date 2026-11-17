@@ -6,9 +6,9 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { CurrencyIcon } from '@/components/ui/CurrencyIcon';
 import type { CurrencyCode } from '@/types/currency.types';
 import {
-  CURRENCY_FLAGS,
   CURRENCY_NAMES,
   CURRENCY_SYMBOLS,
 } from '@/utils/constants';
@@ -69,7 +69,7 @@ export function RateCard({
         {/* Header row */}
         <View className="mb-2 flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
-            <Text className="text-xl">{CURRENCY_FLAGS[currency]}</Text>
+            <CurrencyIcon currency={currency} size={20} />
             <Text className="text-xl font-medium text-text-primary">
               {currency}
             </Text>

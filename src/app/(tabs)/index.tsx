@@ -191,7 +191,10 @@ export default function ConverterScreen() {
             </Animated.View>
 
             <View className="flex-row items-center justify-between">
-              <Text className="text-lg font-medium text-primary">
+              <Text
+                className="text-lg font-medium"
+                style={{ color: COLORS.primary }}
+              >
                 Conversiones
               </Text>
               <View className="flex-row items-center gap-1">

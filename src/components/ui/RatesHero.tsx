@@ -2,10 +2,10 @@ import { ActivityIndicator, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { CurrencyIcon } from '@/components/ui/CurrencyIcon';
 import { OfflineBadge } from '@/components/ui/OfflineBadge';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { CurrencyCode, UnifiedRates } from '@/types/currency.types';
-import { CURRENCY_FLAGS } from '@/utils/constants';
 import { formatNumber, formatPercentage } from '@/utils/formatters';
 
 interface RatesHeroProps {
@@ -105,7 +105,7 @@ export function RatesHero({
             >
               <View className="mb-1.5 flex-row items-center justify-between">
                 <View className="flex-row items-center gap-1">
-                  <Text className="text-sm">{CURRENCY_FLAGS[item.code]}</Text>
+                  <CurrencyIcon currency={item.code} size={15} />
                   <Text className="text-xs font-semibold text-text-primary">
                     {item.code}
                   </Text>

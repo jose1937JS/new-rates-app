@@ -5,10 +5,10 @@ import { Pressable, Text, TextInput } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { Card } from '@/components/ui/Card';
+import { CurrencyIcon } from '@/components/ui/CurrencyIcon';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { CurrencyCode } from '@/types/currency.types';
 import {
-  CURRENCY_FLAGS,
   CURRENCY_NAMES,
   CURRENCY_SYMBOLS,
 } from '@/utils/constants';
@@ -78,14 +78,13 @@ export function CurrencyInput({
         onPress={onCurrencyPress ?? (() => inputRef.current?.focus())}
         className="mb-3 flex-row items-center gap-2 active:opacity-70"
       >
-        <Animated.Text
+        <Animated.View
           key={currency}
           entering={FadeIn.duration(200)}
           exiting={FadeOut.duration(150)}
-          className="text-2xl"
         >
-          {CURRENCY_FLAGS[currency]}
-        </Animated.Text>
+          <CurrencyIcon currency={currency} size={24} />
+        </Animated.View>
         <Text className="text-base font-semibold text-text-primary">
           {CURRENCY_NAMES[currency]}
         </Text>
@@ -101,8 +100,8 @@ export function CurrencyInput({
         style={{ minHeight: 52 }}
       >
         <Text
-          className="text-2xl font-medium text-primary"
-          style={{ includeFontPadding: false }}
+          className="text-2xl font-medium"
+          style={{ color: COLORS.primary, includeFontPadding: false }}
         >
           {CURRENCY_SYMBOLS[currency]}
         </Text>

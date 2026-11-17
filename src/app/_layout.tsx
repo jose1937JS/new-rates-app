@@ -7,14 +7,21 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
-import { useColorScheme } from 'nativewind';
+import { useColorScheme, vars } from 'nativewind';
 import { useEffect, useState } from 'react';
+import { LogBox, Text, TextInput, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { AnimatedSplashOverlay } from '@/components/ui/AnimatedSplashOverlay';
 import '@/global.css';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { useCurrencyStore } from '@/store/currencyStore';
-import { GC_TIME, PERSIST_KEY, PERSIST_THROTTLE, STALE_TIME } from '@/utils/constants';
+import {
+  GC_TIME,
+  PERSIST_KEY,
+  PERSIST_THROTTLE,
+  STALE_TIME,
+} from '@/utils/constants';
 
 import {
   Poppins_100Thin,
@@ -37,9 +44,9 @@ import {
   Poppins_900Black_Italic,
   useFonts,
 } from '@expo-google-fonts/poppins';
-import { LogBox, Text, TextInput } from 'react-native';
 
 SplashScreen.preventAutoHideAsync();
+SplashScreen.setOptions({ duration: 350, fade: true });
 
 // Suppress Reanimated transform layout warning toast if triggered
 LogBox.ignoreLogs([
@@ -93,6 +100,8 @@ export default function RootLayout() {
     Poppins_900Black_Italic,
   });
 
+  const [splashDone, setSplashDone] = useState(false);
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -113,6 +122,12 @@ export default function RootLayout() {
   const COLORS = useThemeColors();
   const { setColorScheme } = useColorScheme();
   const themeMode = useCurrencyStore((state) => state.themeMode);
+
+  const primaryVars = vars({
+    '--color-primary': COLORS.primaryRgb,
+    '--color-primary-light': COLORS.primaryLightRgb,
+    '--color-primary-dark': COLORS.primaryDarkRgb,
+  });
 
   useEffect(() => {
     try {
@@ -136,20 +151,29 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: COLORS.surface }}>
-      <PersistQueryClientProvider
-        client={queryClient}
-        persistOptions={{ persister: asyncStoragePersister }}
-      >
-        <StatusBar style={COLORS.isDark ? 'light' : 'dark'} />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: COLORS.surface },
-          }}
+      <View style={[{ flex: 1, backgroundColor: COLORS.surface }, primaryVars]}>
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={{ persister: asyncStoragePersister }}
         >
-          <Stack.Screen name="(tabs)" />
-        </Stack>
-      </PersistQueryClientProvider>
+          <StatusBar style={COLORS.isDark ? 'light' : 'dark'} />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: COLORS.surface },
+            }}
+          >
+            <Stack.Screen name="(tabs)" />
+          </Stack>
+        </PersistQueryClientProvider>
+
+        {!splashDone && (
+          <AnimatedSplashOverlay
+            isReady={fontsLoaded}
+            onFinish={() => setSplashDone(true)}
+          />
+        )}
+      </View>
     </GestureHandlerRootView>
   );
 }

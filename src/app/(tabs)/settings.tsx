@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import {
+  Check,
   ChevronRight,
   Coins,
   Database,
@@ -18,10 +19,12 @@ import {
   Trash2,
   User,
 } from 'lucide-react-native';
-import { Alert, Linking, Pressable, ScrollView, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Linking, Pressable, ScrollView, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AppModal, type AppModalVariant } from '@/components/ui/AppModal';
 import { Card } from '@/components/ui/Card';
 import { ScreenHero } from '@/components/ui/ScreenHero';
 import { useThemeColors } from '@/hooks/useThemeColors';
@@ -31,8 +34,29 @@ import {
   isNetworkOnline,
 } from '@/services/ratesApi';
 import { useCurrencyStore } from '@/store/currencyStore';
-import type { ThemeMode } from '@/types/currency.types';
-import { APP_VERSION } from '@/utils/constants';
+import type { PrimaryColorId, ThemeMode } from '@/types/currency.types';
+import {
+  APP_NAME,
+  APP_VERSION,
+  PRIMARY_COLOR_OPTIONS,
+} from '@/utils/constants';
+
+interface ModalState {
+  visible: boolean;
+  title: string;
+  message: string;
+  variant: AppModalVariant;
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm?: () => void | Promise<void>;
+}
+
+const CLOSED_MODAL: ModalState = {
+  visible: false,
+  title: '',
+  message: '',
+  variant: 'info',
+};
 
 function SettingsGroup({
   title,
@@ -119,6 +143,7 @@ function ThemeOption({
   onPress: () => void;
   isLast?: boolean;
 }) {
+  const COLORS = useThemeColors();
   const isActive = mode === currentMode;
 
   return (
@@ -132,20 +157,25 @@ function ThemeOption({
         {icon}
         <Text
           className={`text-sm ${
-            isActive
-              ? 'font-semibold text-primary'
-              : 'font-medium text-text-primary'
+            isActive ? 'font-semibold' : 'font-medium text-text-primary'
           }`}
+          style={isActive ? { color: COLORS.primary } : undefined}
         >
           {label}
         </Text>
       </View>
       <View
-        className={`h-4 w-4 items-center justify-center rounded-full border-2 ${
-          isActive ? 'border-primary' : 'border-text-muted'
-        }`}
+        className="h-4 w-4 items-center justify-center rounded-full border-2"
+        style={{
+          borderColor: isActive ? COLORS.primary : COLORS.textMuted,
+        }}
       >
-        {isActive && <View className="h-2 w-2 rounded-full bg-primary" />}
+        {isActive && (
+          <View
+            className="h-2 w-2 rounded-full"
+            style={{ backgroundColor: COLORS.primary }}
+          />
+        )}
       </View>
     </Pressable>
   );
@@ -155,44 +185,61 @@ export default function SettingsScreen() {
   const queryClient = useQueryClient();
   const COLORS = useThemeColors();
   const insets = useSafeAreaInsets();
-  const { themeMode, setThemeMode } = useCurrencyStore();
+  const { themeMode, setThemeMode, primaryColor, setPrimaryColor } = useCurrencyStore();
+
+  const [modalState, setModalState] = useState<ModalState>(CLOSED_MODAL);
+
+  const closeModal = () => setModalState(CLOSED_MODAL);
 
   const handleForceRefresh = async () => {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const online = await isNetworkOnline();
     if (!online) {
-      Alert.alert(
-        'Sin conexión',
-        'No hay conexión a internet. Se mantendrán las tasas guardadas en caché.',
-      );
+      setModalState({
+        visible: true,
+        title: 'Sin conexión',
+        message: 'No hay conexión a internet. Se mantendrán las tasas guardadas en caché.',
+        variant: 'warning',
+        confirmText: 'Entendido',
+      });
       return;
     }
 
     await expireApiCache();
     await queryClient.invalidateQueries();
-    Alert.alert('Actualizado', 'Las tasas se han actualizado correctamente.');
+    setModalState({
+      visible: true,
+      title: 'Actualizado',
+      message: 'Las tasas se han actualizado correctamente.',
+      variant: 'success',
+      confirmText: 'Listo',
+    });
   };
 
   const handleClearCache = () => {
-    Alert.alert(
-      'Limpiar caché',
-      '¿Estás seguro? Se eliminarán las tasas almacenadas localmente.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Limpiar',
-          style: 'destructive',
-          onPress: async () => {
-            void Haptics.notificationAsync(
-              Haptics.NotificationFeedbackType.Warning,
-            );
-            queryClient.clear();
-            await clearApiCache();
-            Alert.alert('Listo', 'La caché ha sido limpiada.');
-          },
-        },
-      ],
-    );
+    setModalState({
+      visible: true,
+      title: 'Limpiar caché',
+      message:
+        '¿Estás seguro? Se eliminarán las tasas almacenadas localmente.',
+      variant: 'danger',
+      confirmText: 'Limpiar',
+      cancelText: 'Cancelar',
+      onConfirm: async () => {
+        void Haptics.notificationAsync(
+          Haptics.NotificationFeedbackType.Warning,
+        );
+        queryClient.clear();
+        await clearApiCache();
+        setModalState({
+          visible: true,
+          title: 'Listo',
+          message: 'La caché ha sido limpiada.',
+          variant: 'success',
+          confirmText: 'Aceptar',
+        });
+      },
+    });
   };
 
   const handleThemeChange = (mode: ThemeMode) => {
@@ -200,12 +247,18 @@ export default function SettingsScreen() {
     setThemeMode(mode);
   };
 
+  const handlePrimaryColorChange = (colorId: PrimaryColorId) => {
+    if (colorId === primaryColor) return;
+    void Haptics.selectionAsync();
+    setPrimaryColor(colorId);
+  };
+
   return (
     <View
       className="flex-1 bg-surface"
       style={{ backgroundColor: COLORS.surface }}
     >
-      {/* Fixed compact orange Hero */}
+      {/* Fixed compact Hero */}
       <ScreenHero
         title="Ajustes"
         subtitle="Apariencia, caché y fuentes"
@@ -231,13 +284,13 @@ export default function SettingsScreen() {
           <SettingsRow
             icon={<User size={16} color={COLORS.textMuted} />}
             label="Autor"
-            value="Jose Lopez"
+            value="DevLopez"
           />
           <SettingsRow
-            icon={<Globe size={16} color={COLORS.textMuted} />}
+            icon={<Globe size={16} color={COLORS.primary} />}
             label="Sitio Web"
-            value="joselopez.vercel.app"
-            onPress={() => Linking.openURL('https://joselopez.vercel.app')}
+            value="devlopez.vercel.app"
+            onPress={() => Linking.openURL('https://devlopez.vercel.app')}
           />
           <SettingsRow
             icon={<Tag size={16} color={COLORS.textMuted} />}
@@ -247,7 +300,7 @@ export default function SettingsScreen() {
           />
         </SettingsGroup>
 
-        {/* Theme */}
+        {/* Theme & Primary Color */}
         <SettingsGroup
           title="Apariencia"
           icon={<Palette size={16} color={COLORS.primary} />}
@@ -290,8 +343,52 @@ export default function SettingsScreen() {
             label="Automático (Sistema)"
             currentMode={themeMode}
             onPress={() => handleThemeChange('system')}
-            isLast
           />
+        </SettingsGroup>
+
+        <SettingsGroup
+          title="Color principal"
+          icon={<Palette size={16} color={COLORS.primary} />}
+          index={2}
+        >
+            {/* Primary Color Picker */}
+          <View className="pt-3">
+            <View className="flex-row flex-wrap items-center justify-between">
+              {PRIMARY_COLOR_OPTIONS.map((option) => {
+                const isSelected = option.id === primaryColor;
+                return (
+                  <Pressable
+                    key={option.id}
+                    onPress={() => handlePrimaryColorChange(option.id)}
+                    accessibilityLabel={`Color ${option.label}`}
+                    className="items-center gap-1 active:opacity-80"
+                  >
+                    <View
+                      className="h-9 w-9 items-center justify-center rounded-full border-2"
+                      style={{
+                        backgroundColor: option.primary,
+                        borderColor: isSelected
+                          ? COLORS.textPrimary
+                          : 'transparent',
+                      }}
+                    >
+                      {isSelected && (
+                        <Check size={16} color="#ffffff" strokeWidth={2.8} />
+                      )}
+                    </View>
+                    <Text
+                      className="text-[10px]"
+                      style={{
+                        color: isSelected ? COLORS.primary : COLORS.textMuted,
+                      }}
+                    >
+                      {option.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
         </SettingsGroup>
 
         {/* Data */}
@@ -301,7 +398,7 @@ export default function SettingsScreen() {
           index={2}
         >
           <SettingsRow
-            icon={<RefreshCw size={16} color={COLORS.textMuted} />}
+            icon={<RefreshCw size={16} color={COLORS.primary} />}
             label="Forzar actualización"
             onPress={handleForceRefresh}
           />
@@ -332,7 +429,31 @@ export default function SettingsScreen() {
             isLast
           />
         </SettingsGroup>
+
+        {/* Footer */}
+        <Animated.View
+          entering={FadeInDown.delay(350).duration(350)}
+          className="items-center pt-2"
+        >
+          <Text className="text-xs text-text-muted">
+            {APP_NAME} v{APP_VERSION}
+          </Text>
+          <Text className="mt-1 text-xs text-text-muted">
+            Datos desde Rates Cloudflare API
+          </Text>
+        </Animated.View>
       </ScrollView>
+
+      <AppModal
+        visible={modalState.visible}
+        title={modalState.title}
+        message={modalState.message}
+        variant={modalState.variant}
+        confirmText={modalState.confirmText}
+        cancelText={modalState.cancelText}
+        onConfirm={modalState.onConfirm}
+        onClose={closeModal}
+      />
     </View>
   );
 }

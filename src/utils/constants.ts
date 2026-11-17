@@ -1,4 +1,10 @@
-import type { ApiCurrency, CurrencyCode } from '@/types/currency.types';
+import Constants from 'expo-constants';
+
+import type {
+  ApiCurrency,
+  CurrencyCode,
+  PrimaryColorOption,
+} from '@/types/currency.types';
 
 // ----- API Configuration -----
 
@@ -46,7 +52,7 @@ export const CURRENCY_SYMBOLS: Record<CurrencyCode, string> = {
 export const CURRENCY_FLAGS: Record<CurrencyCode, string> = {
   USD: '🇺🇸',
   EUR: '🇪🇺',
-  USDT: '💲',
+  USDT: '₮',
   VES: '🇻🇪',
 };
 
@@ -59,12 +65,77 @@ export const CURRENCY_NAMES: Record<CurrencyCode, string> = {
 
 // ----- Theme -----
 
+export const DEFAULT_PRIMARY_COLOR = '#ff6b26';
+
+export const PRIMARY_COLOR_OPTIONS: PrimaryColorOption[] = [
+  {
+    id: 'orange',
+    label: 'Naranja',
+    primary: '#ff6b26',
+    primaryLight: '#ff8f5a',
+    primaryDark: '#cc5520',
+    rgb: '255 107 38',
+    rgbLight: '255 143 90',
+    rgbDark: '204 85 32',
+  },
+  {
+    id: 'blue',
+    label: 'Azul',
+    primary: '#2563eb',
+    primaryLight: '#60a5fa',
+    primaryDark: '#1d4ed8',
+    rgb: '37 99 235',
+    rgbLight: '96 165 250',
+    rgbDark: '29 78 216',
+  },
+  {
+    id: 'emerald',
+    label: 'Esmeralda',
+    primary: '#10b981',
+    primaryLight: '#34d399',
+    primaryDark: '#059669',
+    rgb: '16 185 129',
+    rgbLight: '52 211 153',
+    rgbDark: '5 150 105',
+  },
+  {
+    id: 'violet',
+    label: 'Violeta',
+    primary: '#7c3aed',
+    primaryLight: '#a78bfa',
+    primaryDark: '#6d28d9',
+    rgb: '124 58 237',
+    rgbLight: '167 139 250',
+    rgbDark: '109 40 217',
+  },
+  {
+    id: 'rose',
+    label: 'Carmesí',
+    primary: '#e11d48',
+    primaryLight: '#fb7185',
+    primaryDark: '#be123c',
+    rgb: '225 29 72',
+    rgbLight: '251 113 133',
+    rgbDark: '190 18 60',
+  },
+  {
+    id: 'teal',
+    label: 'Turquesa',
+    primary: '#0d9488',
+    primaryLight: '#2dd4bf',
+    primaryDark: '#0f766e',
+    rgb: '13 148 136',
+    rgbLight: '45 212 191',
+    rgbDark: '15 118 110',
+  },
+];
+
 export const THEME_COLORS = {
   light: {
     primary: '#ff6b26',
     primaryLight: '#ff8f5a',
     primaryDark: '#cc5520',
-    surface: '#f7f7f7ff',
+    surface: '#f7f7f7',
     surfaceCard: '#ffffff',
     surfaceElevated: '#f3f4f6',
     textPrimary: '#111827',
@@ -72,7 +143,7 @@ export const THEME_COLORS = {
     textMuted: '#6b7280',
     success: '#22c55e',
     danger: '#ef4444',
-    border: '#f2f2f2ff',
+    border: '#f2f2f2',
   },
   dark: {
     primary: '#ff6b26',
@@ -92,5 +163,5 @@ export const THEME_COLORS = {
 
 // ----- App -----
 
-export const APP_NAME = 'RatesVenApp';
-export const APP_VERSION = '1.0.0';
+export const APP_NAME = Constants.expoConfig?.name ?? 'RatesVenApp';
+export const APP_VERSION = Constants.expoConfig?.version ?? '1.0.1';
