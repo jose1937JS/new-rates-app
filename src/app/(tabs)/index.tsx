@@ -1,6 +1,6 @@
 import { ArrowLeftRight } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { RefreshControl, ScrollView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -8,6 +8,7 @@ import { ConverterSkeleton } from '@/components/ui/ConverterSkeleton';
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { OfflineBadge } from '@/components/ui/OfflineBadge';
+import { PullToRefreshScrollView } from '@/components/ui/PullToRefreshScrollView';
 import { RateCard } from '@/components/ui/RateCard';
 import { RatesHero } from '@/components/ui/RatesHero';
 import { ScreenHero } from '@/components/ui/ScreenHero';
@@ -157,8 +158,10 @@ export default function ConverterScreen() {
           }
         />
 
-        <ScrollView
-          className="flex-1"
+        <PullToRefreshScrollView
+          containerClassName="flex-1"
+          refreshing={isFetching && !isLoading}
+          onRefresh={refetch}
           contentContainerStyle={{
             flexGrow: 1,
             justifyContent: 'center',
@@ -167,14 +170,6 @@ export default function ConverterScreen() {
             paddingBottom: 104 + insets.bottom,
           }}
           contentInsetAdjustmentBehavior="never"
-          refreshControl={
-            <RefreshControl
-              refreshing={isFetching && !isLoading}
-              onRefresh={refetch}
-              tintColor={COLORS.primary}
-              colors={[COLORS.primary]}
-            />
-          }
         >
           {isLoading ? (
             <View className="items-center py-12">
@@ -204,7 +199,7 @@ export default function ConverterScreen() {
               }
             />
           )}
-        </ScrollView>
+        </PullToRefreshScrollView>
       </View>
     );
   }
@@ -219,8 +214,10 @@ export default function ConverterScreen() {
         isOnline={isOnline}
       />
 
-      <ScrollView
-        className="flex-1 -mt-20"
+      <PullToRefreshScrollView
+        containerClassName="flex-1 -mt-20"
+        refreshing={isFetching && !isLoading}
+        onRefresh={refetch}
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingTop: 0,
@@ -229,14 +226,6 @@ export default function ConverterScreen() {
         }}
         contentInsetAdjustmentBehavior="never"
         keyboardShouldPersistTaps="handled"
-        refreshControl={
-          <RefreshControl
-            refreshing={isFetching && !isLoading}
-            onRefresh={refetch}
-            tintColor={COLORS.primary}
-            colors={[COLORS.primary]}
-          />
-        }
       >
         {/* Main converter */}
         <Animated.View entering={FadeInDown.delay(100).duration(400)}>
@@ -299,7 +288,7 @@ export default function ConverterScreen() {
             </Text>
           )}
         </Animated.View>
-      </ScrollView>
+      </PullToRefreshScrollView>
     </View>
   );
 }
