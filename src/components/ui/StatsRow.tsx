@@ -2,6 +2,7 @@ import { Activity, ArrowDownRight, ArrowUpRight, Percent } from 'lucide-react-na
 import { Text, View } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 
+import { Card } from '@/components/ui/Card';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { formatNumber, formatPercentage } from '@/utils/formatters';
 
@@ -45,35 +46,33 @@ export function StatsRow({ current, max, min, change }: StatsRowProps) {
   const COLORS = useThemeColors();
 
   return (
-    <Animated.View
-      entering={FadeInUp.delay(200).duration(400)}
-      className="flex-row rounded-2xl bg-surface-card p-3.5"
-      style={{ borderCurve: 'continuous' }}
-    >
-      <StatItem
-        icon={<Activity size={12} color={COLORS.textMuted} />}
-        label="Actual"
-        value={formatNumber(current, 2)}
-      />
-      <View className="w-px bg-border my-0.5" />
-      <StatItem
-        icon={<ArrowUpRight size={12} color={COLORS.success} />}
-        label="Máximo"
-        value={formatNumber(max, 2)}
-      />
-      <View className="w-px bg-border my-0.5" />
-      <StatItem
-        icon={<ArrowDownRight size={12} color={COLORS.danger} />}
-        label="Mínimo"
-        value={formatNumber(min, 2)}
-      />
-      <View className="w-px bg-border my-0.5" />
-      <StatItem
-        icon={<Percent size={12} color={isPositive ? COLORS.success : COLORS.danger} />}
-        label="Variación"
-        value={formatPercentage(change)}
-        color={isPositive ? 'text-success' : 'text-danger'}
-      />
+    <Animated.View entering={FadeInUp.delay(200).duration(400)}>
+      <Card noPadding className="flex-row p-3.5">
+        <StatItem
+          icon={<Activity size={12} color={COLORS.textMuted} />}
+          label="Actual"
+          value={formatNumber(current, 2)}
+        />
+        <View className="my-0.5 w-px bg-border" />
+        <StatItem
+          icon={<ArrowUpRight size={12} color={COLORS.success} />}
+          label="Máximo"
+          value={formatNumber(max, 2)}
+        />
+        <View className="my-0.5 w-px bg-border" />
+        <StatItem
+          icon={<ArrowDownRight size={12} color={COLORS.danger} />}
+          label="Mínimo"
+          value={formatNumber(min, 2)}
+        />
+        <View className="my-0.5 w-px bg-border" />
+        <StatItem
+          icon={<Percent size={12} color={isPositive ? COLORS.success : COLORS.danger} />}
+          label="Variación"
+          value={formatPercentage(change)}
+          color={isPositive ? 'text-success' : 'text-danger'}
+        />
+      </Card>
     </Animated.View>
   );
 }

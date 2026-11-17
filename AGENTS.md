@@ -30,10 +30,10 @@ stack:
 <file_map>
 entry_and_routes:
   src/app/_layout.tsx: Root layout, Poppins font loading, QueryClient + AsyncStorage persister, NetInfo -> React Query `onlineManager`, theme sync
-  src/app/(tabs)/_layout.tsx: Bottom tabs (`index` Conversor [headerShown:false], `history` Historial, `settings` Ajustes)
+  src/app/(tabs)/_layout.tsx: Bottom tabs with `CustomTabBar` (`headerShown: false` across tabs; left: `history`, center FAB: `index`, right: `settings`)
   src/app/(tabs)/index.tsx: Main screen — `RatesHero` + active `CurrencyInput` + 3 `RateCard`s (all 4 currencies always visible), 300ms input debounce, immediate card swap
-  src/app/(tabs)/history.tsx: Historical chart, period tabs (`1d|3d|7d|30d`), stats row, chronological price list, pull-to-refresh
-  src/app/(tabs)/settings.tsx: Theme mode (`dark|light|system`), force refresh (checks NetInfo), cache clear, data sources info
+  src/app/(tabs)/history.tsx: Compact `ScreenHero` with embedded `CurrencyTabSelector`, animated `PeriodSelector` (`1d|3d|7d|30d`), sliding content transitions, chart, stats row, chronological price list
+  src/app/(tabs)/settings.tsx: Compact `ScreenHero`, bordered grouped cards with header accents and inset row dividers, theme mode (`dark|light|system`), force refresh, cache clear
 
 services_and_data:
   src/services/ratesApi.ts: Cloudflare API client, `X-API-Key` auth, NetInfo pre-check, AsyncStorage fallback cache, in-flight dedupe, 10s AbortController timeout
@@ -50,7 +50,10 @@ hooks:
   src/hooks/useThemeColors.ts: Resolves `THEME_COLORS.light|dark` from Zustand `themeMode` + system scheme
 
 components_ui:
-  src/components/ui/RatesHero.tsx: Edge-to-edge orange (`COLORS.primary`) rounded-bottom (`28px`) Hero with `OfflineBadge` and 3 quick-verify cards (USD, EUR, USDT)
+  src/components/ui/RatesHero.tsx: Edge-to-edge fixed orange (`COLORS.primary`) rounded-bottom (`28px`) Hero with `OfflineBadge` and 3 quick-verify cards (USD, EUR, USDT)
+  src/components/ui/ScreenHero.tsx: Compact fixed edge-to-edge orange (`COLORS.primary`) rounded-bottom (`26px`) Hero with icon, title, subtitle, and optional children (used in `history` and `settings`)
+  src/components/ui/Card.tsx: Shared flat card container (`rounded-2xl bg-surface-card p-4`, no shadow) with optional header (`title`, `icon`, `headerRight`) used across `history`, `settings`, and `CurrencyInput`
+  src/components/ui/CustomTabBar.tsx: Curved SVG (`#ff6b26`) bottom tab bar with center concave notch, white circular FAB (`index`) with `withTiming` scale-90->100 press animation, and `useSafeAreaInsets().bottom` handling
   src/components/ui/CurrencyInput.tsx: Active currency input, fixed `52px` height, right-side reset-to-1 (`X`) button, comma-to-dot normalization
   src/components/ui/RateCard.tsx: Conversion card with press scale animation, `%` badge (hidden for `VES`), `1 X = Y VES` subtitle
   src/components/ui/OfflineBadge.tsx: Offline indicator pill (`variant: 'default' | 'hero'`)

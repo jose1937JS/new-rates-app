@@ -2,6 +2,7 @@ import { ArrowDownRight, ArrowUpRight, Calendar, Minus } from 'lucide-react-nati
 import { useMemo } from 'react';
 import { Text, View } from 'react-native';
 
+import { Card } from '@/components/ui/Card';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { ChartDataPoint, CurrencyCode } from '@/types/currency.types';
 import {
@@ -63,94 +64,84 @@ export function PriceHistoryList({ data, currency }: PriceHistoryListProps) {
   }
 
   return (
-    <View
-      className="rounded-2xl bg-surface-card p-4"
-      style={{ borderCurve: 'continuous' }}
-    >
-      {/* Header */}
-      <View className="flex-row items-center justify-between pb-3 border-b border-border">
-        <View className="flex-row items-center gap-2">
-          <Calendar size={16} color={COLORS.primary} />
-          <Text className="text-sm font-semibold text-text-primary">
-            Registro de Precios
-          </Text>
-        </View>
-        <View className="rounded-full bg-surface-elevated px-2.5 py-0.5 border border-border">
+    <Card
+      title="Registro de Precios"
+      icon={<Calendar size={16} color={COLORS.primary} />}
+      headerRight={
+        <View className="rounded-full border border-border bg-surface-elevated px-2.5 py-0.5">
           <Text className="text-[11px] font-medium text-text-muted">
             {historyItems.length}{' '}
             {historyItems.length === 1 ? 'registro' : 'registros'}
           </Text>
         </View>
-      </View>
+      }
+      contentClassName="pt-1"
+    >
+      {historyItems.map((item, index) => {
+        const isPositive = item.changePct > 0;
+        const isNegative = item.changePct < 0;
+        const isLast = index === historyItems.length - 1;
 
-      {/* List items */}
-      <View className="pt-1">
-        {historyItems.map((item, index) => {
-          const isPositive = item.changePct > 0;
-          const isNegative = item.changePct < 0;
-          const isLast = index === historyItems.length - 1;
-
-          return (
-            <View
-              key={item.key}
-              className={`flex-row items-center justify-between py-2.5 ${
-                !isLast ? 'border-b border-border/40' : ''
-              }`}
-            >
-              {/* Date & Day/Time */}
-              <View className="gap-0.5">
-                <Text className="text-sm font-medium text-text-primary">
-                  {item.formattedDate}
+        return (
+          <View
+            key={item.key}
+            className={`flex-row items-center justify-between py-2.5 ${
+              !isLast ? 'border-b border-border/40' : ''
+            }`}
+          >
+            {/* Date & Day/Time */}
+            <View className="gap-0.5">
+              <Text className="text-sm font-medium text-text-primary">
+                {item.formattedDate}
+              </Text>
+              {item.subtitle ? (
+                <Text className="text-xs text-text-muted">
+                  {item.subtitle}
                 </Text>
-                {item.subtitle ? (
-                  <Text className="text-xs text-text-muted">
-                    {item.subtitle}
-                  </Text>
-                ) : null}
-              </View>
-
-              {/* Price & Daily Change */}
-              <View className="items-end gap-0.5">
-                <Text
-                  className="text-sm font-semibold text-text-primary"
-                  style={{ fontVariant: ['tabular-nums'] }}
-                  selectable
-                >
-                  {formatNumber(item.value, 2)} VES
-                </Text>
-
-                {item.hasPrev ? (
-                  <View className="flex-row items-center gap-0.5">
-                    {isPositive ? (
-                      <ArrowUpRight size={12} color={COLORS.success} />
-                    ) : isNegative ? (
-                      <ArrowDownRight size={12} color={COLORS.danger} />
-                    ) : (
-                      <Minus size={12} color={COLORS.textMuted} />
-                    )}
-                    <Text
-                      className={`text-xs font-medium ${
-                        isPositive
-                          ? 'text-success'
-                          : isNegative
-                            ? 'text-danger'
-                            : 'text-text-muted'
-                      }`}
-                      style={{ fontVariant: ['tabular-nums'] }}
-                    >
-                      {formatPercentage(item.changePct)}
-                    </Text>
-                  </View>
-                ) : (
-                  <Text className="text-[11px] text-text-muted">
-                    Base del período
-                  </Text>
-                )}
-              </View>
+              ) : null}
             </View>
-          );
-        })}
-      </View>
-    </View>
+
+            {/* Price & Daily Change */}
+            <View className="items-end gap-0.5">
+              <Text
+                className="text-sm font-semibold text-text-primary"
+                style={{ fontVariant: ['tabular-nums'] }}
+                selectable
+              >
+                {formatNumber(item.value, 2)} VES
+              </Text>
+
+              {item.hasPrev ? (
+                <View className="flex-row items-center gap-0.5">
+                  {isPositive ? (
+                    <ArrowUpRight size={12} color={COLORS.success} />
+                  ) : isNegative ? (
+                    <ArrowDownRight size={12} color={COLORS.danger} />
+                  ) : (
+                    <Minus size={12} color={COLORS.textMuted} />
+                  )}
+                  <Text
+                    className={`text-xs font-medium ${
+                      isPositive
+                        ? 'text-success'
+                        : isNegative
+                          ? 'text-danger'
+                          : 'text-text-muted'
+                    }`}
+                    style={{ fontVariant: ['tabular-nums'] }}
+                  >
+                    {formatPercentage(item.changePct)}
+                  </Text>
+                </View>
+              ) : (
+                <Text className="text-[11px] text-text-muted">
+                  Base del período
+                </Text>
+              )}
+            </View>
+          </View>
+        );
+      })}
+    </Card>
   );
 }

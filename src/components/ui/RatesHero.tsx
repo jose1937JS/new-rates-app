@@ -59,10 +59,10 @@ export function RatesHero({
         backgroundColor: COLORS.primary,
         paddingTop: insets.top + 12,
         paddingHorizontal: 16,
-        paddingBottom: 80,
-        // borderBottomLeftRadius: 28,
-        // borderBottomRightRadius: 28,
-        // borderCurve: 'continuous',
+        paddingBottom: 20,
+        borderBottomLeftRadius: 28,
+        borderBottomRightRadius: 28,
+        borderCurve: 'continuous',
       }}
     >
       {/* Header row */}
@@ -97,7 +97,7 @@ export function RatesHero({
             <Animated.View
               key={item.code}
               entering={FadeInDown.delay(index * 60).duration(350)}
-              className="flex-1 rounded-2xl p-3"
+              className="flex-1 rounded-2xl p-3 border-2 border-slate-300"
               style={{
                 backgroundColor: COLORS.surfaceCard,
                 borderCurve: 'continuous',

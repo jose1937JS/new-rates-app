@@ -1,6 +1,7 @@
 import { Text, View, useWindowDimensions } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 
+import { Card } from '@/components/ui/Card';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { ChartDataPoint } from '@/types/currency.types';
 import {
@@ -20,23 +21,17 @@ export function PriceChart({ data, isLoading }: PriceChartProps) {
 
   if (isLoading) {
     return (
-      <View
-        className="h-64 items-center justify-center rounded-2xl bg-surface-card"
-        style={{ borderCurve: 'continuous' }}
-      >
+      <Card noPadding className="h-64 items-center justify-center">
         <Text className="text-sm text-text-muted">Cargando gráfico...</Text>
-      </View>
+      </Card>
     );
   }
 
   if (data.length === 0) {
     return (
-      <View
-        className="h-64 items-center justify-center rounded-2xl bg-surface-card"
-        style={{ borderCurve: 'continuous' }}
-      >
+      <Card noPadding className="h-64 items-center justify-center">
         <Text className="text-sm text-text-muted">Sin datos disponibles</Text>
-      </View>
+      </Card>
     );
   }
 
@@ -68,10 +63,7 @@ export function PriceChart({ data, isLoading }: PriceChartProps) {
   const yAxisOffset = Math.max(0, Math.floor((minVal - padding) * 100) / 100);
 
   return (
-    <View
-      className="rounded-2xl bg-surface-card p-4 overflow-hidden"
-      style={{ borderCurve: 'continuous' }}
-    >
+    <Card className="overflow-hidden">
       <LineChart
         data={labelledData}
         width={chartWidth}
@@ -150,6 +142,6 @@ export function PriceChart({ data, isLoading }: PriceChartProps) {
           },
         }}
       />
-    </View>
+    </Card>
   );
 }

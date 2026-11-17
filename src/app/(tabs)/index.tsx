@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -30,6 +31,7 @@ export default function ConverterScreen() {
   } = useCurrencyRates();
   const { isOnline } = useOfflineStatus();
   const COLORS = useThemeColors();
+  const insets = useSafeAreaInsets();
 
   const [inputValue, setInputValue] = useState(amount);
   const [debouncedAmount, setDebouncedAmount] = useState(amount);
@@ -121,22 +123,8 @@ export default function ConverterScreen() {
   };
 
   return (
-    <ScrollView
-      className="flex-1 bg-surface"
-      style={{ backgroundColor: COLORS.surface }}
-      contentContainerStyle={{ paddingBottom: 32 }}
-      contentInsetAdjustmentBehavior="never"
-      keyboardShouldPersistTaps="handled"
-      refreshControl={
-        <RefreshControl
-          refreshing={isFetching && !isLoading}
-          onRefresh={refetch}
-          tintColor={COLORS.primary}
-          colors={[COLORS.primary]}
-        />
-      }
-    >
-      {/* Orange rounded-bottom Hero with 3 quick-verification rate cards */}
+    <View className="flex-1 bg-surface" style={{ backgroundColor: COLORS.surface }}>
+      {/* Fixed orange rounded-bottom Hero with 3 quick-verification rate cards */}
       <RatesHero
         rates={rates}
         isLoading={isLoading}
@@ -144,7 +132,25 @@ export default function ConverterScreen() {
         isOnline={isOnline}
       />
 
-      <View className="gap-4 px-4 -mt-16">
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 16,
+          paddingBottom: 104 + insets.bottom,
+          gap: 16,
+        }}
+        contentInsetAdjustmentBehavior="never"
+        keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl
+            refreshing={isFetching && !isLoading}
+            onRefresh={refetch}
+            tintColor={COLORS.primary}
+            colors={[COLORS.primary]}
+          />
+        }
+      >
         {/* Loading state */}
         {isLoading && !rates && (
           <View className="items-center py-12">
@@ -234,7 +240,7 @@ export default function ConverterScreen() {
             </Animated.View>
           </>
         )}
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
+import { Card } from '@/components/ui/Card';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { CurrencyCode } from '@/types/currency.types';
 import {
@@ -66,10 +67,9 @@ export function CurrencyInput({
   const showClearButton = value.length > 0 && value !== '1';
 
   return (
-    <View
-      className="rounded-2xl border bg-surface-card p-4 border-4"
+    <Card
+      className="border-4"
       style={{
-        borderCurve: 'continuous',
         borderColor: isFocused ? COLORS.primary : COLORS.border,
       }}
     >
@@ -142,6 +142,6 @@ export function CurrencyInput({
           </Pressable>
         )}
       </Pressable>
-    </View>
+    </Card>
   );
 }
