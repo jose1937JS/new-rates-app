@@ -343,6 +343,7 @@ export default function SettingsScreen() {
             label="Automático (Sistema)"
             currentMode={themeMode}
             onPress={() => handleThemeChange('system')}
+            isLast={true}
           />
         </SettingsGroup>
 

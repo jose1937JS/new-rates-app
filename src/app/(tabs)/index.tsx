@@ -154,7 +154,7 @@ export default function ConverterScreen() {
         {/* Loading state */}
         {isLoading && !rates && (
           <View className="items-center py-12">
-            <ActivityIndicator size="large" color={COLORS.primary} />
+            <ActivityIndicator size="large" color={COLORS.surface} />
             <Text className="mt-3 text-text-secondary">
               Obteniendo tasas de cambio...
             </Text>
