@@ -6,7 +6,6 @@ import {
   Trash2,
 } from 'lucide-react-native';
 import {
-  ActivityIndicator,
   Modal,
   Pressable,
   Text,
@@ -14,6 +13,7 @@ import {
 } from 'react-native';
 import Animated, { ZoomIn } from 'react-native-reanimated';
 
+import { ThreeDotsLoader } from '@/components/ui/ThreeDotsLoader';
 import { useThemeColors } from '@/hooks/useThemeColors';
 
 export type AppModalVariant = 'info' | 'success' | 'warning' | 'danger';
@@ -142,7 +142,7 @@ export function AppModal({
               }}
             >
               {loading ? (
-                <ActivityIndicator size="small" color="#ffffff" />
+                <ThreeDotsLoader size={6} color="#ffffff" />
               ) : (
                 <Text className="text-sm font-semibold text-white">
                   {confirmText}

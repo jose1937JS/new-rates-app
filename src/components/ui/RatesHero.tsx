@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppModal } from '@/components/ui/AppModal';
 import { CurrencyIcon } from '@/components/ui/CurrencyIcon';
 import { OfflineBadge } from '@/components/ui/OfflineBadge';
+import { ThreeDotsLoader } from '@/components/ui/ThreeDotsLoader';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { CurrencyCode, UnifiedRates } from '@/types/currency.types';
 import { formatNumber, formatPercentage } from '@/utils/formatters';
@@ -157,10 +158,8 @@ export function RatesHero({
                 </View>
 
                 {isLoading && !rates ? (
-                  <View className="flex-row items-center justify-between">
-                    <Text className="text-sm font-semibold text-text-muted">
-                      ...
-                    </Text>
+                  <View className="flex-row items-center justify-between pt-1">
+                    <ThreeDotsLoader size={5} color={COLORS.textMuted} />
                     <Info size={12} color={COLORS.textMuted} />
                   </View>
                 ) : (

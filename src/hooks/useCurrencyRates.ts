@@ -1,4 +1,4 @@
-import { useQueries } from '@tanstack/react-query';
+import { useIsRestoring, useQueries } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 
 import {
@@ -39,6 +39,7 @@ function pickPrevious(
 }
 
 export function useCurrencyRates() {
+  const isRestoring = useIsRestoring();
   const [todayQuery, recentQuery] = useQueries({
     queries: [
       {
@@ -56,9 +57,9 @@ export function useCurrencyRates() {
     ],
   });
 
-  const isLoading = todayQuery.isLoading && !todayQuery.data;
+  const isLoading = isRestoring || (todayQuery.isLoading && !todayQuery.data);
   const isFetching = todayQuery.isFetching || recentQuery.isFetching;
-  const isError = todayQuery.isError && !todayQuery.data;
+  const isError = !isRestoring && todayQuery.isError && !todayQuery.data;
   const error = (todayQuery.error ?? recentQuery.error) as Error | null;
 
   const computed = useMemo(() => {

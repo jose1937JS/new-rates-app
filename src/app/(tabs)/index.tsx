@@ -1,12 +1,17 @@
+import { ArrowLeftRight } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { RefreshControl, ScrollView, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ConverterSkeleton } from '@/components/ui/ConverterSkeleton';
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { OfflineBadge } from '@/components/ui/OfflineBadge';
 import { RateCard } from '@/components/ui/RateCard';
 import { RatesHero } from '@/components/ui/RatesHero';
+import { ScreenHero } from '@/components/ui/ScreenHero';
+import { ThreeDotsLoader } from '@/components/ui/ThreeDotsLoader';
 import { convertAmount, useConversion } from '@/hooks/useConversion';
 import { useCurrencyRates } from '@/hooks/useCurrencyRates';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
@@ -35,7 +40,16 @@ export default function ConverterScreen() {
 
   const [inputValue, setInputValue] = useState(amount);
   const [debouncedAmount, setDebouncedAmount] = useState(amount);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(() => Boolean(rates));
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setHasLoadedOnce(true);
+    }
+  }, [isLoading]);
+
+  const showInitialSkeleton = isLoading && !rates && !hasLoadedOnce;
 
   useEffect(() => {
     return () => {
@@ -122,6 +136,79 @@ export default function ConverterScreen() {
     }
   };
 
+  if (showInitialSkeleton) {
+    return <ConverterSkeleton />;
+  }
+
+  if (!rates) {
+    return (
+      <View
+        className="flex-1 bg-surface"
+        style={{ backgroundColor: COLORS.surface }}
+      >
+        <ScreenHero
+          title="RATES VENAPP"
+          subtitle="Tasas de cambio en Venezuela"
+          icon={<ArrowLeftRight size={20} color="#ffffff" />}
+          rightElement={
+            !isOnline ? (
+              <OfflineBadge isOnline={isOnline} variant="hero" />
+            ) : undefined
+          }
+        />
+
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: 'center',
+            paddingHorizontal: 16,
+            paddingTop: 16,
+            paddingBottom: 104 + insets.bottom,
+          }}
+          contentInsetAdjustmentBehavior="never"
+          refreshControl={
+            <RefreshControl
+              refreshing={isFetching && !isLoading}
+              onRefresh={refetch}
+              tintColor={COLORS.primary}
+              colors={[COLORS.primary]}
+            />
+          }
+        >
+          {isLoading ? (
+            <View className="items-center py-12">
+              <ThreeDotsLoader size={10} color={COLORS.primary} />
+              <Text className="mt-3 text-text-secondary">
+                Obteniendo tasas de cambio...
+              </Text>
+            </View>
+          ) : (
+            <EmptyState
+              isError={isError}
+              isRetrying={isFetching}
+              onRetry={refetch}
+              title={
+                !isOnline
+                  ? 'Sin conexión a internet'
+                  : isError
+                    ? 'No pudimos cargar las tasas'
+                    : 'Sin datos disponibles'
+              }
+              message={
+                !isOnline
+                  ? 'No tienes conexión a internet y no hay tasas guardadas en caché todavía.'
+                  : isError
+                    ? 'Ocurrió un problema al conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.'
+                    : 'Aún no hay tasas de cambio registradas. Vuelve a intentarlo en unos minutos.'
+              }
+            />
+          )}
+        </ScrollView>
+      </View>
+    );
+  }
+
   return (
     <View className="flex-1 bg-surface" style={{ backgroundColor: COLORS.surface }}>
       {/* Fixed orange rounded-bottom Hero with 3 quick-verification rate cards */}
@@ -151,98 +238,67 @@ export default function ConverterScreen() {
           />
         }
       >
-        {/* Loading state */}
-        {isLoading && !rates && (
-          <View className="items-center py-12">
-            <ActivityIndicator size="large" color={COLORS.surface} />
-            <Text className="mt-3 text-text-secondary">
-              Obteniendo tasas de cambio...
-            </Text>
-          </View>
-        )}
-
-        {/* Empty / error state */}
-        {!isLoading && !rates && (
-          <EmptyState
-            isError={isError}
-            isRetrying={isFetching}
-            onRetry={refetch}
-            title={isError ? 'No pudimos cargar las tasas' : 'Sin datos disponibles'}
-            message={
-              !isOnline
-                ? 'No tienes conexión a internet y no hay tasas guardadas en caché todavía.'
-                : isError
-                  ? 'Ocurrió un problema al conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.'
-                  : 'Aún no hay tasas de cambio registradas. Vuelve a intentarlo en unos minutos.'
-            }
-          />
-        )}
-
         {/* Main converter */}
-        {rates && (
-          <>
-            <Animated.View entering={FadeInDown.delay(100).duration(400)}>
-              <CurrencyInput
-                value={inputValue}
-                currency={selectedCurrency}
-                onChangeText={handleAmountChange}
-                onClear={handleClearAmount}
-              />
-            </Animated.View>
+        <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+          <CurrencyInput
+            value={inputValue}
+            currency={selectedCurrency}
+            onChangeText={handleAmountChange}
+            onClear={handleClearAmount}
+          />
+        </Animated.View>
 
-            <View className="flex-row items-center justify-between">
-              <Text
-                className="text-lg font-medium"
-                style={{ color: COLORS.primary }}
-              >
-                Conversiones
-              </Text>
-              <View className="flex-row items-center gap-1">
-                {dataUpdatedAt > 0 && (
-                  <Text className="text-xs text-text-muted">
-                    Actualizado {formatRelativeTime(new Date(dataUpdatedAt))}
-                  </Text>
-                )}
-              </View>
-            </View>
-
-            {/* Conversion cards */}
-            <View className="gap-3">
-              {cardCurrencies.map((currency, index) => (
-                <RateCard
-                  key={currency}
-                  currency={currency}
-                  convertedAmount={conversions[currency]}
-                  rate={currency === 'VES' ? 1 : getRate(currency)}
-                  changePercentage={currency === 'VES' ? 0 : getChange(currency)}
-                  onPress={() => handleCardPress(currency)}
-                  isSelected={false}
-                  index={index}
-                />
-              ))}
-            </View>
-
-            {/* Rate source info */}
-            <Animated.View
-              entering={FadeInDown.delay(300).duration(400)}
-              className="items-center pt-2"
-            >
+        <View className="flex-row items-center justify-between">
+          <Text
+            className="text-lg font-medium"
+            style={{ color: COLORS.primary }}
+          >
+            Conversiones
+          </Text>
+          <View className="flex-row items-center gap-1">
+            {dataUpdatedAt > 0 && (
               <Text className="text-xs text-text-muted">
-                Tasas: BCV (USD/EUR) • Yadio (USDT)
+                Actualizado {formatRelativeTime(new Date(dataUpdatedAt))}
               </Text>
-              {hasFallback && (
-                <Text className="mt-0.5 text-[11px] text-text-muted">
-                  Mostrando última tasa BCV disponible
-                </Text>
-              )}
-              {!isOnline && (
-                <Text className="mt-0.5 text-[11px] text-text-muted">
-                  Modo sin conexión • Mostrando consulta guardada
-                </Text>
-              )}
-            </Animated.View>
-          </>
-        )}
+            )}
+          </View>
+        </View>
+
+        {/* Conversion cards */}
+        <View className="gap-3">
+          {cardCurrencies.map((currency, index) => (
+            <RateCard
+              key={currency}
+              currency={currency}
+              convertedAmount={conversions[currency]}
+              rate={currency === 'VES' ? 1 : getRate(currency)}
+              changePercentage={currency === 'VES' ? 0 : getChange(currency)}
+              onPress={() => handleCardPress(currency)}
+              isSelected={false}
+              index={index}
+            />
+          ))}
+        </View>
+
+        {/* Rate source info */}
+        <Animated.View
+          entering={FadeInDown.delay(300).duration(400)}
+          className="items-center pt-2"
+        >
+          <Text className="text-xs text-text-muted">
+            Tasas: BCV (USD/EUR) • Yadio (USDT)
+          </Text>
+          {hasFallback && (
+            <Text className="mt-0.5 text-[11px] text-text-muted">
+              Mostrando última tasa BCV disponible
+            </Text>
+          )}
+          {!isOnline && (
+            <Text className="mt-0.5 text-[11px] text-text-muted">
+              Modo sin conexión • Mostrando consulta guardada
+            </Text>
+          )}
+        </Animated.View>
       </ScrollView>
     </View>
   );

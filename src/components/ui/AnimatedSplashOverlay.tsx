@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Text, View } from 'react-native';
+import { Image, Text, View } from 'react-native';
 import Animated, {
   Easing,
   cancelAnimation,
@@ -10,6 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { ThreeDotsLoader } from '@/components/ui/ThreeDotsLoader';
 import { APP_NAME, DEFAULT_PRIMARY_COLOR } from '@/utils/constants';
 
 const APP_LOGO = require('@/assets/images/logo.png');
@@ -116,7 +117,7 @@ export function AnimatedSplashOverlay({
           />
         </View>
         <View className="flex-row items-center gap-2">
-          <ActivityIndicator size="small" color="#ffffff" />
+          <ThreeDotsLoader size={6} color="#ffffff" />
           <Text className="text-xs font-medium text-white/90">
             Cargando tasas...
           </Text>
