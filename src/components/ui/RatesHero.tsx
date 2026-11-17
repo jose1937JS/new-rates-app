@@ -97,7 +97,7 @@ export function RatesHero({
             <Animated.View
               key={item.code}
               entering={FadeInDown.delay(index * 60).duration(350)}
-              className="flex-1 rounded-2xl p-3 border-2 border-slate-300"
+              className="flex-1 rounded-2xl p-3"
               style={{
                 backgroundColor: COLORS.surfaceCard,
                 borderCurve: 'continuous',
@@ -122,7 +122,7 @@ export function RatesHero({
               ) : (
                 <>
                   <Text
-                    className="text-sm font-bold text-text-primary"
+                    className="text-sm font-semibold text-text-primary"
                     style={{ fontVariant: ['tabular-nums'] }}
                     numberOfLines={1}
                     adjustsFontSizeToFit

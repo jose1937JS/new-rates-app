@@ -141,7 +141,7 @@ function SideTabButton({
         strokeWidth={isFocused ? 2.4 : 1.9}
       />
       <Text
-        className={`text-[13px] ${
+        className={`text-xs ${
           isFocused ? 'font-semibold text-white' : 'font-medium'
         }`}
         style={isFocused ? undefined : { color: tintColor }}

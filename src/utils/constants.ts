@@ -64,7 +64,7 @@ export const THEME_COLORS = {
     primary: '#ff6b26',
     primaryLight: '#ff8f5a',
     primaryDark: '#cc5520',
-    surface: '#f9fafb',
+    surface: '#f7f7f7ff',
     surfaceCard: '#ffffff',
     surfaceElevated: '#f3f4f6',
     textPrimary: '#111827',
@@ -72,7 +72,7 @@ export const THEME_COLORS = {
     textMuted: '#6b7280',
     success: '#22c55e',
     danger: '#ef4444',
-    border: '#e5e7eb',
+    border: '#f2f2f2ff',
   },
   dark: {
     primary: '#ff6b26',

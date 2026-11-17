@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { X } from 'lucide-react-native';
 import { useCallback, useRef, useState } from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { Card } from '@/components/ui/Card';
@@ -68,7 +68,7 @@ export function CurrencyInput({
 
   return (
     <Card
-      className="border-4"
+      className="border-2"
       style={{
         borderColor: isFocused ? COLORS.primary : COLORS.border,
       }}

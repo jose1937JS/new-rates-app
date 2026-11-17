@@ -32,7 +32,7 @@ import {
 } from '@/services/ratesApi';
 import { useCurrencyStore } from '@/store/currencyStore';
 import type { ThemeMode } from '@/types/currency.types';
-import { APP_NAME, APP_VERSION } from '@/utils/constants';
+import { APP_VERSION } from '@/utils/constants';
 
 function SettingsGroup({
   title,
@@ -332,19 +332,6 @@ export default function SettingsScreen() {
             isLast
           />
         </SettingsGroup>
-
-        {/* Footer */}
-        <Animated.View
-          entering={FadeInDown.delay(350).duration(350)}
-          className="items-center pt-2"
-        >
-          <Text className="text-xs text-text-muted">
-            {APP_NAME} v{APP_VERSION}
-          </Text>
-          <Text className="mt-1 text-xs text-text-muted">
-            Datos desde Rates Cloudflare API
-          </Text>
-        </Animated.View>
       </ScrollView>
     </View>
   );
