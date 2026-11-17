@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { Info } from 'lucide-react-native';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -107,7 +107,6 @@ export function RatesHero({
           <Text className="text-3xl font-bold text-white">
             RATES VENAPP
           </Text>
-          {isFetching && <ActivityIndicator size="small" color="#ffffff" />}
         </View>
         <View className="items-end">
           {!isOnline ? (
@@ -125,7 +124,7 @@ export function RatesHero({
         </View>
       </View>
 
-      {/* 3 quick-verification rate cards */}
+      {/* 3 quick-verification rate cards */}  
       <View className="flex-row gap-2.5">
         {items.map((item, index) => {
           const isPositive = item.change >= 0;

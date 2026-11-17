@@ -284,7 +284,7 @@ export default function SettingsScreen() {
           <SettingsRow
             icon={<User size={16} color={COLORS.textMuted} />}
             label="Autor"
-            value="DevLopez"
+            value="José F. López"
           />
           <SettingsRow
             icon={<Globe size={16} color={COLORS.primary} />}
