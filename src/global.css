@@ -17,7 +17,7 @@
     --color-border: 229 231 235;
     --color-primary: 255 107 38;
     --color-primary-light: 255 143 90;
-    --color-primary-dark: 204 85 32;
+    --color-primary-dark: 184 69 20;
     --color-success: 34 197 94;
     --color-danger: 239 68 68;
 
@@ -35,9 +35,9 @@
     --color-text-secondary: 160 160 160;
     --color-text-muted: 102 102 102;
     --color-border: 51 51 51;
-    --color-primary: 255 107 38;
-    --color-primary-light: 255 143 90;
-    --color-primary-dark: 204 85 32;
+    --color-primary: 184 69 20;
+    --color-primary-light: 255 107 38;
+    --color-primary-dark: 184 69 20;
     --color-success: 34 197 94;
     --color-danger: 239 68 68;
 

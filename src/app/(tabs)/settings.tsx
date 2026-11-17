@@ -120,7 +120,7 @@ function SettingsRow({
         {onPress ? (
           <ChevronRight
             size={14}
-            color={destructive ? COLORS.danger : COLORS.textMuted}
+            color={destructive ? COLORS.danger : COLORS.primary}
           />
         ) : null}
       </View>
@@ -287,7 +287,7 @@ export default function SettingsScreen() {
             value="José F. López"
           />
           <SettingsRow
-            icon={<Globe size={16} color={COLORS.primary} />}
+            icon={<Globe size={16} color={COLORS.textMuted} />}
             label="Sitio Web"
             value="devlopez.vercel.app"
             onPress={() => Linking.openURL('https://devlopez.vercel.app')}
@@ -367,7 +367,9 @@ export default function SettingsScreen() {
                     <View
                       className="h-9 w-9 items-center justify-center rounded-full border-2"
                       style={{
-                        backgroundColor: option.primary,
+                        backgroundColor: COLORS.isDark
+                          ? option.primaryDark
+                          : option.primary,
                         borderColor: isSelected
                           ? COLORS.textPrimary
                           : 'transparent',
@@ -399,7 +401,7 @@ export default function SettingsScreen() {
           index={2}
         >
           <SettingsRow
-            icon={<RefreshCw size={16} color={COLORS.primary} />}
+            icon={<RefreshCw size={16} color={COLORS.textMuted} />}
             label="Forzar actualización"
             onPress={handleForceRefresh}
           />

@@ -30,7 +30,7 @@ export function Card({
       style={[{ borderCurve: 'continuous' }, style]}
     >
       {hasHeader && (
-        <View className="flex-row items-center justify-between border-b border-slate-100 pb-3">
+        <View className="flex-row items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
           <View className="flex-row items-center gap-2">
             {icon}
             {title ? (
