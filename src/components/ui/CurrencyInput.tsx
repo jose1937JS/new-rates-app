@@ -68,7 +68,7 @@ export function CurrencyInput({
 
   return (
     <Card
-      className="border-2"
+      className="border-2 shadow-sm"
       style={{
         borderColor: isFocused ? COLORS.primary : COLORS.border,
       }}

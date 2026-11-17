@@ -133,10 +133,10 @@ export default function ConverterScreen() {
       />
 
       <ScrollView
-        className="flex-1"
+        className="flex-1 -mt-20"
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingTop: 16,
+          paddingTop: 0,
           paddingBottom: 104 + insets.bottom,
           gap: 16,
         }}
