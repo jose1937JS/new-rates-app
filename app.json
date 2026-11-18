@@ -2,7 +2,7 @@
   "expo": {
     "name": "RatesVenApp",
     "slug": "ratesvenapp",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
     "scheme": "ratesvenapp",
@@ -16,7 +16,7 @@
     },
     "android": {
       "package": "com.devlopez.ratesvenapp",
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
         "foregroundImage": "./assets/images/logo.png",
