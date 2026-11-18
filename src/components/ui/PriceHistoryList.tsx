@@ -1,6 +1,6 @@
-import { ArrowDownRight, ArrowUpRight, Calendar, Minus } from 'lucide-react-native';
-import { useMemo } from 'react';
-import { Text, View } from 'react-native';
+import { ArrowDownRight, ArrowUpRight, Calendar, ChevronDown, Minus } from 'lucide-react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
 
 import { Card } from '@/components/ui/Card';
 import { useThemeColors } from '@/hooks/useThemeColors';
@@ -29,8 +29,15 @@ interface ProcessedHistoryItem {
   hasPrev: boolean;
 }
 
+const PAGE_SIZE = 20;
+
 export function PriceHistoryList({ data, currency }: PriceHistoryListProps) {
   const COLORS = useThemeColors();
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [currency, data.length]);
 
   const historyItems = useMemo<ProcessedHistoryItem[]>(() => {
     return data
@@ -63,6 +70,9 @@ export function PriceHistoryList({ data, currency }: PriceHistoryListProps) {
     return null;
   }
 
+  const visibleItems = historyItems.slice(0, visibleCount);
+  const remainingCount = historyItems.length - visibleItems.length;
+
   return (
     <Card
       title="Registro de Precios"
@@ -77,10 +87,11 @@ export function PriceHistoryList({ data, currency }: PriceHistoryListProps) {
       }
       contentClassName="pt-1"
     >
-      {historyItems.map((item, index) => {
+      {visibleItems.map((item, index) => {
         const isPositive = item.changePct > 0;
         const isNegative = item.changePct < 0;
-        const isLast = index === historyItems.length - 1;
+        const isLast =
+          index === visibleItems.length - 1 && remainingCount === 0;
 
         return (
           <View
@@ -142,6 +153,23 @@ export function PriceHistoryList({ data, currency }: PriceHistoryListProps) {
           </View>
         );
       })}
+
+      {remainingCount > 0 && (
+        <Pressable
+          onPress={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+          className="mt-2 flex-row items-center justify-center gap-1.5 rounded-xl bg-surface-elevated py-2.5 active:opacity-80"
+          style={{ borderCurve: 'continuous' }}
+        >
+          <ChevronDown size={14} color={COLORS.primary} />
+          <Text
+            className="text-xs font-semibold"
+            style={{ color: COLORS.primary }}
+          >
+            Mostrar más ({remainingCount}{' '}
+            {remainingCount === 1 ? 'restante' : 'restantes'})
+          </Text>
+        </Pressable>
+      )}
     </Card>
   );
 }

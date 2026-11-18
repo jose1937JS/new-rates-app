@@ -1,9 +1,12 @@
+import * as Haptics from 'expo-haptics';
 import { Calendar, TrendingUp } from 'lucide-react-native';
-import { useState } from 'react';
-import { RefreshControl, ScrollView, Text, View } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { Text, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
   FadeInUp,
+  runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withSequence,
@@ -19,6 +22,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { OfflineBadge } from '@/components/ui/OfflineBadge';
 import { PriceChart } from '@/components/ui/PriceChart';
 import { PriceHistoryList } from '@/components/ui/PriceHistoryList';
+import { PullToRefreshScrollView } from '@/components/ui/PullToRefreshScrollView';
 import { ScreenHero } from '@/components/ui/ScreenHero';
 import { StatsRow } from '@/components/ui/StatsRow';
 import { useHistoricalRates } from '@/hooks/useHistoricalRates';
@@ -29,6 +33,27 @@ import { CURRENCY_NAMES } from '@/utils/constants';
 
 const CHART_CURRENCIES: CurrencyCode[] = ['USD', 'EUR', 'USDT'];
 const PERIODS: ChartPeriod[] = ['1d', '3d', '7d', '30d'];
+const SWIPE_DISTANCE = 55;
+const SWIPE_VELOCITY = 450;
+
+function createCurrencySwipeGesture(
+  onSwipeLeft: () => void,
+  onSwipeRight: () => void,
+) {
+  return Gesture.Pan()
+    .activeOffsetX([-28, 28])
+    .failOffsetY([-18, 18])
+    .onEnd((event) => {
+      if (event.translationX < -SWIPE_DISTANCE || event.velocityX < -SWIPE_VELOCITY) {
+        runOnJS(onSwipeLeft)();
+      } else if (
+        event.translationX > SWIPE_DISTANCE ||
+        event.velocityX > SWIPE_VELOCITY
+      ) {
+        runOnJS(onSwipeRight)();
+      }
+    });
+}
 
 export default function HistoryScreen() {
   const COLORS = useThemeColors();
@@ -45,20 +70,23 @@ export default function HistoryScreen() {
     opacity: contentOpacity.get(),
   }));
 
-  const triggerSlide = (direction: 1 | -1) => {
-    slideX.set(
-      withSequence(
-        withTiming(direction * 18, { duration: 0 }),
-        withTiming(0, { duration: 240, easing: Easing.out(Easing.cubic) }),
-      ),
-    );
-    contentOpacity.set(
-      withSequence(
-        withTiming(0.45, { duration: 0 }),
-        withTiming(1, { duration: 240 }),
-      ),
-    );
-  };
+  const triggerSlide = useCallback(
+    (direction: 1 | -1) => {
+      slideX.set(
+        withSequence(
+          withTiming(direction * 18, { duration: 0 }),
+          withTiming(0, { duration: 240, easing: Easing.out(Easing.cubic) }),
+        ),
+      );
+      contentOpacity.set(
+        withSequence(
+          withTiming(0.45, { duration: 0 }),
+          withTiming(1, { duration: 240 }),
+        ),
+      );
+    },
+    [contentOpacity, slideX],
+  );
 
   const handleCurrencySelect = (nextCurrency: CurrencyCode) => {
     if (nextCurrency === selectedCurrency) return;
@@ -67,6 +95,37 @@ export default function HistoryScreen() {
     triggerSlide(nextIdx >= prevIdx ? 1 : -1);
     setSelectedCurrency(nextCurrency);
   };
+
+  const handleSwipeNext = useCallback(() => {
+    const idx = CHART_CURRENCIES.indexOf(selectedCurrency);
+    if (idx < CHART_CURRENCIES.length - 1) {
+      void Haptics.selectionAsync();
+      triggerSlide(1);
+      setSelectedCurrency(CHART_CURRENCIES[idx + 1]);
+    }
+  }, [selectedCurrency, triggerSlide]);
+
+  const handleSwipePrev = useCallback(() => {
+    const idx = CHART_CURRENCIES.indexOf(selectedCurrency);
+    if (idx > 0) {
+      void Haptics.selectionAsync();
+      triggerSlide(-1);
+      setSelectedCurrency(CHART_CURRENCIES[idx - 1]);
+    }
+  }, [selectedCurrency, triggerSlide]);
+
+  const heroSwipeGesture = useMemo(
+    () => createCurrencySwipeGesture(handleSwipeNext, handleSwipePrev),
+    [handleSwipeNext, handleSwipePrev],
+  );
+  const headerSwipeGesture = useMemo(
+    () => createCurrencySwipeGesture(handleSwipeNext, handleSwipePrev),
+    [handleSwipeNext, handleSwipePrev],
+  );
+  const bodySwipeGesture = useMemo(
+    () => createCurrencySwipeGesture(handleSwipeNext, handleSwipePrev),
+    [handleSwipeNext, handleSwipePrev],
+  );
 
   const handlePeriodSelect = (nextPeriod: string) => {
     const typedPeriod = nextPeriod as ChartPeriod;
@@ -95,23 +154,29 @@ export default function HistoryScreen() {
 
   return (
     <View className="flex-1 bg-surface" style={{ backgroundColor: COLORS.surface }}>
-      {/* Fixed compact orange Hero with embedded Currency tabs */}
-      <ScreenHero
-        title="Historial"
-        subtitle="Evolución histórica en VES"
-        icon={<TrendingUp size={20} color="#ffffff" />}
-        rightElement={<OfflineBadge isOnline={isOnline} variant="hero" />}
-      >
-        <CurrencyTabSelector
-          currencies={CHART_CURRENCIES}
-          selected={selectedCurrency}
-          onSelect={handleCurrencySelect}
-          variant="hero"
-        />
-      </ScreenHero>
+      {/* Fixed compact orange Hero with embedded Currency tabs (swipeable) */}
+      <GestureDetector gesture={heroSwipeGesture}>
+        <View>
+          <ScreenHero
+            title="Historial"
+            subtitle="Evolución histórica en VES"
+            icon={<TrendingUp size={20} color="#ffffff" />}
+            rightElement={<OfflineBadge isOnline={isOnline} variant="hero" />}
+          >
+            <CurrencyTabSelector
+              currencies={CHART_CURRENCIES}
+              selected={selectedCurrency}
+              onSelect={handleCurrencySelect}
+              variant="hero"
+            />
+          </ScreenHero>
+        </View>
+      </GestureDetector>
 
-      <ScrollView
-        className="flex-1"
+      <PullToRefreshScrollView
+        containerClassName="flex-1"
+        refreshing={isFetching && !isLoading}
+        onRefresh={refetch}
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingTop: 16,
@@ -119,83 +184,99 @@ export default function HistoryScreen() {
           gap: 16,
         }}
         contentInsetAdjustmentBehavior="never"
-        refreshControl={
-          <RefreshControl
-            refreshing={isFetching && !isLoading}
-            onRefresh={refetch}
-            tintColor={COLORS.primary}
-            colors={[COLORS.primary]}
-          />
-        }
       >
         {/* Title + animated period selector */}
-        <Animated.View
-          entering={FadeInUp.delay(80).duration(300)}
-          className="flex-row items-center justify-between"
-        >
-          <View className="flex-1 pr-2">
-            <View className="flex-row items-center gap-1.5">
-              <TrendingUp size={18} color={COLORS.primary} />
-              <Text
-                className="text-lg font-semibold text-text-primary"
-                numberOfLines={1}
-              >
-                {CURRENCY_NAMES[selectedCurrency]}
+        <GestureDetector gesture={headerSwipeGesture}>
+          <Animated.View
+            entering={FadeInUp.delay(80).duration(300)}
+            className="flex-row items-center justify-between"
+          >
+            <View className="flex-1 pr-2">
+              <View className="flex-row items-center gap-1.5">
+                <TrendingUp size={18} color={COLORS.primary} />
+                <Text
+                  className="text-lg font-semibold text-text-primary"
+                  numberOfLines={1}
+                >
+                  {CURRENCY_NAMES[selectedCurrency]}
+                </Text>
+              </View>
+              <Text className="text-xs text-text-secondary">
+                Evolución en VES
               </Text>
             </View>
-            <Text className="text-xs text-text-secondary">
-              Evolución en VES
-            </Text>
-          </View>
-          <PeriodSelector
-            periods={PERIODS}
-            selected={period}
-            onSelect={handlePeriodSelect}
-          />
-        </Animated.View>
+            <PeriodSelector
+              periods={PERIODS}
+              selected={period}
+              onSelect={handlePeriodSelect}
+            />
+          </Animated.View>
+        </GestureDetector>
 
         {/* Animated content region when switching currency or period */}
         <Animated.View style={transitionStyle} className="gap-4">
           {!isLoading && data.length === 0 && isError ? (
-            <EmptyState
-              isError={isError}
-              isRetrying={isFetching}
-              onRetry={refetch}
-              title="No pudimos cargar el historial"
-              message={
-                !isOnline
-                  ? 'No tienes conexión a internet y no hay historial guardado para esta moneda.'
-                  : 'Ocurrió un problema al consultar el historial. Inténtalo de nuevo.'
-              }
-            />
+            <GestureDetector gesture={bodySwipeGesture}>
+              <View>
+                <EmptyState
+                  isError={isError}
+                  isRetrying={isFetching}
+                  onRetry={refetch}
+                  title="No pudimos cargar el historial"
+                  message={
+                    !isOnline
+                      ? 'No tienes conexión a internet y no hay historial guardado para esta moneda.'
+                      : 'Ocurrió un problema al consultar el historial. Inténtalo de nuevo.'
+                  }
+                />
+              </View>
+            </GestureDetector>
           ) : (
             <>
-              <PriceChart data={data} isLoading={isLoading} />
+              <PriceChart
+                data={data}
+                isLoading={isLoading}
+                onSwipeLeft={handleSwipeNext}
+                onSwipeRight={handleSwipePrev}
+              />
 
-              {!isLoading && data.length > 0 && (
-                <StatsRow
-                  current={stats.current}
-                  max={stats.max}
-                  min={stats.min}
-                  change={stats.change}
-                />
-              )}
+              <GestureDetector gesture={bodySwipeGesture}>
+                <View className="gap-4">
+                  {!isLoading && data.length > 0 && (
+                    <StatsRow
+                      current={stats.current}
+                      max={stats.max}
+                      min={stats.min}
+                      change={stats.change}
+                    />
+                  )}
 
-              {!isLoading && data.length > 0 && (
-                <PriceHistoryList data={data} currency={selectedCurrency} />
-              )}
+                  {!isLoading && data.length > 0 && (
+                    <PriceHistoryList data={data} currency={selectedCurrency} />
+                  )}
+
+                  {/* Info */}
+                  <View className="flex-row items-center justify-center gap-1.5 pt-1">
+                    <Calendar size={13} color={COLORS.textMuted} />
+                    <Text className="text-xs text-text-muted">
+                      {getPeriodLabel(period)}
+                    </Text>
+                  </View>
+                </View>
+              </GestureDetector>
             </>
           )}
         </Animated.View>
 
-        {/* Info */}
-        <View className="flex-row items-center justify-center gap-1.5 pt-1">
-          <Calendar size={13} color={COLORS.textMuted} />
-          <Text className="text-xs text-text-muted">
-            {getPeriodLabel(period)}
-          </Text>
-        </View>
-      </ScrollView>
+        {!isLoading && data.length === 0 && isError && (
+          <View className="flex-row items-center justify-center gap-1.5 pt-1">
+            <Calendar size={13} color={COLORS.textMuted} />
+            <Text className="text-xs text-text-muted">
+              {getPeriodLabel(period)}
+            </Text>
+          </View>
+        )}
+      </PullToRefreshScrollView>
     </View>
   );
 }

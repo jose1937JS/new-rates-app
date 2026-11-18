@@ -33,11 +33,11 @@ import { useThemeColors } from '@/hooks/useThemeColors';
 /** Minimum downward finger travel (px) before the pull even begins moving */
 const PULL_DEAD_ZONE = 200;
 /** Total downward finger travel (px) required to trigger a refresh */
-const PULL_TRIGGER_DISTANCE = 300;
+const PULL_TRIGGER_DISTANCE = 380;
 /** Max visual downward shift (px) applied to the content while pulling */
-const MAX_VISUAL_OFFSET = 80;
+const MAX_VISUAL_OFFSET = 88;
 /** Visual height (px) reserved while the refresh request is running */
-const REFRESHING_OFFSET = 80;
+const REFRESHING_OFFSET = 72;
 const EFFECTIVE_TRIGGER_RANGE = PULL_TRIGGER_DISTANCE - PULL_DEAD_ZONE;
 
 export interface PullToRefreshScrollViewProps
@@ -118,7 +118,7 @@ export function PullToRefreshScrollView({
     const nativeGesture = Gesture.Native();
 
     const panGesture = Gesture.Pan()
-      .activeOffsetY(18)
+      .activeOffsetY(48)
       .failOffsetY(-10)
       .failOffsetX([-24, 24])
       .onBegin(() => {
@@ -144,7 +144,7 @@ export function PullToRefreshScrollView({
         const progress = Math.min(1, effectivePull / EFFECTIVE_TRIGGER_RANGE);
         const visualOffset = Math.min(
           MAX_VISUAL_OFFSET,
-          Math.pow(effectivePull, 0.78) * 1.35,
+          Math.pow(effectivePull, 0.72) * 1.65,
         );
 
         pullOffset.set(visualOffset);

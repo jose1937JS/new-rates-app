@@ -45,6 +45,11 @@ export const useCurrencyStore = create<CurrencyState>()(
         themeMode: state.themeMode,
         primaryColor: state.primaryColor,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state && (state.primaryColor as string) === 'teal') {
+          state.setPrimaryColor('gold');
+        }
+      },
     },
   ),
 );

@@ -117,10 +117,7 @@ export function AnimatedSplashOverlay({
           />
         </View>
         <View className="flex-row items-center gap-2">
-          <ThreeDotsLoader size={6} color="#ffffff" />
-          <Text className="text-xs font-medium text-white/90">
-            Cargando tasas...
-          </Text>
+          <ThreeDotsLoader size={10} color="#ffffff" />
         </View>
       </View>
     </Animated.View>

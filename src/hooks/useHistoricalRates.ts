@@ -51,7 +51,11 @@ export function useHistoricalRates(
       };
     }
 
-    const sorted = [...records].sort((a, b) =>
+    const uniqueRecords = Array.from(
+      new Map(records.map((r) => [r.id, r])).values(),
+    );
+
+    const sorted = [...uniqueRecords].sort((a, b) =>
       a.created_at.localeCompare(b.created_at),
     );
 
@@ -67,16 +71,36 @@ export function useHistoricalRates(
       filtered = sorted.slice(-minPoints);
     }
 
-    const useTimeLabel = period === '1d' && currency === 'USDT';
+    const dayLabels = filtered.map((r) => formatChartDate(r.created_at));
+    const hasIntraday =
+      currency === 'USDT' || new Set(dayLabels).size < dayLabels.length;
+    const seenDays = new Set<string>();
 
-    const points: ChartDataPoint[] = filtered.map((r) => ({
-      id: r.id,
-      date: r.created_at,
-      value: Number(r.rate),
-      label: useTimeLabel
-        ? formatChartTime(r.created_at)
-        : formatChartDate(r.created_at),
-    }));
+    const points: ChartDataPoint[] = filtered.map((r, index) => {
+      const dayLabel = dayLabels[index];
+      const isFirstOfDay = !seenDays.has(dayLabel);
+      if (isFirstOfDay) {
+        seenDays.add(dayLabel);
+      }
+
+      let label: string;
+      if (period === '1d' && hasIntraday) {
+        label = formatChartTime(r.created_at);
+      } else if (isFirstOfDay) {
+        label = dayLabel;
+      } else if (period === '30d') {
+        label = '';
+      } else {
+        label = formatChartTime(r.created_at);
+      }
+
+      return {
+        id: r.id,
+        date: r.created_at,
+        value: Number(r.rate),
+        label,
+      };
+    });
 
     const values = points.map((d) => d.value);
     const first = values[0] ?? 0;

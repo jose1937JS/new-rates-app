@@ -83,12 +83,13 @@ function CenterFabButton({
       onLongPress={onLongPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      className="absolute -top-[50px] items-center justify-center rounded-full bg-white"
+      className="absolute -top-[50px] items-center justify-center rounded-full"
       style={[
         animatedStyle,
         {
           width: FAB_SIZE,
           height: FAB_SIZE,
+          backgroundColor: primaryColor,
           shadowColor: '#4a4a4aff',
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.22,
@@ -99,7 +100,7 @@ function CenterFabButton({
     >
       <ArrowLeftRight
         size={25}
-        color={primaryColor}
+        color="#ffffff"
         strokeWidth={isFocused ? 2.5 : 2}
       />
     </AnimatedPressable>

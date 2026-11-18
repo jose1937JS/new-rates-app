@@ -151,11 +151,7 @@ export default function ConverterScreen() {
           title="RATES VENAPP"
           subtitle="Tasas de cambio en Venezuela"
           icon={<ArrowLeftRight size={20} color="#ffffff" />}
-          rightElement={
-            !isOnline ? (
-              <OfflineBadge isOnline={isOnline} variant="hero" />
-            ) : undefined
-          }
+          rightElement={<OfflineBadge isOnline={isOnline} variant="hero" />}
         />
 
         <PullToRefreshScrollView
@@ -215,7 +211,7 @@ export default function ConverterScreen() {
       />
 
       <PullToRefreshScrollView
-        containerClassName="flex-1 -mt-20"
+        containerClassName="flex-1 -mt-16"
         refreshing={isFetching && !isLoading}
         onRefresh={refetch}
         contentContainerStyle={{
@@ -278,12 +274,12 @@ export default function ConverterScreen() {
             Tasas: BCV (USD/EUR) • Yadio (USDT)
           </Text>
           {hasFallback && (
-            <Text className="mt-0.5 text-[11px] text-text-muted">
+            <Text className="mt-1 text-[11px] text-text-muted">
               Mostrando última tasa BCV disponible
             </Text>
           )}
           {!isOnline && (
-            <Text className="mt-0.5 text-[11px] text-text-muted">
+            <Text className="mt-1 text-[11px] text-text-muted">
               Modo sin conexión • Mostrando consulta guardada
             </Text>
           )}

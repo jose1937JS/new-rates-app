@@ -110,18 +110,7 @@ export function RatesHero({
           </Text>
         </View>
         <View className="items-end">
-          {!isOnline ? (
-            <OfflineBadge isOnline={isOnline} variant="hero" />
-          ) : (
-            <View
-              className="rounded-full px-2.5 py-1"
-              style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
-            >
-              <Text className="text-[11px] font-semibold text-white">
-                Tasas hoy
-              </Text>
-            </View>
-          )}
+          <OfflineBadge isOnline={isOnline} variant="hero" />
         </View>
       </View>
 

@@ -119,14 +119,14 @@ export const PRIMARY_COLOR_OPTIONS: PrimaryColorOption[] = [
     rgbDark: '159 18 57',
   },
   {
-    id: 'teal',
-    label: 'Turquesa',
-    primary: '#0d9488',
-    primaryLight: '#2dd4bf',
-    primaryDark: '#115e59',
-    rgb: '13 148 136',
-    rgbLight: '45 212 191',
-    rgbDark: '17 94 89',
+    id: 'gold',
+    label: 'Dorado',
+    primary: '#ca8a04',
+    primaryLight: '#eab308',
+    primaryDark: '#a16207',
+    rgb: '202 138 4',
+    rgbLight: '234 179 8',
+    rgbDark: '161 98 7',
   },
 ];
 
