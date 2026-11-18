@@ -10,7 +10,6 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { ThreeDotsLoader } from '@/components/ui/ThreeDotsLoader';
 import { APP_NAME, DEFAULT_PRIMARY_COLOR } from '@/utils/constants';
 
 const APP_LOGO = require('@/assets/images/logo.png');
@@ -106,7 +105,7 @@ export function AnimatedSplashOverlay({
         Tasas de cambio al instante
       </Text>
 
-      <View className="mt-8 w-44 items-center gap-3">
+      <View className="mt-12 w-44 items-center gap-3">
         <View
           className="h-1.5 w-full overflow-hidden rounded-full"
           style={{ backgroundColor: 'rgba(255, 255, 255, 0.25)' }}
@@ -115,9 +114,6 @@ export function AnimatedSplashOverlay({
             className="h-full rounded-full bg-white"
             style={progressStyle}
           />
-        </View>
-        <View className="flex-row items-center gap-2">
-          <ThreeDotsLoader size={10} color="#ffffff" />
         </View>
       </View>
     </Animated.View>

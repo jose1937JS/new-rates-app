@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 import { LogBox, Text, TextInput, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+import { OnboardingScreen } from '@/components/onboarding/OnboardingScreen';
 import { AnimatedSplashOverlay } from '@/components/ui/AnimatedSplashOverlay';
 import '@/global.css';
 import { useThemeColors } from '@/hooks/useThemeColors';
@@ -101,6 +102,20 @@ export default function RootLayout() {
   });
 
   const [splashDone, setSplashDone] = useState(false);
+  const [storeHydrated, setStoreHydrated] = useState(() =>
+    useCurrencyStore.persist.hasHydrated(),
+  );
+
+  useEffect(() => {
+    if (useCurrencyStore.persist.hasHydrated()) {
+      setStoreHydrated(true);
+      return;
+    }
+    const unsubscribe = useCurrencyStore.persist.onFinishHydration(() => {
+      setStoreHydrated(true);
+    });
+    return unsubscribe;
+  }, []);
 
   const [queryClient] = useState(
     () =>
@@ -122,6 +137,12 @@ export default function RootLayout() {
   const COLORS = useThemeColors();
   const { setColorScheme } = useColorScheme();
   const themeMode = useCurrencyStore((state) => state.themeMode);
+  const hasCompletedOnboarding = useCurrencyStore(
+    (state) => state.hasCompletedOnboarding,
+  );
+  const completeOnboarding = useCurrencyStore(
+    (state) => state.completeOnboarding,
+  );
 
   const primaryVars = vars({
     '--color-primary': COLORS.primaryRgb,
@@ -157,19 +178,23 @@ export default function RootLayout() {
           persistOptions={{ persister: asyncStoragePersister }}
         >
           <StatusBar style={COLORS.isDark ? 'light' : 'dark'} />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: COLORS.surface },
-            }}
-          >
-            <Stack.Screen name="(tabs)" />
-          </Stack>
+          {!storeHydrated ? null : !hasCompletedOnboarding ? (
+            <OnboardingScreen onComplete={completeOnboarding} />
+          ) : (
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: COLORS.surface },
+              }}
+            >
+              <Stack.Screen name="(tabs)" />
+            </Stack>
+          )}
         </PersistQueryClientProvider>
 
         {!splashDone && (
           <AnimatedSplashOverlay
-            isReady={fontsLoaded}
+            isReady={fontsLoaded && storeHydrated}
             onFinish={() => setSplashDone(true)}
           />
         )}
