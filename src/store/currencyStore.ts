@@ -19,12 +19,15 @@ interface CurrencyState {
   primaryColor: PrimaryColorId;
   /** Whether the user has completed the initial onboarding flow */
   hasCompletedOnboarding: boolean;
+  /** Whether tactile haptic feedback is enabled on touch interactions */
+  hapticsEnabled: boolean;
 
   setSelectedCurrency: (code: CurrencyCode) => void;
   setAmount: (value: string) => void;
   setThemeMode: (mode: ThemeMode) => void;
   setPrimaryColor: (color: PrimaryColorId) => void;
   completeOnboarding: () => void;
+  setHapticsEnabled: (enabled: boolean) => void;
 }
 
 export const useCurrencyStore = create<CurrencyState>()(
@@ -35,12 +38,14 @@ export const useCurrencyStore = create<CurrencyState>()(
       themeMode: 'system',
       primaryColor: 'orange',
       hasCompletedOnboarding: false,
+      hapticsEnabled: true,
 
       setSelectedCurrency: (code) => set({ selectedCurrency: code }),
       setAmount: (value) => set({ amount: value }),
       setThemeMode: (mode) => set({ themeMode: mode }),
       setPrimaryColor: (color) => set({ primaryColor: color }),
       completeOnboarding: () => set({ hasCompletedOnboarding: true }),
+      setHapticsEnabled: (enabled) => set({ hapticsEnabled: enabled }),
     }),
     {
       name: 'ratesvenapp_theme_store',
@@ -50,6 +55,7 @@ export const useCurrencyStore = create<CurrencyState>()(
         themeMode: state.themeMode,
         primaryColor: state.primaryColor,
         hasCompletedOnboarding: state.hasCompletedOnboarding,
+        hapticsEnabled: state.hapticsEnabled,
       }),
       onRehydrateStorage: () => (state) => {
         if (state && (state.primaryColor as string) === 'teal') {

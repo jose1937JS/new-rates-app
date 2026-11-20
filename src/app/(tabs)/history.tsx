@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import { Calendar, TrendingUp } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
@@ -28,6 +27,7 @@ import { StatsRow } from '@/components/ui/StatsRow';
 import { useHistoricalRates } from '@/hooks/useHistoricalRates';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { triggerSelectionHaptic } from '@/utils/haptics';
 import type { ChartPeriod, CurrencyCode } from '@/types/currency.types';
 import { CURRENCY_NAMES } from '@/utils/constants';
 
@@ -99,7 +99,7 @@ export default function HistoryScreen() {
   const handleSwipeNext = useCallback(() => {
     const idx = CHART_CURRENCIES.indexOf(selectedCurrency);
     if (idx < CHART_CURRENCIES.length - 1) {
-      void Haptics.selectionAsync();
+      triggerSelectionHaptic();
       triggerSlide(1);
       setSelectedCurrency(CHART_CURRENCIES[idx + 1]);
     }
@@ -108,7 +108,7 @@ export default function HistoryScreen() {
   const handleSwipePrev = useCallback(() => {
     const idx = CHART_CURRENCIES.indexOf(selectedCurrency);
     if (idx > 0) {
-      void Haptics.selectionAsync();
+      triggerSelectionHaptic();
       triggerSlide(-1);
       setSelectedCurrency(CHART_CURRENCIES[idx - 1]);
     }

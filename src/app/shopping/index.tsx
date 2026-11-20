@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import {
   ArrowLeft,
@@ -21,6 +20,10 @@ import { Card } from '@/components/ui/Card';
 import { ScreenHero } from '@/components/ui/ScreenHero';
 import { useCurrencyRates } from '@/hooks/useCurrencyRates';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import {
+  triggerImpactHaptic,
+  triggerSelectionHaptic,
+} from '@/utils/haptics';
 import { useShoppingStore } from '@/store/shoppingStore';
 import type { ShoppingList } from '@/types/currency.types';
 import { formatFullDateTime } from '@/utils/formatters';
@@ -88,7 +91,7 @@ export default function ShoppingListsScreen() {
       >
         <Pressable
           onPress={() => {
-            void Haptics.selectionAsync();
+            triggerSelectionHaptic();
             router.push({ pathname: '/shopping/[id]', params: { id: list.id } });
           }}
           className="active:opacity-85"
@@ -136,7 +139,7 @@ export default function ShoppingListsScreen() {
 
               <Pressable
                 onPress={() => {
-                  void Haptics.selectionAsync();
+                  triggerSelectionHaptic();
                   setDeleteTarget(list);
                 }}
                 hitSlop={8}
@@ -269,7 +272,7 @@ export default function ShoppingListsScreen() {
         rightElement={
           <Pressable
             onPress={() => {
-              void Haptics.selectionAsync();
+              triggerSelectionHaptic();
               setShowCreateModal(true);
             }}
             className="flex-row items-center gap-1 rounded-xl bg-white px-3 py-2 active:opacity-85"
@@ -316,7 +319,7 @@ export default function ShoppingListsScreen() {
             </Text>
             <Pressable
               onPress={() => {
-                void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                triggerImpactHaptic('light');
                 setShowCreateModal(true);
               }}
               className="mt-5 flex-row items-center gap-2 rounded-2xl px-6 py-3 active:opacity-85"
@@ -338,7 +341,7 @@ export default function ShoppingListsScreen() {
                 <View className="flex-row items-center gap-1.5 px-1">
                   <ShoppingBag size={15} color={COLORS.primary} />
                   <Text
-                    className="text-sm font-bold"
+                    className="text-sm font-semibold"
                     style={{ color: COLORS.primary }}
                   >
                     Compras en curso ({activeLists.length})

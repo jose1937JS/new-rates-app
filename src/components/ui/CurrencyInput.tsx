@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import { X } from 'lucide-react-native';
 import { useCallback, useRef, useState } from 'react';
 import { Pressable, Text, TextInput } from 'react-native';
@@ -13,6 +12,7 @@ import {
   CURRENCY_SYMBOLS,
 } from '@/utils/constants';
 import { formatInputValue } from '@/utils/formatters';
+import { triggerSelectionHaptic } from '@/utils/haptics';
 
 interface CurrencyInputProps {
   value: string;
@@ -54,7 +54,7 @@ export function CurrencyInput({
   );
 
   const handleClear = useCallback(() => {
-    void Haptics.selectionAsync();
+    triggerSelectionHaptic();
     if (onClear) {
       onClear();
     } else {

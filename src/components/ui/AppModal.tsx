@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -15,6 +14,7 @@ import Animated, { ZoomIn } from 'react-native-reanimated';
 
 import { ThreeDotsLoader } from '@/components/ui/ThreeDotsLoader';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { triggerSelectionHaptic } from '@/utils/haptics';
 
 export type AppModalVariant = 'info' | 'success' | 'warning' | 'danger';
 
@@ -59,7 +59,7 @@ export function AppModal({
 
   const handleConfirm = () => {
     if (loading) return;
-    void Haptics.selectionAsync();
+    triggerSelectionHaptic();
     if (onConfirm) {
       void onConfirm();
     } else {

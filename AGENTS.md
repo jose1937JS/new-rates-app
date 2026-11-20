@@ -54,7 +54,7 @@ hooks:
   src/hooks/useThemeColors.ts: Syncs NativeWind + RN color schemes and resolves darker `primaryDark`/`rgbDark` in dark mode vs bright `primary`/`rgb` in light mode
 
 components_ui:
-  src/components/ui/RatesHero.tsx: Edge-to-edge fixed primary-colored rounded-bottom (`28px`) Hero with `logo.webp` + `RATES VENAPP`, `OfflineBadge`, and 3 pressable rate cards opening plain-Spanish calculation `AppModal` dialogs
+  src/components/ui/RatesHero.tsx: Edge-to-edge fixed primary-colored rounded-bottom (`28px`) Hero with `logo.webp` + `RATESVEN`, `OfflineBadge`, and 3 pressable rate cards opening plain-Spanish calculation `AppModal` dialogs
   src/components/ui/ScreenHero.tsx: Compact fixed primary-colored rounded-bottom (`26px`) Hero with optional `leftAction`, `icon`, `showLogo` (default `false`), `rightElement`, and `children`
   src/components/ui/ConverterSkeleton.tsx: Full-screen pulsing skeleton rendered exclusively during first-ever load on `index.tsx`
   src/components/ui/ThreeDotsLoader.tsx: Reanimated 3-dot bouncing loader (`size`, `color`, `colors`, `gap`) replacing `ActivityIndicator` everywhere

@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import type { Tabs } from 'expo-router';
 import { ArrowLeftRight, Settings, TrendingUp } from 'lucide-react-native';
 import type { ComponentProps } from 'react';
@@ -12,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { triggerSelectionHaptic } from '@/utils/haptics';
 
 export type CustomTabBarProps = Parameters<
   NonNullable<ComponentProps<typeof Tabs>['tabBar']>
@@ -186,7 +186,7 @@ export function CustomTabBar({
     });
 
     if (!isFocused && !event.defaultPrevented) {
-      void Haptics.selectionAsync();
+      triggerSelectionHaptic();
       navigation.navigate(routeName, routeParams);
     }
   };

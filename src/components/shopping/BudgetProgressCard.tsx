@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import { Pencil, Wallet } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Modal, Pressable, Text, TextInput, View } from 'react-native';
@@ -8,6 +7,7 @@ import { CurrencyChipRow } from '@/components/shopping/CurrencyChipRow';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { CurrencyCode } from '@/types/currency.types';
 import { parseFormattedNumber } from '@/utils/formatters';
+import { triggerSelectionHaptic } from '@/utils/haptics';
 import {
   formatShoppingMoney,
   sanitizeDecimalInput,
@@ -185,7 +185,7 @@ export function ListSettingsModal({
   }, [visible, initialTitle, initialBudgetLimit, initialBudgetCurrency]);
 
   const handleSave = () => {
-    void Haptics.selectionAsync();
+    triggerSelectionHaptic();
     const parsedLimit = budgetText ? parseFormattedNumber(budgetText) : 0;
     onSave({
       title: title.trim(),

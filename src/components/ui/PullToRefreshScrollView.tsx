@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import { ArrowDown } from 'lucide-react-native';
 import {
   useCallback,
@@ -29,6 +28,7 @@ import Animated, {
 
 import { ThreeDotsLoader } from '@/components/ui/ThreeDotsLoader';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { triggerImpactHaptic } from '@/utils/haptics';
 
 /** Minimum downward finger travel (px) before the pull even begins moving */
 const PULL_DEAD_ZONE = 200;
@@ -97,7 +97,7 @@ export function PullToRefreshScrollView({
   const notifyReadyChange = useCallback((ready: boolean) => {
     setIsReady(ready);
     if (ready) {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      triggerImpactHaptic('medium');
     }
   }, []);
 

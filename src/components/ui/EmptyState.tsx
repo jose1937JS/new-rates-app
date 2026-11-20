@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import { CloudOff, RefreshCw } from 'lucide-react-native';
 import { useEffect } from 'react';
 import { Pressable, Text, View } from 'react-native';
@@ -15,6 +14,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { triggerImpactHaptic } from '@/utils/haptics';
 
 interface EmptyStateProps {
   title: string;
@@ -74,7 +74,7 @@ export function EmptyState({ title, message, onRetry, isRetrying = false, isErro
 
   const handlePress = () => {
     if (isRetrying) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    triggerImpactHaptic('medium');
     onRetry();
   };
 

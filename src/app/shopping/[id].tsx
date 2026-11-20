@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ArrowLeft,
@@ -32,6 +31,10 @@ import { Card } from '@/components/ui/Card';
 import { ScreenHero } from '@/components/ui/ScreenHero';
 import { useCurrencyRates } from '@/hooks/useCurrencyRates';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import {
+  triggerNotificationHaptic,
+  triggerSelectionHaptic,
+} from '@/utils/haptics';
 import { useShoppingStore } from '@/store/shoppingStore';
 import type { CurrencyCode, ShoppingItem } from '@/types/currency.types';
 import { formatFullDateTime, formatNumber } from '@/utils/formatters';
@@ -147,13 +150,13 @@ export default function ShoppingDetailScreen() {
   };
 
   const handleFinishList = () => {
-    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    triggerNotificationHaptic('success');
     setEditingItem(null);
     completeList(list.id);
   };
 
   const handleReopenList = () => {
-    void Haptics.selectionAsync();
+    triggerSelectionHaptic();
     reopenList(list.id);
   };
 
@@ -192,7 +195,7 @@ export default function ShoppingDetailScreen() {
           isActive ? (
             <Pressable
               onPress={() => {
-                void Haptics.selectionAsync();
+                triggerSelectionHaptic();
                 setShowListConfig(true);
               }}
               hitSlop={8}
@@ -256,7 +259,7 @@ export default function ShoppingDetailScreen() {
             <Pressable
               key={code}
               onPress={() => {
-                void Haptics.selectionAsync();
+                triggerSelectionHaptic();
                 updateListMeta(list.id, { displayCurrency: code });
               }}
               className="rounded-lg px-2 py-1 active:opacity-80"
@@ -406,7 +409,7 @@ export default function ShoppingDetailScreen() {
             {/* Delete Purchase Button */}
             <Pressable
               onPress={() => {
-                void Haptics.selectionAsync();
+                triggerSelectionHaptic();
                 setShowDeleteModal(true);
               }}
               className="flex-row items-center justify-center gap-2 rounded-2xl border border-danger/30 bg-danger/10 py-3.5 active:opacity-80"

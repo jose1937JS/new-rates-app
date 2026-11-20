@@ -1,9 +1,9 @@
-import * as Haptics from 'expo-haptics';
 import { Pressable, Text, View } from 'react-native';
 
 import { CurrencyIcon } from '@/components/ui/CurrencyIcon';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { CurrencyCode } from '@/types/currency.types';
+import { triggerSelectionHaptic } from '@/utils/haptics';
 
 const CURRENCIES: CurrencyCode[] = ['USD', 'EUR', 'USDT', 'VES'];
 
@@ -40,7 +40,7 @@ export function CurrencyChipRow({
             key={code}
             onPress={() => {
               if (code === selected) return;
-              void Haptics.selectionAsync();
+              triggerSelectionHaptic();
               onSelect(code);
             }}
             className="flex-1 flex-row items-center justify-center gap-1 rounded-lg py-1.5 active:opacity-80"

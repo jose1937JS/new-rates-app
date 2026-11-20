@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import { Check, Minus, Plus, X } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
@@ -13,6 +12,10 @@ import type {
 } from '@/types/currency.types';
 import { CURRENCY_SYMBOLS } from '@/utils/constants';
 import { parseFormattedNumber } from '@/utils/formatters';
+import {
+  triggerImpactHaptic,
+  triggerSelectionHaptic,
+} from '@/utils/haptics';
 import {
   formatShoppingMoney,
   getItemSubtotal,
@@ -79,7 +82,7 @@ export function ProductFormCard({
   );
 
   const stepQuantity = (delta: number) => {
-    void Haptics.selectionAsync();
+    triggerSelectionHaptic();
     const current = qtyText ? parseFormattedNumber(qtyText) : 1;
     const next = Math.max(1, Math.round((current + delta) * 100) / 100);
     setQtyText(String(next));
@@ -87,7 +90,7 @@ export function ProductFormCard({
 
   const handleSubmit = () => {
     if (!isValid) return;
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerImpactHaptic('light');
     onSubmit({
       name: name.trim(),
       unitPrice: numericPrice,

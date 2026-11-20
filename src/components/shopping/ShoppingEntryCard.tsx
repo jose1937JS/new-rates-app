@@ -1,10 +1,13 @@
-import * as Haptics from 'expo-haptics';
 import { ArrowRight, ListChecks, Plus, ShoppingCart } from 'lucide-react-native';
 import { Pressable, Text, View } from 'react-native';
 
 import { Card } from '@/components/ui/Card';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { ShoppingList } from '@/types/currency.types';
+import {
+  triggerImpactHaptic,
+  triggerSelectionHaptic,
+} from '@/utils/haptics';
 import {
   evaluateBudget,
   formatShoppingMoney,
@@ -152,7 +155,7 @@ export function ShoppingEntryCard({
       <View className="mt-3 flex-row gap-2.5">
         <Pressable
           onPress={() => {
-            void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            triggerImpactHaptic('light');
             if (activeList) {
               onContinueActive(activeList.id);
             } else {
@@ -177,7 +180,7 @@ export function ShoppingEntryCard({
 
         <Pressable
           onPress={() => {
-            void Haptics.selectionAsync();
+            triggerSelectionHaptic();
             onOpenAllLists();
           }}
           className="flex-row items-center justify-center gap-1.5 rounded-xl border border-border bg-surface-elevated px-3.5 py-2.5 active:opacity-80"

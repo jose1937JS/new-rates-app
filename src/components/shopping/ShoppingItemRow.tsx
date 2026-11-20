@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import { Minus, Pencil, Plus, Trash2 } from 'lucide-react-native';
 import { Pressable, Text, View } from 'react-native';
 
@@ -9,6 +8,10 @@ import type {
   ShoppingItem,
   ShoppingRatesSnapshot,
 } from '@/types/currency.types';
+import {
+  triggerImpactHaptic,
+  triggerSelectionHaptic,
+} from '@/utils/haptics';
 import {
   formatQuantity,
   formatShoppingMoney,
@@ -111,7 +114,7 @@ export function ShoppingItemRow({
           <View className="flex-row items-center gap-1.5">
             <Pressable
               onPress={() => {
-                void Haptics.selectionAsync();
+                triggerSelectionHaptic();
                 onAdjustQuantity?.(-1);
               }}
               hitSlop={4}
@@ -127,7 +130,7 @@ export function ShoppingItemRow({
             </Text>
             <Pressable
               onPress={() => {
-                void Haptics.selectionAsync();
+                triggerSelectionHaptic();
                 onAdjustQuantity?.(1);
               }}
               hitSlop={4}
@@ -141,7 +144,7 @@ export function ShoppingItemRow({
             {onEdit && (
               <Pressable
                 onPress={() => {
-                  void Haptics.selectionAsync();
+                  triggerSelectionHaptic();
                   onEdit();
                 }}
                 hitSlop={6}
@@ -156,7 +159,7 @@ export function ShoppingItemRow({
             {onDelete && (
               <Pressable
                 onPress={() => {
-                  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  triggerImpactHaptic('light');
                   onDelete();
                 }}
                 hitSlop={6}

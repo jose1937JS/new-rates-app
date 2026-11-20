@@ -109,24 +109,22 @@ export function RealtimeRatesSlide({ isActive }: SlideProps) {
   return (
     <View className="flex-1 justify-between px-7 pb-6 pt-2">
       {/* Hero 3D visual */}
-      <Animated.View
-        entering={FadeInDown.duration(380)}
-        style={imageStyle}
-        className="flex-1 items-center justify-center"
-      >
-        <Image
-          source={ONBOARDING_IMG_1}
-          style={{ width: imageSize, height: imageSize }}
-          resizeMode="contain"
-        />
+      <Animated.View entering={FadeInDown.duration(380)} className="flex-1">
+        <Animated.View
+          style={imageStyle}
+          className="flex-1 items-center justify-center"
+        >
+          <Image
+            source={ONBOARDING_IMG_1}
+            style={{ width: imageSize, height: imageSize }}
+            resizeMode="contain"
+          />
+        </Animated.View>
       </Animated.View>
 
       {/* Left-aligned editorial typography */}
-      <Animated.View
-        entering={FadeInUp.delay(70).duration(380)}
-        style={textStyle}
-        className="items-start"
-      >
+      <Animated.View entering={FadeInUp.delay(70).duration(380)}>
+        <Animated.View style={textStyle} className="items-start">
         <Text
           className="font-bold"
           style={{
@@ -170,6 +168,7 @@ export function RealtimeRatesSlide({ isActive }: SlideProps) {
             </View>
           ))}
         </View>
+        </Animated.View>
       </Animated.View>
     </View>
   );
@@ -190,24 +189,22 @@ export function OfflineAccessSlide({ isActive }: SlideProps) {
   return (
     <View className="flex-1 justify-between px-7 pb-6 pt-2">
       {/* Hero 3D visual */}
-      <Animated.View
-        entering={FadeInDown.duration(380)}
-        style={imageStyle}
-        className="flex-1 items-center justify-center"
-      >
-        <Image
-          source={ONBOARDING_IMG_2}
-          style={{ width: imageSize, height: imageSize }}
-          resizeMode="contain"
-        />
+      <Animated.View entering={FadeInDown.duration(380)} className="flex-1">
+        <Animated.View
+          style={imageStyle}
+          className="flex-1 items-center justify-center"
+        >
+          <Image
+            source={ONBOARDING_IMG_2}
+            style={{ width: imageSize, height: imageSize }}
+            resizeMode="contain"
+          />
+        </Animated.View>
       </Animated.View>
 
       {/* Centered typography */}
-      <Animated.View
-        entering={FadeInUp.delay(70).duration(380)}
-        style={textStyle}
-        className="items-center"
-      >
+      <Animated.View entering={FadeInUp.delay(70).duration(380)}>
+        <Animated.View style={textStyle} className="items-center">
         <Text
           className="text-center font-bold"
           style={{
@@ -260,6 +257,7 @@ export function OfflineAccessSlide({ isActive }: SlideProps) {
             </Text>
           </View>
         </View>
+        </Animated.View>
       </Animated.View>
     </View>
   );
@@ -280,24 +278,22 @@ export function ShoppingCalculatorSlide({ isActive }: SlideProps) {
   return (
     <View className="flex-1 justify-between px-7 pb-6 pt-2">
       {/* Hero 3D visual */}
-      <Animated.View
-        entering={FadeInDown.duration(380)}
-        style={imageStyle}
-        className="flex-1 items-center justify-center"
-      >
-        <Image
-          source={ONBOARDING_IMG_4}
-          style={{ width: imageSize, height: imageSize }}
-          resizeMode="contain"
-        />
+      <Animated.View entering={FadeInDown.duration(380)} className="flex-1">
+        <Animated.View
+          style={imageStyle}
+          className="flex-1 items-center justify-center"
+        >
+          <Image
+            source={ONBOARDING_IMG_4}
+            style={{ width: imageSize, height: imageSize }}
+            resizeMode="contain"
+          />
+        </Animated.View>
       </Animated.View>
 
       {/* Left-aligned editorial typography */}
-      <Animated.View
-        entering={FadeInUp.delay(70).duration(380)}
-        style={textStyle}
-        className="items-start"
-      >
+      <Animated.View entering={FadeInUp.delay(70).duration(380)}>
+        <Animated.View style={textStyle} className="items-start">
         <Text
           className="font-bold"
           style={{
@@ -350,6 +346,7 @@ export function ShoppingCalculatorSlide({ isActive }: SlideProps) {
             </Text>
           </View>
         </View>
+        </Animated.View>
       </Animated.View>
     </View>
   );
@@ -371,24 +368,22 @@ export function PersonalizationHistorySlide({ isActive }: SlideProps) {
   return (
     <View className="flex-1 justify-between px-7 pb-6 pt-2">
       {/* Hero 3D visual */}
-      <Animated.View
-        entering={FadeInDown.duration(380)}
-        style={imageStyle}
-        className="flex-1 items-center justify-center"
-      >
-        <Image
-          source={ONBOARDING_IMG_3}
-          style={{ width: imageSize, height: imageSize }}
-          resizeMode="contain"
-        />
+      <Animated.View entering={FadeInDown.duration(380)} className="flex-1">
+        <Animated.View
+          style={imageStyle}
+          className="flex-1 items-center justify-center"
+        >
+          <Image
+            source={ONBOARDING_IMG_3}
+            style={{ width: imageSize, height: imageSize }}
+            resizeMode="contain"
+          />
+        </Animated.View>
       </Animated.View>
 
       {/* Right-aligned editorial typography */}
-      <Animated.View
-        entering={FadeInUp.delay(70).duration(380)}
-        style={textStyle}
-        className="items-end"
-      >
+      <Animated.View entering={FadeInUp.delay(70).duration(380)}>
+        <Animated.View style={textStyle} className="items-end">
         <Text
           className="text-right font-bold"
           style={{
@@ -444,6 +439,7 @@ export function PersonalizationHistorySlide({ isActive }: SlideProps) {
             ))}
           </View>
         </View>
+        </Animated.View>
       </Animated.View>
     </View>
   );

@@ -1,4 +1,4 @@
-import { formatDistanceToNow, format, parseISO } from 'date-fns';
+import { format, formatDistanceToNow, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 /** Format number as Venezuelan bolívares: "1.234,56 Bs" */
@@ -63,7 +63,7 @@ export function formatFullDate(date: string): string {
 /** "07/09/2026 14:30" — for intraday chart pointer display */
 export function formatFullDateTime(date: string): string {
   try {
-    return format(parseISO(date), 'dd/MM/yyyy HH:mm');
+    return format(parseISO(date), 'dd MMM yyyy HH:mm', { locale: es });
   } catch {
     return date;
   }

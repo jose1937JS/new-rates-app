@@ -1,5 +1,4 @@
 import { useQueryClient } from '@tanstack/react-query';
-import * as Haptics from 'expo-haptics';
 import {
   Check,
   ChevronRight,
@@ -18,9 +17,11 @@ import {
   Tag,
   Trash2,
   User,
+  Vibrate,
+  VibrateOff,
 } from 'lucide-react-native';
 import { useState } from 'react';
-import { Linking, Pressable, ScrollView, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, Switch, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -40,6 +41,11 @@ import {
   APP_VERSION,
   PRIMARY_COLOR_OPTIONS,
 } from '@/utils/constants';
+import {
+  triggerImpactHaptic,
+  triggerNotificationHaptic,
+  triggerSelectionHaptic,
+} from '@/utils/haptics';
 
 interface ModalState {
   visible: boolean;
@@ -185,14 +191,21 @@ export default function SettingsScreen() {
   const queryClient = useQueryClient();
   const COLORS = useThemeColors();
   const insets = useSafeAreaInsets();
-  const { themeMode, setThemeMode, primaryColor, setPrimaryColor } = useCurrencyStore();
+  const {
+    themeMode,
+    setThemeMode,
+    primaryColor,
+    setPrimaryColor,
+    hapticsEnabled,
+    setHapticsEnabled,
+  } = useCurrencyStore();
 
   const [modalState, setModalState] = useState<ModalState>(CLOSED_MODAL);
 
   const closeModal = () => setModalState(CLOSED_MODAL);
 
   const handleForceRefresh = async () => {
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    triggerImpactHaptic('light');
     const online = await isNetworkOnline();
     if (!online) {
       setModalState({
@@ -226,9 +239,7 @@ export default function SettingsScreen() {
       confirmText: 'Limpiar',
       cancelText: 'Cancelar',
       onConfirm: async () => {
-        void Haptics.notificationAsync(
-          Haptics.NotificationFeedbackType.Warning,
-        );
+        triggerNotificationHaptic('warning');
         queryClient.clear();
         await clearApiCache();
         setModalState({
@@ -243,14 +254,21 @@ export default function SettingsScreen() {
   };
 
   const handleThemeChange = (mode: ThemeMode) => {
-    void Haptics.selectionAsync();
+    triggerSelectionHaptic();
     setThemeMode(mode);
   };
 
   const handlePrimaryColorChange = (colorId: PrimaryColorId) => {
     if (colorId === primaryColor) return;
-    void Haptics.selectionAsync();
+    triggerSelectionHaptic();
     setPrimaryColor(colorId);
+  };
+
+  const handleToggleHaptics = (nextEnabled: boolean) => {
+    setHapticsEnabled(nextEnabled);
+    if (nextEnabled) {
+      triggerSelectionHaptic();
+    }
   };
 
   return (
@@ -394,11 +412,51 @@ export default function SettingsScreen() {
           </View>
         </SettingsGroup>
 
+        {/* Interaction */}
+        <SettingsGroup
+          title="Interacción"
+          icon={<Vibrate size={16} color={COLORS.primary} />}
+          index={3}
+        >
+          <Pressable
+            onPress={() => handleToggleHaptics(!hapticsEnabled)}
+            accessibilityRole="switch"
+            accessibilityState={{ checked: hapticsEnabled }}
+            accessibilityLabel="Vibración al tocar"
+            className="flex-row items-center justify-between py-2 active:opacity-80"
+          >
+            <View className="flex-1 flex-row items-center gap-2.5 pr-3">
+              {hapticsEnabled ? (
+                <Vibrate size={16} color={COLORS.primary} />
+              ) : (
+                <VibrateOff size={16} color={COLORS.textMuted} />
+              )}
+              <View className="flex-1">
+                <Text className="text-sm font-medium text-text-primary">
+                  Vibración al tocar
+                </Text>
+                <Text className="text-xs text-text-muted">
+                  Respuesta háptica en botones y gestos
+                </Text>
+              </View>
+            </View>
+            <Switch
+              value={hapticsEnabled}
+              onValueChange={handleToggleHaptics}
+              trackColor={{
+                false: COLORS.border,
+                true: `${COLORS.primary}80`,
+              }}
+              thumbColor={hapticsEnabled ? COLORS.primary : COLORS.textMuted}
+            />
+          </Pressable>
+        </SettingsGroup>
+
         {/* Data */}
         <SettingsGroup
           title="Datos"
           icon={<Database size={16} color={COLORS.primary} />}
-          index={2}
+          index={4}
         >
           <SettingsRow
             icon={<RefreshCw size={16} color={COLORS.textMuted} />}
@@ -418,7 +476,7 @@ export default function SettingsScreen() {
         <SettingsGroup
           title="Fuentes de datos"
           icon={<Server size={16} color={COLORS.primary} />}
-          index={3}
+          index={5}
         >
           <SettingsRow
             icon={<Landmark size={16} color={COLORS.textMuted} />}

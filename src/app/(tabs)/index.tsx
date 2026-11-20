@@ -165,7 +165,7 @@ export default function ConverterScreen() {
         style={{ backgroundColor: COLORS.surface }}
       >
         <ScreenHero
-          title="RATES VENAPP"
+          title="RATESVEN"
           subtitle="Tasas de cambio en Venezuela"
           showLogo
           icon={<ArrowLeftRight size={20} color="#ffffff" />}
@@ -252,7 +252,7 @@ export default function ConverterScreen() {
         </Animated.View>
 
         <View className="flex-row items-center justify-between">
-          <Text className="text-lg font-medium text-secondary">
+          <Text className="text-lg font-medium text-secondary dark:text-white">
             Conversiones
           </Text>
           <View className="flex-row items-center gap-1">

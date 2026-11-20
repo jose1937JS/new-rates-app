@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import { Banknote, Coins, DollarSign, Euro } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
@@ -10,6 +9,7 @@ import Animated, {
 
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { CurrencyCode } from '@/types/currency.types';
+import { triggerSelectionHaptic } from '@/utils/haptics';
 
 const CURRENCY_ICONS: Partial<
   Record<CurrencyCode, React.ComponentType<{ size?: number; color?: string }>>
@@ -60,7 +60,7 @@ export function CurrencyTabSelector({
 
   const handlePress = (currency: CurrencyCode) => {
     if (currency !== selected) {
-      void Haptics.selectionAsync();
+      triggerSelectionHaptic();
       onSelect(currency);
     }
   };
@@ -185,7 +185,7 @@ export function PeriodSelector({
             key={period}
             onPress={() => {
               if (period !== selected) {
-                void Haptics.selectionAsync();
+                triggerSelectionHaptic();
                 onSelect(period);
               }
             }}

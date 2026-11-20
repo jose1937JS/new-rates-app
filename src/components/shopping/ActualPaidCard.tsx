@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import { Check, Receipt, X } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
@@ -10,6 +9,10 @@ import { useThemeColors } from '@/hooks/useThemeColors';
 import type { CurrencyCode, ShoppingRatesSnapshot } from '@/types/currency.types';
 import { CURRENCY_SYMBOLS } from '@/utils/constants';
 import { formatPercentage, parseFormattedNumber } from '@/utils/formatters';
+import {
+  triggerNotificationHaptic,
+  triggerSelectionHaptic,
+} from '@/utils/haptics';
 import {
   compareActualPaid,
   formatShoppingMoney,
@@ -56,14 +59,14 @@ export function ActualPaidCard({
   );
 
   const handleSave = () => {
-    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    triggerNotificationHaptic('success');
     onSaveActualPaid(parsedInput > 0 ? parsedInput : undefined, currency);
     setSavedNotice(true);
     setTimeout(() => setSavedNotice(false), 1800);
   };
 
   const handleClear = () => {
-    void Haptics.selectionAsync();
+    triggerSelectionHaptic();
     setAmountText('');
     onSaveActualPaid(undefined, currency);
   };

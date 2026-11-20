@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import { Info } from 'lucide-react-native';
 import { useState } from 'react';
 import { Image, Pressable, Text, View } from 'react-native';
@@ -12,6 +11,7 @@ import { ThreeDotsLoader } from '@/components/ui/ThreeDotsLoader';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { CurrencyCode, UnifiedRates } from '@/types/currency.types';
 import { formatNumber, formatPercentage } from '@/utils/formatters';
+import { triggerSelectionHaptic } from '@/utils/haptics';
 
 const APP_LOGO = require('@/assets/images/logo.webp');
 
@@ -85,7 +85,7 @@ export function RatesHero({
   ];
 
   const handleCardPress = (code: HeroCurrencyCode) => {
-    void Haptics.selectionAsync();
+    triggerSelectionHaptic();
     setSelectedInfo(code);
   };
 
@@ -117,7 +117,7 @@ export function RatesHero({
             numberOfLines={1}
             adjustsFontSizeToFit
           >
-            RATES VENAPP
+            RATESVEN
           </Text>
         </View>
         <View className="items-end">

@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import { StatusBar } from 'expo-status-bar';
 import { ArrowRight } from 'lucide-react-native';
 import { useCallback, useMemo, useRef, useState } from 'react';
@@ -30,6 +29,10 @@ import {
   ShoppingCalculatorSlide,
 } from '@/components/onboarding/OnboardingSlides';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import {
+  triggerNotificationHaptic,
+  triggerSelectionHaptic,
+} from '@/utils/haptics';
 
 const APP_LOGO = require('@/assets/images/logo.webp');
 const TOTAL_STEPS = 4;
@@ -76,16 +79,16 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   }, []);
 
   const handleSkip = useCallback(() => {
-    void Haptics.selectionAsync();
+    triggerSelectionHaptic();
     pagerRef.current?.setPage(LAST_STEP_INDEX);
   }, []);
 
   const handlePrimaryAction = useCallback(() => {
     if (isLastStep) {
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      triggerNotificationHaptic('success');
       onComplete();
     } else {
-      void Haptics.selectionAsync();
+      triggerSelectionHaptic();
       pagerRef.current?.setPage(currentPage + 1);
     }
   }, [currentPage, isLastStep, onComplete]);
@@ -165,7 +168,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
             className="text-lg font-bold tracking-wide"
             style={{ color: brandTextColor }}
           >
-            RATES VENAPP
+            RATESVEN
           </Text>
         </View>
 
