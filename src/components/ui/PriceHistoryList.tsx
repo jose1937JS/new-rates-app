@@ -6,11 +6,11 @@ import { Card } from '@/components/ui/Card';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { ChartDataPoint, CurrencyCode } from '@/types/currency.types';
 import {
-  formatChartTime,
-  formatDayOfWeek,
-  formatHistoryDate,
-  formatNumber,
-  formatPercentage,
+    formatChartTime,
+    formatDayOfWeek,
+    formatHistoryDate,
+    formatNumber,
+    formatPercentage,
 } from '@/utils/formatters';
 
 interface PriceHistoryListProps {

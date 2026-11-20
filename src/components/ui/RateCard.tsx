@@ -1,16 +1,16 @@
 import { Pressable, Text, View } from 'react-native';
 import Animated, {
-  FadeInDown,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
+    FadeInDown,
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming,
 } from 'react-native-reanimated';
 
 import { CurrencyIcon } from '@/components/ui/CurrencyIcon';
 import type { CurrencyCode } from '@/types/currency.types';
 import {
-  CURRENCY_NAMES,
-  CURRENCY_SYMBOLS,
+    CURRENCY_NAMES,
+    CURRENCY_SYMBOLS,
 } from '@/utils/constants';
 import { formatNumber, formatPercentage } from '@/utils/formatters';
 

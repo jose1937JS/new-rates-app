@@ -1,9 +1,11 @@
+import { useRouter } from 'expo-router';
 import { ArrowLeftRight } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ShoppingEntryCard } from '@/components/shopping/ShoppingEntryCard';
 import { ConverterSkeleton } from '@/components/ui/ConverterSkeleton';
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -18,14 +20,20 @@ import { useCurrencyRates } from '@/hooks/useCurrencyRates';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { useCurrencyStore } from '@/store/currencyStore';
+import { useShoppingStore } from '@/store/shoppingStore';
 import type { CurrencyCode } from '@/types/currency.types';
 import { formatRelativeTime, parseFormattedNumber } from '@/utils/formatters';
+import { snapshotFromUnifiedRates } from '@/utils/shoppingUtils';
 
 const ALL_CURRENCIES: CurrencyCode[] = ['USD', 'EUR', 'USDT', 'VES'];
 const DEBOUNCE_MS = 300;
 
 export default function ConverterScreen() {
+  const router = useRouter();
   const { selectedCurrency, amount, setSelectedCurrency, setAmount } = useCurrencyStore();
+  const shoppingLists = useShoppingStore((state) => state.lists);
+  const createShoppingList = useShoppingStore((state) => state.createList);
+  const activeShoppingList = shoppingLists.find((l) => l.status === 'active');
   const {
     rates,
     hasFallback,
@@ -79,10 +87,19 @@ export default function ConverterScreen() {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
-    setInputValue('1');
-    setAmount('1');
-    setDebouncedAmount('1');
+    setInputValue('');
+    setAmount('');
+    setDebouncedAmount('');
   }, [setAmount]);
+
+  const handleStartNewShopping = useCallback(() => {
+    const newId = createShoppingList({
+      displayCurrency: 'VES',
+      defaultInputCurrency: 'USD',
+      ratesSnapshot: snapshotFromUnifiedRates(rates),
+    });
+    router.push({ pathname: '/shopping/[id]', params: { id: newId } });
+  }, [createShoppingList, rates, router]);
 
   const numericAmount = debouncedAmount ? parseFormattedNumber(debouncedAmount) : 0;
   const conversions = useConversion(numericAmount, selectedCurrency, rates);
@@ -150,6 +167,7 @@ export default function ConverterScreen() {
         <ScreenHero
           title="RATES VENAPP"
           subtitle="Tasas de cambio en Venezuela"
+          showLogo
           icon={<ArrowLeftRight size={20} color="#ffffff" />}
           rightElement={<OfflineBadge isOnline={isOnline} variant="hero" />}
         />
@@ -234,10 +252,7 @@ export default function ConverterScreen() {
         </Animated.View>
 
         <View className="flex-row items-center justify-between">
-          <Text
-            className="text-lg font-medium"
-            style={{ color: COLORS.primary }}
-          >
+          <Text className="text-lg font-medium text-secondary">
             Conversiones
           </Text>
           <View className="flex-row items-center gap-1">
@@ -264,6 +279,19 @@ export default function ConverterScreen() {
             />
           ))}
         </View>
+
+        {/* Shopping Calculator Entry Card */}
+        <Animated.View entering={FadeInDown.delay(250).duration(400)}>
+          <ShoppingEntryCard
+            activeList={activeShoppingList}
+            totalListsCount={shoppingLists.length}
+            onStartNew={handleStartNewShopping}
+            onContinueActive={(listId) =>
+              router.push({ pathname: '/shopping/[id]', params: { id: listId } })
+            }
+            onOpenAllLists={() => router.push('/shopping')}
+          />
+        </Animated.View>
 
         {/* Rate source info */}
         <Animated.View

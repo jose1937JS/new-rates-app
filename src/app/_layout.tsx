@@ -188,6 +188,8 @@ export default function RootLayout() {
               }}
             >
               <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="shopping/index" />
+              <Stack.Screen name="shopping/[id]" />
             </Stack>
           )}
         </PersistQueryClientProvider>

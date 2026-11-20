@@ -58,13 +58,13 @@ export function CurrencyInput({
     if (onClear) {
       onClear();
     } else {
-      onChangeText('1');
+      onChangeText('');
     }
     inputRef.current?.focus();
   }, [onChangeText, onClear]);
 
   const displayValue = value ? formatInputValue(value) : '';
-  const showClearButton = value.length > 0 && value !== '1';
+  const showClearButton = value.length > 0;
 
   return (
     <Card
@@ -133,7 +133,7 @@ export function CurrencyInput({
           <Pressable
             onPress={handleClear}
             hitSlop={8}
-            accessibilityLabel="Restablecer a 1"
+            accessibilityLabel="Limpiar monto"
             className="h-8 w-8 items-center justify-center rounded-full active:opacity-70"
             style={{ backgroundColor: COLORS.surfaceElevated }}
           >

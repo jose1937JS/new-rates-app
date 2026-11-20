@@ -109,7 +109,7 @@ export function AppModal({
           </View>
 
           {/* Title & Message */}
-          <Text className="text-center text-base font-bold text-text-primary">
+          <Text className="text-center text-base font-semibold text-text-primary">
             {title}
           </Text>
           <Text className="mt-1.5 text-center text-sm leading-5 text-text-secondary">

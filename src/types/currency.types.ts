@@ -108,3 +108,39 @@ export interface PrimaryColorOption {
 }
 
 export type ChartPeriod = '1d' | '3d' | '7d' | '30d';
+
+// ----- Shopping Calculator Types -----
+
+export interface ShoppingRatesSnapshot {
+  usdToVes: number;
+  eurToVes: number;
+  usdtToVes: number;
+}
+
+export interface ShoppingItem {
+  id: string;
+  name: string;
+  unitPrice: number;
+  currency: CurrencyCode;
+  quantity: number;
+  createdAt: string;
+}
+
+export type ShoppingListStatus = 'active' | 'completed';
+
+export interface ShoppingList {
+  id: string;
+  title: string;
+  status: ShoppingListStatus;
+  createdAt: string;
+  updatedAt: string;
+  completedAt?: string;
+  displayCurrency: CurrencyCode;
+  defaultInputCurrency: CurrencyCode;
+  budgetLimit?: number;
+  budgetCurrency: CurrencyCode;
+  actualPaidAmount?: number;
+  actualPaidCurrency: CurrencyCode;
+  ratesSnapshot: ShoppingRatesSnapshot;
+  items: ShoppingItem[];
+}
