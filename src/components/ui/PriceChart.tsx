@@ -104,10 +104,12 @@ export function PriceChart({
   if (isLoading) {
     return (
       <GestureDetector gesture={swipeGesture}>
-        <Card noPadding className="h-64 items-center justify-center gap-3">
-          <ThreeDotsLoader size={8} color={COLORS.primary} />
-          <Text className="text-sm text-text-muted">Cargando gráfico...</Text>
-        </Card>
+        <View collapsable={false}>
+          <Card noPadding className="h-64 items-center justify-center gap-3">
+            <ThreeDotsLoader size={8} color={COLORS.primary} />
+            <Text className="text-sm text-text-muted">Cargando gráfico...</Text>
+          </Card>
+        </View>
       </GestureDetector>
     );
   }
@@ -115,9 +117,11 @@ export function PriceChart({
   if (!chartMetrics) {
     return (
       <GestureDetector gesture={swipeGesture}>
-        <Card noPadding className="h-64 items-center justify-center">
-          <Text className="text-sm text-text-muted">Sin datos disponibles</Text>
-        </Card>
+        <View collapsable={false}>
+          <Card noPadding className="h-64 items-center justify-center">
+            <Text className="text-sm text-text-muted">Sin datos disponibles</Text>
+          </Card>
+        </View>
       </GestureDetector>
     );
   }
@@ -233,5 +237,9 @@ export function PriceChart({
     return chartCard;
   }
 
-  return <GestureDetector gesture={swipeGesture}>{chartCard}</GestureDetector>;
+  return (
+    <GestureDetector gesture={swipeGesture}>
+      <View collapsable={false}>{chartCard}</View>
+    </GestureDetector>
+  );
 }

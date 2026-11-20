@@ -156,7 +156,7 @@ export default function HistoryScreen() {
     <View className="flex-1 bg-surface" style={{ backgroundColor: COLORS.surface }}>
       {/* Fixed compact orange Hero with embedded Currency tabs (swipeable) */}
       <GestureDetector gesture={heroSwipeGesture}>
-        <View>
+        <View collapsable={false}>
           <ScreenHero
             title="Historial"
             subtitle="Evolución histórica en VES"
@@ -188,6 +188,7 @@ export default function HistoryScreen() {
         {/* Title + animated period selector */}
         <GestureDetector gesture={headerSwipeGesture}>
           <Animated.View
+            collapsable={false}
             entering={FadeInUp.delay(80).duration(300)}
             className="flex-row items-center justify-between"
           >
@@ -217,7 +218,7 @@ export default function HistoryScreen() {
         <Animated.View style={transitionStyle} className="gap-4">
           {!isLoading && data.length === 0 && isError ? (
             <GestureDetector gesture={bodySwipeGesture}>
-              <View>
+              <View collapsable={false}>
                 <EmptyState
                   isError={isError}
                   isRetrying={isFetching}
@@ -241,7 +242,7 @@ export default function HistoryScreen() {
               />
 
               <GestureDetector gesture={bodySwipeGesture}>
-                <View className="gap-4">
+                <View collapsable={false} className="gap-4">
                   {!isLoading && data.length > 0 && (
                     <StatsRow
                       current={stats.current}
