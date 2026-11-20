@@ -2,6 +2,7 @@ import { View } from 'react-native';
 import Animated, {
   Extrapolation,
   interpolate,
+  interpolateColor,
   useAnimatedStyle,
   type SharedValue,
 } from 'react-native-reanimated';
@@ -9,19 +10,22 @@ import Animated, {
 interface OnboardingDotsProps {
   count: number;
   scrollOffset: SharedValue<number>;
-  color?: string;
+  activeColor?: string;
+  inactiveColor?: string;
 }
 
 interface AnimatedDotProps {
   index: number;
   scrollOffset: SharedValue<number>;
   activeColor: string;
+  inactiveColor: string;
 }
 
 function AnimatedProgressDot({
   index,
   scrollOffset,
   activeColor,
+  inactiveColor,
 }: AnimatedDotProps) {
   const animatedStyle = useAnimatedStyle(() => {
     const progress = scrollOffset.get();
@@ -31,16 +35,15 @@ function AnimatedProgressDot({
       [8, 30, 8],
       Extrapolation.CLAMP,
     );
-    const opacity = interpolate(
+    const backgroundColor = interpolateColor(
       progress,
       [index - 1, index, index + 1],
-      [0.35, 1, 0.35],
-      Extrapolation.CLAMP,
+      [inactiveColor, activeColor, inactiveColor],
     );
 
     return {
       width,
-      opacity,
+      backgroundColor,
     };
   });
 
@@ -50,7 +53,6 @@ function AnimatedProgressDot({
         {
           height: 8,
           borderRadius: 4,
-          backgroundColor: activeColor,
         },
         animatedStyle,
       ]}
@@ -61,7 +63,8 @@ function AnimatedProgressDot({
 export function OnboardingDots({
   count,
   scrollOffset,
-  color = '#ffffff',
+  activeColor = '#ff6b26',
+  inactiveColor = 'rgba(255, 107, 38, 0.24)',
 }: OnboardingDotsProps) {
   return (
     <View
@@ -73,7 +76,8 @@ export function OnboardingDots({
           key={index}
           index={index}
           scrollOffset={scrollOffset}
-          activeColor={color}
+          activeColor={activeColor}
+          inactiveColor={inactiveColor}
         />
       ))}
     </View>

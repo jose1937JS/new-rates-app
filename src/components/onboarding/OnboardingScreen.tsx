@@ -10,7 +10,13 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+import Svg, {
+  Defs,
+  LinearGradient,
+  RadialGradient,
+  Rect,
+  Stop,
+} from 'react-native-svg';
 
 import { OnboardingDots } from '@/components/onboarding/OnboardingDots';
 import {
@@ -44,11 +50,21 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   const ctaScale = useSharedValue(1);
 
   const isLastStep = currentPage === LAST_STEP_INDEX;
+  const isDark = COLORS.isDark;
 
-  const gradientTop = COLORS.isDark ? '#e06024' : '#ff8c4f';
-  const gradientMid = COLORS.isDark ? '#b84514' : '#ff6b26';
-  const gradientBottom = COLORS.isDark ? '#7d2907' : '#cc440e';
-  const ctaTextColor = COLORS.isDark ? '#b84514' : '#ff6b26';
+  // Harmonized studio gradient matching the 3D orange + dark slate illustrations
+  const gradientTop = isDark ? '#1e242c' : '#ffffff';
+  const gradientMid = isDark ? '#14181f' : '#fff8f3';
+  const gradientBottom = isDark ? '#0c0f14' : '#fae8dc';
+  const accentColor = isDark ? '#e85d1a' : '#ff6b26';
+  const brandTextColor = isDark ? '#f8fafc' : '#14181f';
+  const skipBg = isDark
+    ? 'rgba(255, 255, 255, 0.09)'
+    : 'rgba(20, 24, 31, 0.06)';
+  const skipTextColor = isDark ? '#cbd5e1' : '#4b5563';
+  const inactiveDotColor = isDark
+    ? 'rgba(255, 255, 255, 0.22)'
+    : 'rgba(20, 24, 31, 0.16)';
 
   const ctaAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: ctaScale.get() }],
@@ -84,19 +100,51 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
 
   return (
     <Animated.View entering={FadeIn.duration(280)} className="flex-1">
-      <StatusBar style="light" />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
 
-      {/* Full-bleed edge-to-edge orange gradient from status bar to navigation bar */}
+      {/* Full-bleed edge-to-edge studio gradient + soft radial orange backlight behind 3D art */}
       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
         <Svg width="100%" height="100%">
           <Defs>
-            <LinearGradient id="onboardingBg" x1="0" y1="0" x2="0.3" y2="1">
+            <LinearGradient id="onboardingStudioBg" x1="0" y1="0" x2="0.2" y2="1">
               <Stop offset="0%" stopColor={gradientTop} />
-              <Stop offset="48%" stopColor={gradientMid} />
+              <Stop offset="50%" stopColor={gradientMid} />
               <Stop offset="100%" stopColor={gradientBottom} />
             </LinearGradient>
+            <RadialGradient
+              id="onboardingSpotlight"
+              cx="50%"
+              cy="34%"
+              rx="52%"
+              ry="32%"
+            >
+              <Stop
+                offset="0%"
+                stopColor="#ff6b26"
+                stopOpacity={isDark ? 0.26 : 0.14}
+              />
+              <Stop
+                offset="58%"
+                stopColor="#ff8c4f"
+                stopOpacity={isDark ? 0.08 : 0.05}
+              />
+              <Stop offset="100%" stopColor="#ff6b26" stopOpacity={0} />
+            </RadialGradient>
           </Defs>
-          <Rect x="0" y="0" width="100%" height="100%" fill="url(#onboardingBg)" />
+          <Rect
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            fill="url(#onboardingStudioBg)"
+          />
+          <Rect
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            fill="url(#onboardingSpotlight)"
+          />
         </Svg>
       </View>
 
@@ -108,10 +156,13 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
         <View className="flex-row items-center gap-2.5">
           <Image
             source={APP_LOGO}
-            style={{ width: 42, height: 42, marginTop: 2 }}
+            style={{ width: 38, height: 38, marginTop: 2 }}
             resizeMode="contain"
           />
-          <Text className="text-xl font-bold tracking-wide text-white">
+          <Text
+            className="text-lg font-bold tracking-wide"
+            style={{ color: brandTextColor }}
+          >
             RATES VENAPP
           </Text>
         </View>
@@ -124,10 +175,15 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
           className="rounded-full px-3.5 py-1.5 active:opacity-70"
           style={{
             opacity: isLastStep ? 0 : 1,
-            backgroundColor: 'rgba(255, 255, 255, 0.16)',
+            backgroundColor: skipBg,
           }}
         >
-          <Text className="text-xs font-semibold text-white">Saltar</Text>
+          <Text
+            className="text-xs font-semibold"
+            style={{ color: skipTextColor }}
+          >
+            Saltar
+          </Text>
         </Pressable>
       </View>
 
@@ -141,7 +197,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
         />
       </View>
 
-      {/* Bottom progress indicators + high-contrast white CTA button */}
+      {/* Bottom progress indicators + vibrant primary CTA */}
       <View
         className="gap-5 px-7 pt-2"
         style={{ paddingBottom: Math.max(insets.bottom, 16) + 14 }}
@@ -149,7 +205,8 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
         <OnboardingDots
           count={TOTAL_STEPS}
           scrollOffset={scrollOffset}
-          color="#ffffff"
+          activeColor={accentColor}
+          inactiveColor={inactiveDotColor}
         />
 
         <AnimatedPressable
@@ -160,21 +217,24 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
           accessibilityLabel={
             isLastStep ? 'Entrar a la aplicación' : 'Siguiente paso'
           }
-          className="h-14 flex-row items-center justify-center gap-2 rounded-2xl bg-white shadow-md"
+          className="h-14 flex-row items-center justify-center gap-2 rounded-2xl"
           style={[
             ctaAnimatedStyle,
             {
+              backgroundColor: accentColor,
               borderCurve: 'continuous',
+              shadowColor: '#ff6b26',
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: isDark ? 0.34 : 0.28,
+              shadowRadius: 14,
+              elevation: 5,
             },
           ]}
         >
-          <Text
-            className="text-base font-bold"
-            style={{ color: ctaTextColor }}
-          >
+          <Text className="text-base font-bold text-white">
             {isLastStep ? 'Entrar' : 'Siguiente'}
           </Text>
-          <ArrowRight size={18} color={ctaTextColor} strokeWidth={2.5} />
+          <ArrowRight size={18} color="#ffffff" strokeWidth={2.5} />
         </AnimatedPressable>
       </View>
     </Animated.View>

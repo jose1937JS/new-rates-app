@@ -1,14 +1,6 @@
-import {
-  Ban,
-  Calendar,
-  Moon,
-  Palette,
-  ShieldCheck,
-  Sparkles,
-  WifiOff
-} from 'lucide-react-native';
+import { Ban, Calendar, Sparkles, WifiOff } from 'lucide-react-native';
 import { useEffect } from 'react';
-import { Text, View } from 'react-native';
+import { Image, Text, View, useWindowDimensions } from 'react-native';
 import Animated, {
   Easing,
   FadeInDown,
@@ -17,24 +9,60 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Circle, Path } from 'react-native-svg';
 
 import { CurrencyIcon } from '@/components/ui/CurrencyIcon';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { PRIMARY_COLOR_OPTIONS } from '@/utils/constants';
 
+const ONBOARDING_IMG_1 = require('@/assets/images/onboarding-1.png');
+const ONBOARDING_IMG_2 = require('@/assets/images/onboarding-2.png');
+const ONBOARDING_IMG_3 = require('@/assets/images/onboarding-3.png');
+
 interface SlideProps {
   isActive: boolean;
 }
 
+function useSlideTokens() {
+  const COLORS = useThemeColors();
+  const { width, height } = useWindowDimensions();
+
+  const imageSize = Math.round(Math.min(width - 56, height * 0.36, 290));
+  const accent = COLORS.isDark ? '#ff7a3d' : '#ff6b26';
+  const titleColor = COLORS.isDark ? '#f8fafc' : '#14181f';
+  const bodyColor = COLORS.isDark ? '#9ca3af' : '#4b5563';
+  const chipBg = COLORS.isDark
+    ? 'rgba(255, 255, 255, 0.08)'
+    : 'rgba(255, 255, 255, 0.85)';
+  const chipBorder = COLORS.isDark
+    ? 'rgba(255, 255, 255, 0.14)'
+    : 'rgba(20, 24, 31, 0.08)';
+  const chipText = COLORS.isDark ? '#f1f5f9' : '#1f2937';
+
+  return {
+    isDark: COLORS.isDark,
+    imageSize,
+    accent,
+    titleColor,
+    bodyColor,
+    chipBg,
+    chipBorder,
+    chipText,
+  };
+}
+
 function useEntranceAnimation(isActive: boolean) {
-  const translateY = useSharedValue(isActive ? 0 : 12);
+  const imageScale = useSharedValue(isActive ? 1 : 0.94);
+  const translateY = useSharedValue(isActive ? 0 : 14);
   const opacity = useSharedValue(isActive ? 1 : 0.72);
 
   useEffect(() => {
     if (isActive) {
-      translateY.set(12);
+      imageScale.set(0.94);
+      translateY.set(14);
       opacity.set(0.75);
+      imageScale.set(
+        withTiming(1, { duration: 360, easing: Easing.out(Easing.cubic) }),
+      );
       translateY.set(
         withTiming(0, { duration: 320, easing: Easing.out(Easing.cubic) }),
       );
@@ -42,284 +70,282 @@ function useEntranceAnimation(isActive: boolean) {
         withTiming(1, { duration: 280, easing: Easing.out(Easing.cubic) }),
       );
     }
-  }, [isActive, opacity, translateY]);
+  }, [imageScale, isActive, opacity, translateY]);
 
-  return useAnimatedStyle(() => ({
+  const imageStyle = useAnimatedStyle(() => ({
+    opacity: opacity.get(),
+    transform: [{ scale: imageScale.get() }],
+  }));
+
+  const textStyle = useAnimatedStyle(() => ({
     opacity: opacity.get(),
     transform: [{ translateY: translateY.get() }],
   }));
+
+  return { imageStyle, textStyle };
 }
 
 export function RealtimeRatesSlide({ isActive }: SlideProps) {
-  const COLORS = useThemeColors();
-  const entranceStyle = useEntranceAnimation(isActive);
-  const orangeInk = COLORS.isDark ? '#b84514' : '#ff6b26';
-  const orangeSecondaryInk = COLORS.isDark ? '#8c3008' : '#cc5520';
+  const {
+    imageSize,
+    accent,
+    titleColor,
+    bodyColor,
+    chipBg,
+    chipBorder,
+    chipText,
+  } = useSlideTokens();
+  const { imageStyle, textStyle } = useEntranceAnimation(isActive);
 
   return (
-    <Animated.View
-      style={entranceStyle}
-      className="flex-1 justify-between px-7 pb-16 pt-10"
-    >
-      {/* Top-right stepped visual chips */}
+    <View className="flex-1 justify-between px-7 pb-6 pt-2">
+      {/* Hero 3D visual */}
       <Animated.View
-        entering={FadeInDown.duration(360)}
-        className="items-end gap-3 pt-4"
+        entering={FadeInDown.duration(380)}
+        style={imageStyle}
+        className="flex-1 items-center justify-center"
       >
-        <View
-          className="flex-row items-center gap-2.5 rounded-2xl px-4 py-2.5"
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.18)',
-            borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.28)',
-            borderCurve: 'continuous',
-          }}
-        >
-          <CurrencyIcon currency="USD" size={20} />
-          <Text className="text-sm font-bold text-white">USD</Text>
-          <Text
-            className="text-xs font-medium"
-            style={{ color: 'rgba(255, 255, 255, 0.85)' }}
-          >
-            BCV Oficial
-          </Text>
-        </View>
-
-        <View
-          className="mr-6 flex-row items-center gap-2.5 rounded-2xl px-4 py-2.5"
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.18)',
-            borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.28)',
-            borderCurve: 'continuous',
-          }}
-        >
-          <CurrencyIcon currency="EUR" size={20} />
-          <Text className="text-sm font-bold text-white">EUR</Text>
-          <Text
-            className="text-xs font-medium"
-            style={{ color: 'rgba(255, 255, 255, 0.85)' }}
-          >
-            BCV Oficial
-          </Text>
-        </View>
-
-        <View
-          className="mr-16 flex-row items-center gap-2.5 rounded-2xl px-4 py-2.5 shadow-md"
-          style={{
-            backgroundColor: '#ffffff',
-            borderCurve: 'continuous',
-          }}
-        >
-          <CurrencyIcon currency="USDT" size={20} />
-          <Text className="text-sm font-bold" style={{ color: orangeInk }}>
-            USDT
-          </Text>
-          <Text
-            className="text-xs font-semibold"
-            style={{ color: orangeSecondaryInk }}
-          >
-            Yadio
-          </Text>
-        </View>
+        <Image
+          source={ONBOARDING_IMG_1}
+          style={{ width: imageSize, height: imageSize }}
+          resizeMode="contain"
+        />
       </Animated.View>
 
-      {/* Left-aligned large headline */}
-      <Animated.View entering={FadeInUp.delay(80).duration(380)}>
+      {/* Left-aligned editorial typography */}
+      <Animated.View
+        entering={FadeInUp.delay(70).duration(380)}
+        style={textStyle}
+        className="items-start"
+      >
         <Text
-          className="font-bold text-white"
-          style={{ fontSize: 36, lineHeight: 42, letterSpacing: -0.7 }}
+          className="font-bold"
+          style={{
+            color: titleColor,
+            fontSize: 38,
+            lineHeight: 44,
+            letterSpacing: -0.8,
+          }}
           numberOfLines={2}
           adjustsFontSizeToFit
         >
-          Todas tus tasas{'\n'}al instante
+          Todas tus tasas{'\n'}
+          <Text style={{ color: accent }}>al instante</Text>
         </Text>
 
         <Text
-          className="mt-4 text-base font-medium leading-6"
-          style={{ color: 'rgba(255, 255, 255, 0.9)', maxWidth: 310 }}
+          className="mt-3.5 text-base font-medium leading-6"
+          style={{ color: bodyColor, maxWidth: 315 }}
         >
-          Consulta y convierte entre Dólar BCV, Euro BCV, USDT y Bolívares en un
-          solo lugar.
+          Consulta y convierte entre Dólar, Euro, USDT y Bolívares en un solo
+          lugar.
         </Text>
+
+        <View className="mt-5 flex-row flex-wrap items-center gap-2">
+          {(['USD', 'EUR', 'USDT', 'VES'] as const).map((code) => (
+            <View
+              key={code}
+              className="flex-row items-center gap-1.5 rounded-full border px-3 py-1.5"
+              style={{
+                backgroundColor: chipBg,
+                borderColor: chipBorder,
+              }}
+            >
+              <CurrencyIcon currency={code} size={14} />
+              <Text
+                className="text-xs font-semibold"
+                style={{ color: chipText }}
+              >
+                {code}
+              </Text>
+            </View>
+          ))}
+        </View>
       </Animated.View>
-    </Animated.View>
+    </View>
   );
 }
 
 export function OfflineAccessSlide({ isActive }: SlideProps) {
-  const COLORS = useThemeColors();
-  const entranceStyle = useEntranceAnimation(isActive);
-  const orangeInk = COLORS.isDark ? '#b84514' : '#ff6b26';
+  const {
+    imageSize,
+    accent,
+    titleColor,
+    bodyColor,
+    chipBg,
+    chipBorder,
+    chipText,
+  } = useSlideTokens();
+  const { imageStyle, textStyle } = useEntranceAnimation(isActive);
 
   return (
-    <Animated.View
-      style={entranceStyle}
-      className="flex-1 items-center justify-center px-7"
-    >
-      {/* Centered icon emblem */}
+    <View className="flex-1 justify-between px-7 pb-6 pt-2">
+      {/* Hero 3D visual */}
       <Animated.View
-        entering={FadeInDown.duration(360)}
-        className="mb-8 items-center"
+        entering={FadeInDown.duration(380)}
+        style={imageStyle}
+        className="flex-1 items-center justify-center"
       >
-        <View
-          className="h-24 w-24 items-center justify-center rounded-full"
-          style={{ backgroundColor: '#ffffff' }}
-        >
-          <ShieldCheck size={42} color={orangeInk} strokeWidth={2.2} />
-        </View>
+        <Image
+          source={ONBOARDING_IMG_2}
+          style={{ width: imageSize, height: imageSize }}
+          resizeMode="contain"
+        />
       </Animated.View>
 
-      {/* Centered large typography */}
+      {/* Centered typography */}
       <Animated.View
-        entering={FadeInUp.delay(60).duration(380)}
+        entering={FadeInUp.delay(70).duration(380)}
+        style={textStyle}
         className="items-center"
       >
         <Text
-          className="text-center font-bold text-white"
-          style={{ fontSize: 36, lineHeight: 42, letterSpacing: -0.7 }}
+          className="text-center font-bold"
+          style={{
+            color: titleColor,
+            fontSize: 38,
+            lineHeight: 44,
+            letterSpacing: -0.8,
+          }}
           numberOfLines={2}
           adjustsFontSizeToFit
         >
-          Lista incluso{'\n'}sin internet
+          Lista incluso{'\n'}
+          <Text style={{ color: accent }}>sin internet</Text>
         </Text>
 
         <Text
-          className="mt-4 text-center text-base font-medium leading-6"
-          style={{ color: 'rgba(255, 255, 255, 0.9)', maxWidth: 315 }}
+          className="mt-3.5 text-center text-base font-medium leading-6"
+          style={{ color: bodyColor, maxWidth: 320 }}
         >
           Caché inteligente que conserva tus últimas tasas. 100% gratis, privada
           y sin cuentas.
         </Text>
 
-        {/* Minimal inline trust markers */}
-        <View className="mt-7 flex-row flex-wrap items-center justify-center gap-3">
+        <View className="mt-5 flex-row flex-wrap items-center justify-center gap-2">
           <View
-            className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.18)' }}
+            className="flex-row items-center gap-1.5 rounded-full border px-3 py-1.5"
+            style={{ backgroundColor: chipBg, borderColor: chipBorder }}
           >
-            <WifiOff size={14} color="#ffffff" />
-            <Text className="text-xs font-semibold text-white">Offline</Text>
+            <WifiOff size={13} color={accent} />
+            <Text className="text-xs font-semibold" style={{ color: chipText }}>
+              Offline
+            </Text>
           </View>
           <View
-            className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.18)' }}
+            className="flex-row items-center gap-1.5 rounded-full border px-3 py-1.5"
+            style={{ backgroundColor: chipBg, borderColor: chipBorder }}
           >
-            <Ban size={14} color="#ffffff" />
-            <Text className="text-xs font-semibold text-white">
+            <Ban size={13} color={accent} />
+            <Text className="text-xs font-semibold" style={{ color: chipText }}>
               Sin anuncios
             </Text>
           </View>
           <View
-            className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.18)' }}
+            className="flex-row items-center gap-1.5 rounded-full border px-3 py-1.5"
+            style={{ backgroundColor: chipBg, borderColor: chipBorder }}
           >
-            <Sparkles size={14} color="#ffffff" />
-            <Text className="text-xs font-semibold text-white">
+            <Sparkles size={13} color={accent} />
+            <Text className="text-xs font-semibold" style={{ color: chipText }}>
               Sin registro
             </Text>
           </View>
         </View>
       </Animated.View>
-    </Animated.View>
+    </View>
   );
 }
 
 export function PersonalizationHistorySlide({ isActive }: SlideProps) {
-  const entranceStyle = useEntranceAnimation(isActive);
+  const {
+    isDark,
+    imageSize,
+    accent,
+    titleColor,
+    bodyColor,
+    chipBg,
+    chipBorder,
+    chipText,
+  } = useSlideTokens();
+  const { imageStyle, textStyle } = useEntranceAnimation(isActive);
 
   return (
-    <Animated.View
-      style={entranceStyle}
-      className="flex-1 justify-between px-7 pb-16 pt-10"
-    >
-      {/* Top-left trend line + theme swatches */}
+    <View className="flex-1 justify-between px-7 pb-6 pt-2">
+      {/* Hero 3D visual */}
       <Animated.View
-        entering={FadeInDown.duration(360)}
-        className="items-start gap-4 pt-2"
+        entering={FadeInDown.duration(380)}
+        style={imageStyle}
+        className="flex-1 items-center justify-center"
       >
-        <View
-          className="rounded-3xl p-4"
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.16)',
-            borderWidth: 1,
-            borderColor: 'rgba(255, 255, 255, 0.28)',
-            borderCurve: 'continuous',
-          }}
-        >
-          <View className="mb-2 flex-row items-center gap-2">
-            <Calendar size={14} color="#ffffff" />
-            <Text className="text-xs font-semibold text-white">
-              Evolución 1d • 7d • 30d
-            </Text>
-          </View>
-          <Svg width={210} height={64} viewBox="0 0 210 64">
-            <Path
-              d="M 8 50 C 40 46, 52 24, 86 30 C 118 36, 134 14, 166 18 C 182 20, 194 10, 202 8"
-              stroke="#ffffff"
-              strokeWidth={3.5}
-              strokeLinecap="round"
-              fill="none"
-            />
-            <Circle cx={86} cy={30} r={4} fill="#ffffff" />
-            <Circle cx={166} cy={18} r={4} fill="#ffffff" />
-            <Circle cx={202} cy={8} r={5.5} fill="#ffffff" />
-          </Svg>
-        </View>
-
-        <View className="flex-row items-center gap-2.5">
-          <View
-            className="flex-row items-center gap-2 rounded-full px-3.5 py-2"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.18)' }}
-          >
-            <Palette size={14} color="#ffffff" />
-            <View className="flex-row items-center gap-1.5">
-              {PRIMARY_COLOR_OPTIONS.map((option) => (
-                <View
-                  key={option.id}
-                  className="h-3.5 w-3.5 rounded-full"
-                  style={{
-                    backgroundColor: option.primary,
-                    borderWidth: 1.5,
-                    borderColor: '#ffffff',
-                  }}
-                />
-              ))}
-            </View>
-          </View>
-
-          <View
-            className="flex-row items-center gap-1.5 rounded-full px-3 py-2"
-            style={{ backgroundColor: 'rgba(255, 255, 255, 0.18)' }}
-          >
-            <Moon size={13} color="#ffffff" />
-            <Text className="text-xs font-semibold text-white">Oscuro</Text>
-          </View>
-        </View>
+        <Image
+          source={ONBOARDING_IMG_3}
+          style={{ width: imageSize, height: imageSize }}
+          resizeMode="contain"
+        />
       </Animated.View>
 
-      {/* Right-aligned & bottom-anchored large typography */}
+      {/* Right-aligned editorial typography */}
       <Animated.View
-        entering={FadeInUp.delay(80).duration(380)}
+        entering={FadeInUp.delay(70).duration(380)}
+        style={textStyle}
         className="items-end"
       >
         <Text
-          className="text-right font-bold text-white"
-          style={{ fontSize: 36, lineHeight: 42, letterSpacing: -0.7 }}
+          className="text-right font-bold"
+          style={{
+            color: titleColor,
+            fontSize: 38,
+            lineHeight: 44,
+            letterSpacing: -0.8,
+          }}
           numberOfLines={2}
           adjustsFontSizeToFit
         >
-          Historial y tema{'\n'}a tu medida
+          Historial y tema{'\n'}
+          <Text style={{ color: accent }}>a tu medida</Text>
         </Text>
 
         <Text
-          className="mt-4 text-right text-base font-medium leading-6"
-          style={{ color: 'rgba(255, 255, 255, 0.9)', maxWidth: 300 }}
+          className="mt-3.5 text-right text-base font-medium leading-6"
+          style={{ color: bodyColor, maxWidth: 310 }}
         >
           Explora gráficas históricas hasta 30 días y personaliza tu color y
           modo oscuro.
         </Text>
+
+        <View className="mt-5 flex-row flex-wrap items-center justify-end gap-2">
+          <View
+            className="flex-row items-center gap-1.5 rounded-full border px-3 py-1.5"
+            style={{ backgroundColor: chipBg, borderColor: chipBorder }}
+          >
+            <Calendar size={13} color={accent} />
+            <Text className="text-xs font-semibold" style={{ color: chipText }}>
+              1d • 7d • 30d
+            </Text>
+          </View>
+
+          <View
+            className="flex-row items-center gap-1.5 rounded-full border px-3 py-1.5"
+            style={{ backgroundColor: chipBg, borderColor: chipBorder }}
+          >
+            {PRIMARY_COLOR_OPTIONS.map((option) => (
+              <View
+                key={option.id}
+                className="h-3.5 w-3.5 rounded-full"
+                style={{
+                  backgroundColor: isDark
+                    ? option.primaryDark
+                    : option.primary,
+                  borderWidth: 1,
+                  borderColor: isDark
+                    ? 'rgba(255, 255, 255, 0.35)'
+                    : 'rgba(255, 255, 255, 0.9)',
+                }}
+              />
+            ))}
+          </View>
+        </View>
       </Animated.View>
-    </Animated.View>
+    </View>
   );
 }
