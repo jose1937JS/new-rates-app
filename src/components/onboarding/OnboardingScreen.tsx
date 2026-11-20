@@ -27,11 +27,12 @@ import {
   OfflineAccessSlide,
   PersonalizationHistorySlide,
   RealtimeRatesSlide,
+  ShoppingCalculatorSlide,
 } from '@/components/onboarding/OnboardingSlides';
 import { useThemeColors } from '@/hooks/useThemeColors';
 
 const APP_LOGO = require('@/assets/images/logo.png');
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 const LAST_STEP_INDEX = TOTAL_STEPS - 1;
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -93,7 +94,8 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
     () => [
       <RealtimeRatesSlide key="realtime" isActive={currentPage === 0} />,
       <OfflineAccessSlide key="offline" isActive={currentPage === 1} />,
-      <PersonalizationHistorySlide key="themes" isActive={currentPage === 2} />,
+      <ShoppingCalculatorSlide key="shopping" isActive={currentPage === 2} />,
+      <PersonalizationHistorySlide key="themes" isActive={currentPage === 3} />,
     ],
     [currentPage],
   );

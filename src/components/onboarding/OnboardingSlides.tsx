@@ -1,4 +1,12 @@
-import { Ban, Calendar, Sparkles, WifiOff } from 'lucide-react-native';
+import {
+  Ban,
+  Calendar,
+  Receipt,
+  ShoppingBasket,
+  Sparkles,
+  Wallet,
+  WifiOff,
+} from 'lucide-react-native';
 import { useEffect } from 'react';
 import { Image, Text, View, useWindowDimensions } from 'react-native';
 import Animated, {
@@ -14,9 +22,10 @@ import { CurrencyIcon } from '@/components/ui/CurrencyIcon';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { PRIMARY_COLOR_OPTIONS } from '@/utils/constants';
 
-const ONBOARDING_IMG_1 = require('@/assets/images/onboarding-1.png');
-const ONBOARDING_IMG_2 = require('@/assets/images/onboarding-2.png');
-const ONBOARDING_IMG_3 = require('@/assets/images/onboarding-3.png');
+const ONBOARDING_IMG_1 = require('@/assets/images/onboarding-1.webp');
+const ONBOARDING_IMG_2 = require('@/assets/images/onboarding-2.webp');
+const ONBOARDING_IMG_3 = require('@/assets/images/onboarding-3.webp');
+const ONBOARDING_IMG_4 = require('@/assets/images/onboarding-4.webp');
 
 interface SlideProps {
   isActive: boolean;
@@ -26,7 +35,7 @@ function useSlideTokens() {
   const COLORS = useThemeColors();
   const { width, height } = useWindowDimensions();
 
-  const imageSize = Math.round(Math.min(width - 56, height * 0.36, 290));
+  const imageSize = Math.round(Math.min(width - 32, height * 0.43, 345));
   const accent = COLORS.isDark ? '#ff7a3d' : '#ff6b26';
   const titleColor = COLORS.isDark ? '#f8fafc' : '#14181f';
   const bodyColor = COLORS.isDark ? '#9ca3af' : '#4b5563';
@@ -129,7 +138,7 @@ export function RealtimeRatesSlide({ isActive }: SlideProps) {
           numberOfLines={2}
           adjustsFontSizeToFit
         >
-          Todas tus tasas{'\n'}
+          Todas las tasas{'\n'}
           <Text style={{ color: accent }}>al instante</Text>
         </Text>
 
@@ -248,6 +257,96 @@ export function OfflineAccessSlide({ isActive }: SlideProps) {
             <Sparkles size={13} color={accent} />
             <Text className="text-xs font-semibold" style={{ color: chipText }}>
               Sin registro
+            </Text>
+          </View>
+        </View>
+      </Animated.View>
+    </View>
+  );
+}
+
+export function ShoppingCalculatorSlide({ isActive }: SlideProps) {
+  const {
+    imageSize,
+    accent,
+    titleColor,
+    bodyColor,
+    chipBg,
+    chipBorder,
+    chipText,
+  } = useSlideTokens();
+  const { imageStyle, textStyle } = useEntranceAnimation(isActive);
+
+  return (
+    <View className="flex-1 justify-between px-7 pb-6 pt-2">
+      {/* Hero 3D visual */}
+      <Animated.View
+        entering={FadeInDown.duration(380)}
+        style={imageStyle}
+        className="flex-1 items-center justify-center"
+      >
+        <Image
+          source={ONBOARDING_IMG_4}
+          style={{ width: imageSize, height: imageSize }}
+          resizeMode="contain"
+        />
+      </Animated.View>
+
+      {/* Left-aligned editorial typography */}
+      <Animated.View
+        entering={FadeInUp.delay(70).duration(380)}
+        style={textStyle}
+        className="items-start"
+      >
+        <Text
+          className="font-bold"
+          style={{
+            color: titleColor,
+            fontSize: 38,
+            lineHeight: 44,
+            letterSpacing: -0.8,
+          }}
+          numberOfLines={2}
+          adjustsFontSizeToFit
+        >
+          Calcula tus compras{'\n'}
+          <Text style={{ color: accent }}>al momento.</Text>
+        </Text>
+
+        <Text
+          className="mt-3.5 text-base font-medium leading-6"
+          style={{ color: bodyColor, maxWidth: 325 }}
+        >
+          Arma tus listas en varias monedas, controla tu presupuesto y compara
+          el total antes de pagar.
+        </Text>
+
+        <View className="mt-5 flex-row flex-wrap items-center gap-2">
+          <View
+            className="flex-row items-center gap-1.5 rounded-full border px-3 py-1.5"
+            style={{ backgroundColor: chipBg, borderColor: chipBorder }}
+          >
+            <ShoppingBasket size={13} color={accent} />
+            <Text className="text-xs font-semibold" style={{ color: chipText }}>
+              Multi-moneda
+            </Text>
+          </View>
+          <View
+            className="flex-row items-center gap-1.5 rounded-full border px-3 py-1.5"
+            style={{ backgroundColor: chipBg, borderColor: chipBorder }}
+          >
+            <Wallet size={13} color={accent} />
+            <Text className="text-xs font-semibold" style={{ color: chipText }}>
+              Presupuesto
+            </Text>
+          </View>
+          <View
+            className="flex-row items-center gap-1.5 rounded-full border px-3 py-1.5"
+            style={{ backgroundColor: chipBg, borderColor: chipBorder }}
+          >
+            <Receipt size={13} color={accent} />
+            <Text className="text-xs font-semibold" style={{ color: chipText }}>
+              Precio real
             </Text>
           </View>
         </View>
