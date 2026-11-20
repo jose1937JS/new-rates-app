@@ -12,7 +12,7 @@ import Animated, {
 
 import { APP_NAME, DEFAULT_PRIMARY_COLOR } from '@/utils/constants';
 
-const APP_LOGO = require('@/assets/images/logo.png');
+const APP_LOGO = require('@/assets/images/logo.webp');
 
 interface AnimatedSplashOverlayProps {
   isReady: boolean;

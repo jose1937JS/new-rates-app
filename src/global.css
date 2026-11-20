@@ -79,18 +79,6 @@
   }
 
   /* Font weights: map to specific Poppins font and set font-weight: normal to prevent Android font synthesis issues */
-  .font-thin {
-    font-family: Poppins_100Thin;
-    font-weight: normal;
-  }
-  .font-extralight {
-    font-family: Poppins_200ExtraLight;
-    font-weight: normal;
-  }
-  .font-light {
-    font-family: Poppins_300Light;
-    font-weight: normal;
-  }
   .font-normal,
   .font-regular {
     font-family: Poppins_400Regular;
@@ -107,71 +95,5 @@
   .font-bold {
     font-family: Poppins_700Bold;
     font-weight: normal;
-  }
-  .font-extrabold {
-    font-family: Poppins_800ExtraBold;
-    font-weight: normal;
-  }
-  .font-black {
-    font-family: Poppins_900Black;
-    font-weight: normal;
-  }
-
-  /* Italic variants */
-  .font-thin.italic,
-  .font-thin-italic {
-    font-family: Poppins_100Thin_Italic;
-    font-weight: normal;
-    font-style: normal;
-  }
-  .font-extralight.italic,
-  .font-extralight-italic {
-    font-family: Poppins_200ExtraLight_Italic;
-    font-weight: normal;
-    font-style: normal;
-  }
-  .font-light.italic,
-  .font-light-italic {
-    font-family: Poppins_300Light_Italic;
-    font-weight: normal;
-    font-style: normal;
-  }
-  .font-normal.italic,
-  .font-regular.italic,
-  .font-regular-italic,
-  .italic {
-    font-family: Poppins_400Regular_Italic;
-    font-weight: normal;
-    font-style: normal;
-  }
-  .font-medium.italic,
-  .font-medium-italic {
-    font-family: Poppins_500Medium_Italic;
-    font-weight: normal;
-    font-style: normal;
-  }
-  .font-semibold.italic,
-  .font-semibold-italic {
-    font-family: Poppins_600SemiBold_Italic;
-    font-weight: normal;
-    font-style: normal;
-  }
-  .font-bold.italic,
-  .font-bold-italic {
-    font-family: Poppins_700Bold_Italic;
-    font-weight: normal;
-    font-style: normal;
-  }
-  .font-extrabold.italic,
-  .font-extrabold-italic {
-    font-family: Poppins_800ExtraBold_Italic;
-    font-weight: normal;
-    font-style: normal;
-  }
-  .font-black.italic,
-  .font-black-italic {
-    font-family: Poppins_900Black_Italic;
-    font-weight: normal;
-    font-style: normal;
   }
 }

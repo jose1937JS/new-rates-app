@@ -4,12 +4,12 @@
     "slug": "ratesvenapp",
     "version": "1.0.4",
     "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
+    "icon": "./assets/images/logo.webp",
     "scheme": "ratesvenapp",
     "userInterfaceStyle": "automatic",
     "ios": {
       "bundleIdentifier": "com.devlopez.ratesvenapp",
-      "icon": "./assets/images/logo.png",
+      "icon": "./assets/images/logo.webp",
       "infoPlist": {
         "CADisableMinimumFrameDurationOnPhone": true
       }
@@ -19,15 +19,15 @@
       "versionCode": 4,
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
-        "foregroundImage": "./assets/images/logo.png",
-        "backgroundImage": "./assets/images/logo.png",
-        "monochromeImage": "./assets/images/logo.png"
+        "foregroundImage": "./assets/images/logo.webp",
+        "backgroundImage": "./assets/images/logo.webp",
+        "monochromeImage": "./assets/images/logo.webp"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/logo.png"
+      "favicon": "./assets/images/logo.webp"
     },
     "plugins": [
       "expo-router",
@@ -35,7 +35,7 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#ff6b26",
-          "image": "./assets/images/logo.png",
+          "image": "./assets/images/logo.webp",
           "imageWidth": 160
         }
       ]

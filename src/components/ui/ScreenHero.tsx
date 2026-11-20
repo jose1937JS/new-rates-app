@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useThemeColors } from '@/hooks/useThemeColors';
 
-const APP_LOGO = require('@/assets/images/logo.png');
+const APP_LOGO = require('@/assets/images/logo.webp');
 
 interface ScreenHeroProps {
   title: string;

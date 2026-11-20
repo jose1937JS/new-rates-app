@@ -4,7 +4,6 @@
   "version": "1.0.0",
   "dependencies": {
     "@expo-google-fonts/poppins": "^0.4.1",
-    "@expo/ui": "~57.0.16",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/netinfo": "^12.0.1",
     "@tanstack/query-async-storage-persister": "^5.102.8",
@@ -15,13 +14,11 @@
     "expo": "~57.0.20",
     "expo-constants": "~57.0.17",
     "expo-font": "~57.0.3",
-    "expo-glass-effect": "~57.0.1",
     "expo-haptics": "^57.0.2",
     "expo-linking": "~57.0.9",
     "expo-router": "~57.0.19",
     "expo-splash-screen": "~57.0.8",
     "expo-status-bar": "~57.0.1",
-    "expo-symbols": "~57.0.2",
     "expo-system-ui": "~57.0.3",
     "lucide-react-native": "^1.42.0",
     "nativewind": "^4.2.6",
@@ -66,8 +63,9 @@
     "build:apk:prod:local": "eas build --platform android --profile production --local",
     "build:apk:native": "cd android && NODE_ENV=production ./gradlew assembleRelease -Pandroid.enableMinifyInReleaseBuilds=true -Pandroid.enableShrinkResourcesInReleaseBuilds=true -Pandroid.enablePngCrunchInReleaseBuilds=true -Pandroid.enableBundleCompression=true -Pexpo.useLegacyPackaging=true",
     "build:apk:arm64": "cd android && NODE_ENV=production ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a -Pandroid.enableMinifyInReleaseBuilds=true -Pandroid.enableShrinkResourcesInReleaseBuilds=true -Pandroid.enablePngCrunchInReleaseBuilds=true -Pandroid.enableBundleCompression=true -Pexpo.useLegacyPackaging=true",
+    "build:apk:universal": "cd android && NODE_ENV=production ./gradlew assembleRelease -PreactNativeArchitectures=armeabi-v7a,arm64-v8a -Pandroid.enableMinifyInReleaseBuilds=true -Pandroid.enableShrinkResourcesInReleaseBuilds=true -Pandroid.enablePngCrunchInReleaseBuilds=true -Pandroid.enableBundleCompression=true -Pexpo.useLegacyPackaging=true",
     "build:aab": "eas build --platform android --profile production-aab",
-    "build:aab:native": "cd android && NODE_ENV=production ./gradlew bundleRelease -Pandroid.enableMinifyInReleaseBuilds=true -Pandroid.enableShrinkResourcesInReleaseBuilds=true -Pandroid.enablePngCrunchInReleaseBuilds=true"
+    "build:aab:native": "cd android && NODE_ENV=production ./gradlew bundleRelease -PreactNativeArchitectures=armeabi-v7a,arm64-v8a -Pandroid.enableMinifyInReleaseBuilds=true -Pandroid.enableShrinkResourcesInReleaseBuilds=true -Pandroid.enablePngCrunchInReleaseBuilds=true"
   },
   "private": true
 }

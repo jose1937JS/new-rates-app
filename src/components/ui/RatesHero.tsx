@@ -13,7 +13,7 @@ import { useThemeColors } from '@/hooks/useThemeColors';
 import type { CurrencyCode, UnifiedRates } from '@/types/currency.types';
 import { formatNumber, formatPercentage } from '@/utils/formatters';
 
-const APP_LOGO = require('@/assets/images/logo.png');
+const APP_LOGO = require('@/assets/images/logo.webp');
 
 interface RatesHeroProps {
   rates: UnifiedRates | null;

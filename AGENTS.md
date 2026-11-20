@@ -22,7 +22,7 @@ path_aliases: `@/*` -> `./src/*` | `@/assets/*` -> `./assets/*`
 stack:
   framework: Expo SDK 57 + Expo Router (`~57.0.19`, typedRoutes)
   ui: NativeWind v4 (`tailwindcss ^3.4.19`) + `react-native-reanimated 4.5.1` + `react-native-gesture-handler ~2.32.0` + `react-native-pager-view 8.0.2` + `react-native-svg ^15.15.4` + `lucide-react-native` + `react-native-gifted-charts`
-  fonts: `@expo-google-fonts/poppins` (`Poppins_100Thin` .. `Poppins_900Black`)
+  fonts: `@expo-google-fonts/poppins` (`Poppins_400Regular`, `Poppins_500Medium`, `Poppins_600SemiBold`, `Poppins_700Bold`)
   state: Zustand (`src/store/currencyStore.ts`, `src/store/shoppingStore.ts`) + TanStack Query v5 (`PersistQueryClientProvider`)
   network: `fetch` + `@react-native-community/netinfo` + `@react-native-async-storage/async-storage`
 </project>
@@ -54,7 +54,7 @@ hooks:
   src/hooks/useThemeColors.ts: Syncs NativeWind + RN color schemes and resolves darker `primaryDark`/`rgbDark` in dark mode vs bright `primary`/`rgb` in light mode
 
 components_ui:
-  src/components/ui/RatesHero.tsx: Edge-to-edge fixed primary-colored rounded-bottom (`28px`) Hero with `logo.png` + `RATES VENAPP`, `OfflineBadge`, and 3 pressable rate cards opening plain-Spanish calculation `AppModal` dialogs
+  src/components/ui/RatesHero.tsx: Edge-to-edge fixed primary-colored rounded-bottom (`28px`) Hero with `logo.webp` + `RATES VENAPP`, `OfflineBadge`, and 3 pressable rate cards opening plain-Spanish calculation `AppModal` dialogs
   src/components/ui/ScreenHero.tsx: Compact fixed primary-colored rounded-bottom (`26px`) Hero with optional `leftAction`, `icon`, `showLogo` (default `false`), `rightElement`, and `children`
   src/components/ui/ConverterSkeleton.tsx: Full-screen pulsing skeleton rendered exclusively during first-ever load on `index.tsx`
   src/components/ui/ThreeDotsLoader.tsx: Reanimated 3-dot bouncing loader (`size`, `color`, `colors`, `gap`) replacing `ActivityIndicator` everywhere
@@ -88,9 +88,9 @@ components_shopping:
   src/components/shopping/ActualPaidCard.tsx: Checkout price input + calculated vs actual difference summary
 
 config:
-  app.json: Expo config (`version: 1.0.2`, `android.versionCode: 2`, `android.package: com.devlopez.ratesvenapp`, `ios.bundleIdentifier: com.devlopez.ratesvenapp`, orange splash `#ff6b26`, `extra.eas.projectId`)
+  app.json: Expo config (`version: 1.0.4`, `android.versionCode: 4`, `android.package: com.devlopez.ratesvenapp`, `ios.bundleIdentifier: com.devlopez.ratesvenapp`, orange splash `#ff6b26`, `logo.webp` icons/splash, `extra.eas.projectId`)
   eas.json: EAS build profiles (`development`, `preview` [APK], `production` [APK], `production-aab` [AAB])
-  android/: Native Android config (R8 minify + resource shrinking + compressed `.so` + `arm64-v8a,armeabi-v7a`, `expo.webp.enabled=true` for WebP onboarding assets, Android 14+ 3-button nav bar contrast fix in `MainActivity.kt`/`styles.xml`, local release signing via gitignored `android/keystore.properties` + root `.jks`)
+  android/: Native Android config (R8 minify + resource shrinking + compressed `.so` + default `arm64-v8a` in `gradle.properties`, `expo.webp.enabled=true` for WebP logo & onboarding assets, Android 14+ 3-button nav bar contrast fix in `MainActivity.kt`/`styles.xml`, local release signing via gitignored `android/keystore.properties` + root `.jks`)
   tailwind.config.js & src/global.css: Theme tokens + Poppins weight-to-fontFamily mapping (`--color-primary` in `.dark:root` defaults to `184 69 20`)
 </file_map>
 
@@ -157,9 +157,10 @@ validation:
   `pnpm typecheck` (`tsc --noEmit`) — run after every code edit
   note: `pnpm lint` (`expo lint`) currently prompts interactively (no ESLint config installed)
 local_native_builds:
-  `pnpm build:apk:native` (universal release APK: `armeabi-v7a,arm64-v8a`, `NODE_ENV=production`, R8 + resource shrink + PNG crunch + bundle & `.so` compression)
-  `pnpm build:apk:arm64` (lightweight `arm64-v8a`-only release APK)
-  `pnpm build:aab:native` (local release AAB for Play Store)
+  `pnpm build:apk:native` (`arm64-v8a` release APK via `gradle.properties`, `NODE_ENV=production`, R8 + resource shrink + PNG crunch + bundle & `.so` compression)
+  `pnpm build:apk:arm64` (explicit `arm64-v8a`-only release APK)
+  `pnpm build:apk:universal` (universal release APK: `armeabi-v7a,arm64-v8a`)
+  `pnpm build:aab:native` (local dual-ABI `armeabi-v7a,arm64-v8a` release AAB for Play Store)
 eas_apk_builds:
   `pnpm build:apk` (`eas build --platform android --profile preview`)
   `pnpm build:apk:local` (uses local `.env`)

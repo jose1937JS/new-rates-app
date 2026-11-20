@@ -31,7 +31,7 @@ import {
 } from '@/components/onboarding/OnboardingSlides';
 import { useThemeColors } from '@/hooks/useThemeColors';
 
-const APP_LOGO = require('@/assets/images/logo.png');
+const APP_LOGO = require('@/assets/images/logo.webp');
 const TOTAL_STEPS = 4;
 const LAST_STEP_INDEX = TOTAL_STEPS - 1;
 
