@@ -31,13 +31,13 @@ import { Card } from '@/components/ui/Card';
 import { ScreenHero } from '@/components/ui/ScreenHero';
 import { useCurrencyRates } from '@/hooks/useCurrencyRates';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { useShoppingStore } from '@/store/shoppingStore';
+import type { CurrencyCode, ShoppingItem } from '@/types/currency.types';
+import { formatFullDateTime, formatNumber } from '@/utils/formatters';
 import {
   triggerNotificationHaptic,
   triggerSelectionHaptic,
 } from '@/utils/haptics';
-import { useShoppingStore } from '@/store/shoppingStore';
-import type { CurrencyCode, ShoppingItem } from '@/types/currency.types';
-import { formatFullDateTime, formatNumber } from '@/utils/formatters';
 import {
   evaluateBudget,
   formatShoppingMoney,
@@ -427,9 +427,9 @@ export default function ShoppingDetailScreen() {
       {/* Fixed Bottom Action Bar when actively shopping */}
       {isActive && (
         <View
-          className="absolute bottom-0 left-0 right-0 border-t border-border bg-surface-card px-4 pt-3"
+          className="absolute bottom-0 left-0 right-0 border-t border-border bg-surface-card px-4 pt-4"
           style={{
-            paddingBottom: Math.max(insets.bottom, 12),
+            paddingBottom: Math.max(insets.bottom + 3, 12),
             borderColor: COLORS.border,
           }}
         >
