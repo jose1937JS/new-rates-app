@@ -13,6 +13,7 @@ import {
   triggerNotificationHaptic,
   triggerSelectionHaptic,
 } from '@/utils/haptics';
+import { singleLineInputStyle } from '@/utils/inputStyles';
 import {
   compareActualPaid,
   formatShoppingMoney,
@@ -42,8 +43,10 @@ export function ActualPaidCard({
   );
   const [currency, setCurrency] = useState<CurrencyCode>(actualPaidCurrency);
   const [savedNotice, setSavedNotice] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
+    setErrorMsg(null);
     setAmountText(actualPaidAmount ? String(actualPaidAmount) : '');
     setCurrency(actualPaidCurrency);
   }, [actualPaidAmount, actualPaidCurrency]);
@@ -59,6 +62,11 @@ export function ActualPaidCard({
   );
 
   const handleSave = () => {
+    if (amountText.trim().length > 0 && parsedInput <= 0) {
+      setErrorMsg('Ingresa un monto cobrado mayor a 0 o limpia el campo.');
+      return;
+    }
+    setErrorMsg(null);
     triggerNotificationHaptic('success');
     onSaveActualPaid(parsedInput > 0 ? parsedInput : undefined, currency);
     setSavedNotice(true);
@@ -66,6 +74,7 @@ export function ActualPaidCard({
   };
 
   const handleClear = () => {
+    setErrorMsg(null);
     triggerSelectionHaptic();
     setAmountText('');
     onSaveActualPaid(undefined, currency);
@@ -109,18 +118,21 @@ export function ActualPaidCard({
         </Text>
         <TextInput
           value={amountText}
-          onChangeText={(t) =>
-            setAmountText(sanitizeDecimalInput(t, amountText))
-          }
+          onChangeText={(t) => {
+            if (errorMsg) setErrorMsg(null);
+            setAmountText(sanitizeDecimalInput(t, amountText));
+          }}
           placeholder="Monto cobrado en caja"
           placeholderTextColor={COLORS.textMuted}
           keyboardType="decimal-pad"
-          className="flex-1 text-base font-semibold text-text-primary"
-          style={{
-            paddingVertical: 0,
-            includeFontPadding: false,
-            fontVariant: ['tabular-nums'],
-          }}
+          className="flex-1"
+          style={singleLineInputStyle({
+            color: COLORS.textPrimary,
+            fontSize: 15,
+            height: 48,
+            weight: 'semibold',
+            tabularNums: true,
+          })}
         />
         {amountText.length > 0 && (
           <Pressable onPress={handleClear} hitSlop={8}>
@@ -128,6 +140,10 @@ export function ActualPaidCard({
           </Pressable>
         )}
       </View>
+
+      {errorMsg ? (
+        <Text className="mt-1.5 text-xs font-medium text-danger">{errorMsg}</Text>
+      ) : null}
 
       <View className="mt-2.5">
         <CurrencyChipRow selected={currency} onSelect={setCurrency} />
@@ -142,7 +158,7 @@ export function ActualPaidCard({
         }}
       >
         <Check size={16} color="#ffffff" strokeWidth={2.4} />
-        <Text className="text-xs font-bold text-white">
+        <Text className="text-xs font-medium text-white">
           {actualPaidAmount ? 'Actualizar monto real' : 'Guardar monto real'}
         </Text>
       </Pressable>

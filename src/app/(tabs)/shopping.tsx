@@ -1,6 +1,5 @@
 import { useRouter } from 'expo-router';
 import {
-  ArrowLeft,
   ArrowRight,
   CheckCircle2,
   Plus,
@@ -20,13 +19,13 @@ import { Card } from '@/components/ui/Card';
 import { ScreenHero } from '@/components/ui/ScreenHero';
 import { useCurrencyRates } from '@/hooks/useCurrencyRates';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { useShoppingStore } from '@/store/shoppingStore';
+import type { ShoppingList } from '@/types/currency.types';
+import { formatFullDateTime } from '@/utils/formatters';
 import {
   triggerImpactHaptic,
   triggerSelectionHaptic,
 } from '@/utils/haptics';
-import { useShoppingStore } from '@/store/shoppingStore';
-import type { ShoppingList } from '@/types/currency.types';
-import { formatFullDateTime } from '@/utils/formatters';
 import {
   compareActualPaid,
   evaluateBudget,
@@ -35,7 +34,7 @@ import {
   snapshotFromUnifiedRates,
 } from '@/utils/shoppingUtils';
 
-export default function ShoppingListsScreen() {
+export default function ShoppingTabScreen() {
   const router = useRouter();
   const COLORS = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -256,19 +255,7 @@ export default function ShoppingListsScreen() {
       <ScreenHero
         title="Mis Compras"
         subtitle="Calculadora de mercado y cuentas"
-        leftAction={
-          <Pressable
-            onPress={() => router.back()}
-            hitSlop={8}
-            className="h-10 w-10 items-center justify-center rounded-xl active:opacity-75"
-            style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.2)',
-              borderCurve: 'continuous',
-            }}
-          >
-            <ArrowLeft size={20} color="#ffffff" />
-          </Pressable>
-        }
+        icon={<ShoppingCart size={20} color="#ffffff" />}
         rightElement={
           <Pressable
             onPress={() => {
@@ -280,7 +267,7 @@ export default function ShoppingListsScreen() {
           >
             <Plus size={15} color={COLORS.primary} strokeWidth={2.5} />
             <Text
-              className="text-xs font-bold"
+              className="text-xs font-medium"
               style={{ color: COLORS.primary }}
             >
               Nueva
@@ -294,7 +281,7 @@ export default function ShoppingListsScreen() {
         contentContainerStyle={{
           paddingHorizontal: 16,
           paddingTop: 16,
-          paddingBottom: Math.max(insets.bottom, 16) + 24,
+          paddingBottom: 104 + insets.bottom,
           gap: 14,
         }}
         contentInsetAdjustmentBehavior="never"
@@ -310,12 +297,11 @@ export default function ShoppingListsScreen() {
             >
               <ShoppingCart size={30} color={COLORS.primary} />
             </View>
-            <Text className="text-center text-base font-bold text-text-primary">
+            <Text className="text-center text-base font-semibold text-text-primary">
               Aún no tienes listas de compras
             </Text>
             <Text className="mt-1.5 max-w-[270px] text-center text-xs leading-5 text-text-secondary">
-              Crea una lista, fija un límite si lo deseas y ve sumando
-              productos en dólares o bolívares sin pasarte en caja.
+              Crea una lista, fija un límite si lo deseas y ve sumando productos en dólares o bolívares sin pasarte en caja.
             </Text>
             <Pressable
               onPress={() => {
@@ -329,7 +315,7 @@ export default function ShoppingListsScreen() {
               }}
             >
               <Plus size={16} color="#ffffff" strokeWidth={2.5} />
-              <Text className="text-sm font-bold text-white">
+              <Text className="text-sm font-medium text-white">
                 Crear primera compra
               </Text>
             </Pressable>

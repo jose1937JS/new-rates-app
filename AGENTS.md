@@ -11,67 +11,70 @@ SECRETS:
   rule: Never hardcode or commit `EXPO_PUBLIC_RATES_API_KEY` into tracked files (`src/`, `eas.json`, `app.json`). Keep secrets only in `.env` (gitignored) or EAS environment secrets.
 
 REACT_COMPILER:
-  rule: `experiments.reactCompiler: true` is active in `app.json`. Never read/write `ref.current` during render; keep hooks pure.
+  rule: `experiments.reactCompiler: true` is active in `app.json`. Never read/write `ref.current` during render; keep hooks pure. Put `'use no memo';` at the top of Android widget files (`src/widgets/RatesWidget.tsx`) because `react-native-android-widget` calls widget functions directly outside React render.
 </gates>
 
 <project>
 name: RatesVenApp (`new-rates-app`)
-purpose: Venezuelan exchange rate converter (USD BCV, EUR BCV, USDT Yadio, VES), historical price charts, offline cache, onboarding, and multi-currency shopping budget calculator.
+purpose: Venezuelan exchange rate converter (USD BCV, EUR BCV, USDT Yadio, VES), custom merchant rates, IVA/IGTF/mixed-payment calculators, payment templates, bill splitter, historical charts, offline cache, multi-currency shopping budget calculator (with PNG/PDF tickets), shareable rate images, and Android home screen widgets.
 pkg_manager: pnpm (`pnpm-lock.yaml`)
 path_aliases: `@/*` -> `./src/*` | `@/assets/*` -> `./assets/*`
 stack:
-  framework: Expo SDK 57 + Expo Router (`~57.0.19`, typedRoutes)
+  framework: Expo SDK 57 + Expo Router (`~57.0.19`, typedRoutes, entry `index.ts`)
   ui: NativeWind v4 (`tailwindcss ^3.4.19`) + `react-native-reanimated 4.5.1` + `react-native-gesture-handler ~2.32.0` + `react-native-pager-view 8.0.2` + `react-native-svg ^15.15.4` + `lucide-react-native` + `react-native-gifted-charts`
   fonts: `@expo-google-fonts/poppins` (`Poppins_400Regular`, `Poppins_500Medium`, `Poppins_600SemiBold`, `Poppins_700Bold`)
-  state: Zustand (`src/store/currencyStore.ts`, `src/store/shoppingStore.ts`) + TanStack Query v5 (`PersistQueryClientProvider`)
-  network: `fetch` + `@react-native-community/netinfo` + `@react-native-async-storage/async-storage`
+  state: Zustand (`currencyStore`, `shoppingStore`, `customRateStore`, `paymentTemplatesStore`, `billSplitStore`, `toastStore`) + TanStack Query v5 (`PersistQueryClientProvider`)
+  network_and_share: `fetch` + `@react-native-community/netinfo` + `@react-native-async-storage/async-storage` + `expo-clipboard` + `expo-sharing` + `react-native-view-shot` + `expo-print` + `react-native-android-widget`
 </project>
 
 <file_map>
 entry_and_routes:
-  src/app/_layout.tsx: Root layout, Poppins font loading, NativeWind primary `vars()`, `AnimatedSplashOverlay` gated on `fontsLoaded && storeHydrated`, onboarding gate (`!hasCompletedOnboarding`), `Stack` (`(tabs)`, `shopping/index`, `shopping/[id]`), QueryClient + AsyncStorage persister, NetInfo -> React Query `onlineManager`
-  src/app/(tabs)/_layout.tsx: Bottom tabs with `CustomTabBar` (`headerShown: false`; left: `history`, center FAB: `index`, right: `settings`)
-  src/app/(tabs)/index.tsx: Main converter — full-screen first-load `ConverterSkeleton`, `RatesHero` + `PullToRefreshScrollView` + `CurrencyInput` + 3 `RateCard`s (all 4 currencies visible) + `ShoppingEntryCard`, 300ms input debounce, immediate card swap, clean `ScreenHero` + `EmptyState` on error/empty
+  index.ts: Root entry (`"main"` in `package.json`); imports `expo-router/entry` and registers Android `widgetTaskHandler`
+  src/app/_layout.tsx: Root layout, Poppins font loading, NativeWind primary `vars()`, `Toast` overlay, `AnimatedSplashOverlay` gated on `fontsLoaded && storeHydrated`, onboarding gate (`!hasCompletedOnboarding`), `Stack` (`(tabs)`, `shopping/[id]`, `tools/*`), QueryClient + AsyncStorage persister, NetInfo -> React Query `onlineManager`
+  src/app/(tabs)/_layout.tsx: Bottom tabs (`animation: 'shift'`, `headerShown: false`; order: `history`, `shopping`, center initial `index`, `tools`, `settings`) with sliding `CustomTabBar`
+  src/app/(tabs)/index.tsx: Main converter — `RatesHero` + `PullToRefreshScrollView` + `CurrencyInput` + `FiscalToolsCard` (IVA/IGTF toggles + Pago mixto link) + 3 `RateCard`s (all 4 currencies visible) + enabled `CustomRateCard`s + `ShoppingEntryCard`, 300ms input debounce, immediate card swap, clean `ScreenHero` + `EmptyState` on error/empty
   src/app/(tabs)/history.tsx: Fixed compact `ScreenHero` with `CurrencyTabSelector`, left/right horizontal swipe between `USD|EUR|USDT`, `PullToRefreshScrollView`, `PeriodSelector` (`1d|3d|7d|30d`), `PriceChart`, `StatsRow`, `PriceHistoryList`
-  src/app/(tabs)/settings.tsx: Fixed compact `ScreenHero`, flat `Card` groups, theme mode (`dark|light|system`), 6-color primary picker (`orange|blue|emerald|violet|rose|gold`), force refresh, cache clear, `AppModal` dialogs
-  src/app/shopping/index.tsx: Shopping lists hub — active in-progress purchases, completed purchase history, create list modal (`ListSettingsModal`), delete confirmation via `AppModal`
-  src/app/shopping/[id].tsx: Dual-mode shopping screen — active calculator (live multi-currency total switcher, budget limit progress bar, `ProductFormCard`, `ShoppingItemRow` +/-/edit/delete, `"Finalizar y guardar compra"`) and completed detail (`ActualPaidCard` with diff vs calculated total, itemized breakdown, `"Editar lista"`)
+  src/app/(tabs)/shopping.tsx: Shopping lists hub tab — active in-progress purchases, completed purchase history, create list modal (`ListSettingsModal`), delete confirmation via `AppModal`
+  src/app/(tabs)/tools.tsx: Tools hub grid linking to custom rates, mixed payment, payment templates, bill splitter, and shareable rate cards
+  src/app/(tabs)/settings.tsx: Fixed compact `ScreenHero`, flat `Card` groups, theme mode (`dark|light|system`), 6-color primary picker, haptics toggle (`Vibración al tocar`), commerce/taxes editor sheet (`businessName`, IVA/IGTF %, link to custom rates), force refresh, cache clear, `AppModal` dialogs
+  src/app/shopping/[id].tsx: Dual-mode shopping screen + `Share2` button opening ticket preview `AppSheet` (PNG/PDF/text export)
+  src/app/tools/custom-rate.tsx: CRUD & toggle manager for multiple custom rates (`emoji` picker, `fixed | average | margin`, base currency, rounding up to `0.5/1/5/10` Bs)
+  src/app/tools/mixed-payment.tsx: Mixed foreign-cash + Pago Móvil VES remainder calculator with per-cash-only IGTF and bank-safe copy / payment template handoff
+  src/app/tools/payments.tsx & src/app/tools/payments/[id].tsx: Payment template list & shareable detail (`Pago Móvil`, `Transferencia`, `Binance Pay`, `Zelle`, `Otro`) with optional multi-currency amount, tap-to-copy fields, bank-safe VES amount (`3650,25`), and formatted share message
+  src/app/tools/split.tsx & src/app/tools/split/[id].tsx: Multi-currency bill splitter (last 30 saved), tip presets/fixed, N people, exact cent-residual split + custom per-person override, `"Pagó"` status tracking, and payment template handoff
+  src/app/tools/share-rates.tsx: Full-screen shareable rate image builder (shares `ShareRatesStudio` with `RatesHero` sheet)
 
 services_and_data:
-  src/services/ratesApi.ts: Cloudflare API client, `X-API-Key` auth, NetInfo pre-check, AsyncStorage fallback cache, in-flight dedupe, 10s AbortController timeout
-  src/types/currency.types.ts: API DTOs, app domain types (`CurrencyCode`, `UnifiedRates`, `ChartDataPoint`, `PrimaryColorId`), and shopping types (`ShoppingRatesSnapshot`, `ShoppingItem`, `ShoppingList`)
-  src/utils/constants.ts: Env config (`RATES_API_URL`, `RATES_API_KEY`), `CURRENCY_TO_API`, React Query keys, cache TTLs (`5m` stale / `7d` GC), currency metadata, `PRIMARY_COLOR_OPTIONS`, `THEME_COLORS`, `APP_VERSION`
-  src/utils/formatters.ts: `es-VE` number formatters, `date-fns` Spanish formatters, `formatInputValue`, `parseFormattedNumber`
-  src/utils/shoppingUtils.ts: Pure multi-currency shopping helpers (`convertShoppingAmount`, `getListTotals`, `evaluateBudget`, `compareActualPaid`, `sanitizeDecimalInput`)
-  src/store/currencyStore.ts: Zustand store (`selectedCurrency`, `amount`, `themeMode`, `primaryColor`, `hasCompletedOnboarding`) with `'teal' -> 'gold'` rehydration migration
-  src/store/shoppingStore.ts: Zustand store persisted in AsyncStorage (`ratesvenapp_shopping_lists`) managing lists, items, quantities, budgets, and actual paid amounts
+  src/services/ratesApi.ts: Cloudflare API client (`X-API-Key`, NetInfo pre-check, AsyncStorage fallback cache, dedupe, 10s timeout) + `fetchWidgetRates()` (30m cache TTL for background widget updates)
+  src/types/currency.types.ts: API DTOs, app domain types, shopping types, custom rate/fiscal types, payment template discriminated union, and bill splitter types
+  src/constants/banks.ts: Venezuelan SUDEBAN bank catalog (`code`, `name`, `shortName`)
+  src/utils/constants.ts: Env config, `CURRENCY_TO_API`, React Query keys, cache TTLs (`5m` stale / `7d` GC), currency metadata, `PRIMARY_COLOR_OPTIONS`, `THEME_COLORS`, `APP_VERSION`
+  src/utils/formatters.ts: `es-VE` number formatters, `formatBankAmount` (`3650,25` without thousands separator), `date-fns` Spanish formatters, `formatInputValue`, `parseFormattedNumber`
+  src/utils/ratesTransform.ts: Shared `buildUnifiedRatesFromApi()` pure mapper used by both `useCurrencyRates` and headless `widgetTaskHandler`
+  src/utils/customRateUtils.ts: `resolveCustomRateValue()`, `applyCustomRateRounding()`, `buildEffectiveRatesSnapshot()`, `buildRateSourceOptions()`, `convertWithRateSource()`
+  src/utils/fiscalUtils.ts: `computeFiscalBreakdown()` (IVA/IGTF), `computeMixedPayment()` (IGTF strictly on foreign cash paid)
+  src/utils/paymentFormat.ts: SUDEBAN template validator + formatted multi-currency payment share builder
+  src/utils/splitUtils.ts: Exact cent-residual `computeSplitSummary()` + `buildSplitShareText()`
+  src/utils/shareUtils.ts: Centralized `copyToClipboard`, `shareTextContent`, `shareViewAsImage`, `sharePdfFromHtml`
+  src/utils/ticketHtml.ts: Printable 80mm HTML receipt & WhatsApp plain-text formatters for shopping lists
+  src/utils/shoppingUtils.ts: Pure multi-currency shopping helpers
+  src/utils/haptics.ts: Centralized haptic triggers gated on `useCurrencyStore.getState().hapticsEnabled`
+  src/store/currencyStore.ts: Zustand store (`selectedCurrency`, `amount`, `themeMode`, `primaryColor`, `hasCompletedOnboarding`, `hapticsEnabled`, `fiscalSettings`, `businessName`)
+  src/store/customRateStore.ts | shoppingStore.ts | paymentTemplatesStore.ts | billSplitStore.ts | toastStore.ts
 
 hooks:
-  src/hooks/useCurrencyRates.ts: Fetches `today` + `recent` rates, respects `useIsRestoring()`, computes `UnifiedRates`, `%` variation, `hasFallback`, `refetch`
-  src/hooks/useHistoricalRates.ts: Fetches 30d history once per currency, deduplicates by `id`, filters `1d|3d|7d|30d` locally, formats non-repetitive intraday/daily X-axis labels
-  src/hooks/useConversion.ts: Pure `convertAmount()` helper + `useConversion()` hook (VES as common pivot)
-  src/hooks/useOfflineStatus.ts: NetInfo subscription + initial `NetInfo.fetch()` returning `{ isOnline, lastOnline }`
-  src/hooks/useThemeColors.ts: Syncs NativeWind + RN color schemes and resolves darker `primaryDark`/`rgbDark` in dark mode vs bright `primary`/`rgb` in light mode
+  src/hooks/useCurrencyRates.ts: Fetches `today` + `recent` rates, respects `useIsRestoring()`, builds `UnifiedRates`, syncs Android widgets via `syncWidgetsWithRates`
+  src/hooks/useEffectiveRates.ts: Combines `useCurrencyRates` with active `useCustomRateStore` entries into `snapshot` and `sourceOptions`
+  src/hooks/useHistoricalRates.ts | useConversion.ts | useOfflineStatus.ts | useThemeColors.ts
 
 components_ui:
-  src/components/ui/RatesHero.tsx: Edge-to-edge fixed primary-colored rounded-bottom (`28px`) Hero with `logo.webp` + `RATESVEN`, `OfflineBadge`, and 3 pressable rate cards opening plain-Spanish calculation `AppModal` dialogs
-  src/components/ui/ScreenHero.tsx: Compact fixed primary-colored rounded-bottom (`26px`) Hero with optional `leftAction`, `icon`, `showLogo` (default `false`), `rightElement`, and `children`
-  src/components/ui/ConverterSkeleton.tsx: Full-screen pulsing skeleton rendered exclusively during first-ever load on `index.tsx`
-  src/components/ui/ThreeDotsLoader.tsx: Reanimated 3-dot bouncing loader (`size`, `color`, `colors`, `gap`) replacing `ActivityIndicator` everywhere
-  src/components/ui/PullToRefreshScrollView.tsx: Custom RNGH + Reanimated pull-to-refresh scroll container with high drag threshold (`PULL_DEAD_ZONE = 200`, `PULL_TRIGGER_DISTANCE = 380`) to prevent accidental API calls
-  src/components/ui/CurrencyIcon.tsx: Renders `assets/images/usdt-icon.png` for `USDT` and flag emojis for `USD`/`EUR`/`VES`
-  src/components/ui/AppModal.tsx: Custom themed confirmation/info modal (`primary` color for `info`/`success`, `danger` color for `danger`/`warning`, `ThreeDotsLoader` when `loading`)
-  src/components/ui/AnimatedSplashOverlay.tsx: Orange (`#ff6b26`) animated splash overlay with logo pulse, progress bar, and `ThreeDotsLoader`
-  src/components/ui/Card.tsx: Shared flat card container (`rounded-2xl bg-surface-card p-4`) with optional header
-  src/components/ui/CustomTabBar.tsx: Curved SVG (`COLORS.primary`) bottom tab bar with center concave notch and primary-colored circular FAB (`index`) with white icon
-  src/components/ui/CurrencyInput.tsx: Active currency input, fixed `52px` height, `X` button clearing input to `''` for fast typing, comma-to-dot normalization
-  src/components/ui/RateCard.tsx: Conversion card with press scale animation, `%` badge (hidden for `VES`), `1 X = Y VES` subtitle
-  src/components/ui/OfflineBadge.tsx: Online/offline pill (`"Conectado"` in green / `"Sin conexión"` in red; `variant: 'default' | 'hero'`)
-  src/components/ui/EmptyState.tsx: Animated empty/error card with retry CTA
-  src/components/ui/CurrencyTabSelector.tsx: `CurrencyTabSelector` + `PeriodSelector` for History screen
-  src/components/ui/PriceChart.tsx: `LineChart` wrapper with `yAxisOffset`-adjusted `maxValue`, horizontal scroll (`activatePointersOnLongPress: true`), long-press tooltip, and perf thresholds for 30d datasets
-  src/components/ui/PriceHistoryList.tsx: Reverse-chronological rate log keyed by `id` with progressive `20`-item pagination
-  src/components/ui/StatsRow.tsx: Actual / Max / Min / Variation summary card
+  src/components/ui/RatesHero.tsx: Edge-to-edge fixed primary-colored rounded-bottom (`28px`) Hero with `logo.webp` + `RATESVEN`, `Share2` action (`ShareRatesSheet`), `OfflineBadge`, and 3 pressable rate cards opening `AppModal` dialogs
+  src/components/ui/CustomTabBar.tsx: 5-slot curved SVG (`COLORS.primary`) bottom tab bar (`history | shopping | index | tools | settings`) with worklet animated notch (`useAnimatedProps`) and sliding circular active FAB
+  src/components/ui/AppModal.tsx | AppSheet.tsx | Toast.tsx | RateSourceSelector.tsx | CustomRateCard.tsx | RateCard.tsx | CurrencyInput.tsx | OfflineBadge.tsx | EmptyState.tsx | ConverterSkeleton.tsx | ThreeDotsLoader.tsx | PullToRefreshScrollView.tsx | CurrencyIcon.tsx | ScreenHero.tsx | CurrencyTabSelector.tsx | PriceChart.tsx | PriceHistoryList.tsx | StatsRow.tsx
+  src/components/converter/FiscalToolsCard.tsx: Inline `+ IVA` / `+ IGTF` toggles, breakdown copy card, and `Pago mixto` shortcut
+  src/components/share/RateShareCard.tsx | ShareRatesSheet.tsx | ShoppingTicket.tsx: Capture-ready PNG (`react-native-view-shot`) rate poster and receipt components
+  src/components/tools/PaymentTemplateSheet.tsx: Shared modal sheet for creating/editing payment templates
+  src/widgets/RatesWidget.tsx & widgetTaskHandler.tsx: Android home screen widgets (`RatesSmall` 2x1 & `RatesMedium` 4x2) with light/dark mode and click-to-refresh/open-app
 
 components_onboarding:
   src/components/onboarding/OnboardingScreen.tsx: Full-bleed edge-to-edge studio gradient onboarding with brand header, `"Saltar"`, `OnboardingPager`, `OnboardingDots`, and `"Siguiente"`/`"Entrar"` CTA
@@ -88,9 +91,9 @@ components_shopping:
   src/components/shopping/ActualPaidCard.tsx: Checkout price input + calculated vs actual difference summary
 
 config:
-  app.json: Expo config (`version: 1.0.4`, `android.versionCode: 4`, `android.package: com.devlopez.ratesvenapp`, `ios.bundleIdentifier: com.devlopez.ratesvenapp`, orange splash `#ff6b26`, `logo.webp` icons/splash, `extra.eas.projectId`)
+  app.json: Expo config (`version: 1.0.4`, `android.versionCode: 4`, `android.package: com.devlopez.ratesvenapp`, `ios.bundleIdentifier: com.devlopez.ratesvenapp`, orange splash `#ff6b26`, `logo.webp`, `expo-sharing`, `react-native-android-widget`, `extra.eas.projectId`)
   eas.json: EAS build profiles (`development`, `preview` [APK], `production` [APK], `production-aab` [AAB])
-  android/: Native Android config (R8 minify + resource shrinking + compressed `.so` + default `arm64-v8a` in `gradle.properties`, `expo.webp.enabled=true` for WebP logo & onboarding assets, Android 14+ 3-button nav bar contrast fix in `MainActivity.kt`/`styles.xml`, local release signing via gitignored `android/keystore.properties` + root `.jks`)
+  android/: Versioned in git (`.gitignore` excludes `build/`, `.gradle/`, `.cxx/`, `.kotlin/`, `local.properties`, `keystore.properties`, `*.keystore`, `*.jks`, `*.apk`, `*.aab`); includes `MainActivity.kt` Android 14+ nav bar contrast fix, `styles.xml`, R8 minify + resource shrinking + default `arm64-v8a` in `gradle.properties`, `expo.webp.enabled=true`, and widget receivers/providers (`RatesSmall.java`, `RatesMedium.java`, `res/xml/widgetprovider_*.xml`)
   tailwind.config.js & src/global.css: Theme tokens + Poppins weight-to-fontFamily mapping (`--color-primary` in `.dark:root` defaults to `184 69 20`)
 </file_map>
 
@@ -111,7 +114,16 @@ endpoints:
 <invariants_and_gotchas>
 startup_state:
   rule: App MUST always launch with `selectedCurrency: 'USD'` and `amount: '1'`.
-  detail: `currencyStore.ts` `partialize` persists ONLY `themeMode`, `primaryColor`, and `hasCompletedOnboarding`. Do NOT persist `selectedCurrency` or `amount`. `_layout.tsx` waits for `storeHydrated` before hiding `AnimatedSplashOverlay` or deciding between `OnboardingScreen` and `(tabs)`.
+  detail: `currencyStore.ts` `partialize` persists `themeMode`, `primaryColor`, `hasCompletedOnboarding`, `hapticsEnabled`, `fiscalSettings`, and `businessName` — NEVER `selectedCurrency` or `amount`. `_layout.tsx` waits for `storeHydrated` before hiding `AnimatedSplashOverlay` or deciding between `OnboardingScreen` and `(tabs)`.
+
+custom_rates_isolation:
+  rule: Custom rates (`customRateStore.ts`) MUST remain independent from `UnifiedRates` and API caches so official BCV/Yadio figures stay unaltered across Hero, History, and RateCards.
+
+reanimated_layout_wrappers:
+  rule: Never put `entering`/`exiting`/`layout` props on the same `<Animated.View>` that also receives a `useAnimatedStyle` with `opacity` or `transform` — apply layout animations to an outer wrapper.
+
+native_prebuild_guard:
+  rule: NEVER run `npx expo prebuild --clean` because `android/` contains tracked native customizations (`MainActivity.kt`, `styles.xml`, `gradle.properties`, signing, and widget receivers). Also avoid `app.plugin.js` auto-overwriting `android/` paths without checking `git diff android/`.
 
 all_currencies_visible:
   rule: Converter screen MUST always render all 4 currencies (`USD`, `EUR`, `USDT`, `VES`) — 1 in `CurrencyInput` + 3 `RateCard`s below (`VES` first when not selected). Never filter out `USD`/`EUR` if a rate is `0`; show `"--"` / `"Tasa no disponible"`.

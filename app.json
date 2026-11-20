@@ -2,7 +2,7 @@
   "expo": {
     "name": "RatesVenApp",
     "slug": "ratesvenapp",
-    "version": "1.0.4",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.webp",
     "scheme": "ratesvenapp",
@@ -16,7 +16,7 @@
     },
     "android": {
       "package": "com.devlopez.ratesvenapp",
-      "versionCode": 4,
+      "versionCode": 5,
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
         "foregroundImage": "./assets/images/logo.webp",
@@ -37,6 +37,38 @@
           "backgroundColor": "#ff6b26",
           "image": "./assets/images/logo.webp",
           "imageWidth": 160
+        }
+      ],
+      "expo-sharing",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "RatesSmall",
+              "label": "RatesVen Compacto",
+              "description": "Tasa USD BCV y USDT del día",
+              "minWidth": "120dp",
+              "minHeight": "60dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 1,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000,
+              "previewImage": "./assets/images/widget-preview-small.png"
+            },
+            {
+              "name": "RatesMedium",
+              "label": "RatesVen Completo",
+              "description": "Tasas USD, EUR y USDT con variación del día",
+              "minWidth": "250dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000,
+              "previewImage": "./assets/images/widget-preview-medium.png"
+            }
+          ]
         }
       ]
     ],

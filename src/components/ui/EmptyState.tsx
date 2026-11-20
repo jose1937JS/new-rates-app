@@ -103,7 +103,7 @@ export function EmptyState({ title, message, onRetry, isRetrying = false, isErro
         </Animated.View>
       </View>
 
-      <Text className="text-center text-xl font-bold" style={{ color: COLORS.textPrimary }}>
+      <Text className="text-center text-xl font-semibold" style={{ color: COLORS.textPrimary }}>
         {title}
       </Text>
       <Text
@@ -133,7 +133,7 @@ export function EmptyState({ title, message, onRetry, isRetrying = false, isErro
           <Animated.View style={spinStyle}>
             <RefreshCw size={18} color="#fff" strokeWidth={2.4} />
           </Animated.View>
-          <Text className="text-base font-semibold text-white">
+          <Text className="text-base font-medium text-white">
             {isRetrying ? 'Reintentando...' : 'Reintentar'}
           </Text>
         </Pressable>

@@ -14,6 +14,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { OnboardingScreen } from '@/components/onboarding/OnboardingScreen';
 import { AnimatedSplashOverlay } from '@/components/ui/AnimatedSplashOverlay';
+import { SheetHost } from '@/components/ui/SheetHost';
+import { Toast } from '@/components/ui/Toast';
 import '@/global.css';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { useCurrencyStore } from '@/store/currencyStore';
@@ -160,11 +162,20 @@ export default function RootLayout() {
               }}
             >
               <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="shopping/index" />
               <Stack.Screen name="shopping/[id]" />
+              <Stack.Screen name="tools/custom-rate" />
+              <Stack.Screen name="tools/mixed-payment" />
+              <Stack.Screen name="tools/payments" />
+              <Stack.Screen name="tools/payments/[id]" />
+              <Stack.Screen name="tools/split" />
+              <Stack.Screen name="tools/split/[id]" />
+              <Stack.Screen name="tools/share-rates" />
             </Stack>
           )}
+          <SheetHost />
         </PersistQueryClientProvider>
+
+        <Toast />
 
         {!splashDone && (
           <AnimatedSplashOverlay

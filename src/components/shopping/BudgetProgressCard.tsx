@@ -4,10 +4,12 @@ import { Modal, Pressable, Text, TextInput, View } from 'react-native';
 import Animated, { ZoomIn } from 'react-native-reanimated';
 
 import { CurrencyChipRow } from '@/components/shopping/CurrencyChipRow';
+import { ClearInputButton } from '@/components/ui/ClearInputButton';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { CurrencyCode } from '@/types/currency.types';
 import { parseFormattedNumber } from '@/utils/formatters';
 import { triggerSelectionHaptic } from '@/utils/haptics';
+import { singleLineInputStyle } from '@/utils/inputStyles';
 import {
   formatShoppingMoney,
   sanitizeDecimalInput,
@@ -46,7 +48,7 @@ export function BudgetProgressBar({
             Definir monto límite de compra
           </Text>
         </View>
-        <Text className="text-xs font-semibold text-white">+ Límite</Text>
+        <Text className="text-xs font-medium text-white">+ Límite</Text>
       </Pressable>
     );
   }
@@ -175,9 +177,11 @@ export function ListSettingsModal({
   const [budgetCurrency, setBudgetCurrency] = useState<CurrencyCode>(
     initialBudgetCurrency,
   );
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
     if (visible) {
+      setErrorMsg(null);
       setTitle(initialTitle);
       setBudgetText(initialBudgetLimit ? String(initialBudgetLimit) : '');
       setBudgetCurrency(initialBudgetCurrency);
@@ -185,8 +189,14 @@ export function ListSettingsModal({
   }, [visible, initialTitle, initialBudgetLimit, initialBudgetCurrency]);
 
   const handleSave = () => {
+    const trimmedBudget = budgetText.trim();
+    const parsedLimit = trimmedBudget ? parseFormattedNumber(trimmedBudget) : 0;
+    if (trimmedBudget.length > 0 && parsedLimit <= 0) {
+      setErrorMsg('El monto límite debe ser mayor a 0 o déjalo vacío.');
+      return;
+    }
+
     triggerSelectionHaptic();
-    const parsedLimit = budgetText ? parseFormattedNumber(budgetText) : 0;
     onSave({
       title: title.trim(),
       budgetLimit: parsedLimit > 0 ? parsedLimit : null,
@@ -232,8 +242,11 @@ export function ListSettingsModal({
                 onChangeText={setTitle}
                 placeholder="Ej. Mercado, Farmacia..."
                 placeholderTextColor={COLORS.textMuted}
-                className="rounded-xl border bg-surface-elevated px-3.5 py-2.5 text-sm text-text-primary"
-                style={{ borderColor: COLORS.border }}
+                className="rounded-xl border bg-surface-elevated px-3.5"
+                style={[
+                  { borderColor: COLORS.border },
+                  singleLineInputStyle({ color: COLORS.textPrimary }),
+                ]}
               />
             </View>
 
@@ -241,20 +254,34 @@ export function ListSettingsModal({
               <Text className="text-xs font-medium text-text-secondary">
                 Monto límite (opcional)
               </Text>
-              <TextInput
-                value={budgetText}
-                onChangeText={(t) =>
-                  setBudgetText(sanitizeDecimalInput(t, budgetText))
-                }
-                placeholder="Sin límite (0.00)"
-                placeholderTextColor={COLORS.textMuted}
-                keyboardType="decimal-pad"
-                className="rounded-xl border bg-surface-elevated px-3.5 py-2.5 text-sm font-semibold text-text-primary"
-                style={{
-                  borderColor: COLORS.border,
-                  fontVariant: ['tabular-nums'],
-                }}
-              />
+              <View
+                className="h-11 flex-row items-center gap-2 rounded-xl border bg-surface-elevated px-3.5"
+                style={{ borderColor: COLORS.border, borderCurve: 'continuous' }}
+              >
+                <TextInput
+                  value={budgetText}
+                  onChangeText={(t) => {
+                    if (errorMsg) setErrorMsg(null);
+                    setBudgetText(sanitizeDecimalInput(t, budgetText));
+                  }}
+                  placeholder="Sin límite"
+                  placeholderTextColor={COLORS.textMuted}
+                  keyboardType="decimal-pad"
+                  className="flex-1"
+                  style={singleLineInputStyle({
+                    color: COLORS.textPrimary,
+                    weight: 'semibold',
+                    tabularNums: true,
+                  })}
+                />
+                <ClearInputButton
+                  visible={budgetText.length > 0}
+                  onPress={() => {
+                    if (errorMsg) setErrorMsg(null);
+                    setBudgetText('');
+                  }}
+                />
+              </View>
             </View>
 
             <View className="gap-1.5">
@@ -266,6 +293,10 @@ export function ListSettingsModal({
                 onSelect={setBudgetCurrency}
               />
             </View>
+
+            {errorMsg ? (
+              <Text className="text-xs font-medium text-danger">{errorMsg}</Text>
+            ) : null}
           </View>
 
           <View className="mt-5 flex-row gap-2.5">
@@ -274,7 +305,7 @@ export function ListSettingsModal({
               className="flex-1 items-center justify-center rounded-xl bg-surface-elevated py-3 active:opacity-80"
               style={{ borderCurve: 'continuous' }}
             >
-              <Text className="text-sm font-semibold text-text-secondary">
+              <Text className="text-sm font-medium text-text-secondary">
                 Cancelar
               </Text>
             </Pressable>
@@ -287,7 +318,7 @@ export function ListSettingsModal({
                 borderCurve: 'continuous',
               }}
             >
-              <Text className="text-sm font-semibold text-white">
+              <Text className="text-sm font-medium text-white">
                 {confirmLabel}
               </Text>
             </Pressable>

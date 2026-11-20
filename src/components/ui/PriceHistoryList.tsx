@@ -162,7 +162,7 @@ export function PriceHistoryList({ data, currency }: PriceHistoryListProps) {
         >
           <ChevronDown size={14} color={COLORS.primary} />
           <Text
-            className="text-xs font-semibold"
+            className="text-xs font-medium"
             style={{ color: COLORS.primary }}
           >
             Mostrar más ({remainingCount}{' '}

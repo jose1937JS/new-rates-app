@@ -2,12 +2,16 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
   ArrowLeft,
   CheckCircle2,
+  Copy,
+  FileText,
+  Image as ImageIcon,
   Receipt,
   Settings2,
+  Share2,
   ShoppingBasket,
-  Trash2
+  Trash2,
 } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -18,6 +22,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ShoppingTicket } from '@/components/share/ShoppingTicket';
 import { ActualPaidCard } from '@/components/shopping/ActualPaidCard';
 import {
   BudgetProgressBar,
@@ -27,23 +32,35 @@ import { CurrencyChipRow } from '@/components/shopping/CurrencyChipRow';
 import { ProductFormCard } from '@/components/shopping/ProductFormCard';
 import { ShoppingItemRow } from '@/components/shopping/ShoppingItemRow';
 import { AppModal } from '@/components/ui/AppModal';
+import { AppSheet } from '@/components/ui/AppSheet';
 import { Card } from '@/components/ui/Card';
 import { ScreenHero } from '@/components/ui/ScreenHero';
 import { useCurrencyRates } from '@/hooks/useCurrencyRates';
 import { useThemeColors } from '@/hooks/useThemeColors';
+import { useCurrencyStore } from '@/store/currencyStore';
 import { useShoppingStore } from '@/store/shoppingStore';
 import type { CurrencyCode, ShoppingItem } from '@/types/currency.types';
 import { formatFullDateTime, formatNumber } from '@/utils/formatters';
 import {
+  triggerImpactHaptic,
   triggerNotificationHaptic,
   triggerSelectionHaptic,
 } from '@/utils/haptics';
+import {
+  copyToClipboard,
+  sharePdfFromHtml,
+  shareViewAsImage,
+} from '@/utils/shareUtils';
 import {
   evaluateBudget,
   formatShoppingMoney,
   getListTotals,
   snapshotFromUnifiedRates,
 } from '@/utils/shoppingUtils';
+import {
+  buildShoppingTicketHtml,
+  buildShoppingTicketText,
+} from '@/utils/ticketHtml';
 
 const ALL_CURRENCIES: CurrencyCode[] = ['USD', 'EUR', 'USDT', 'VES'];
 
@@ -72,6 +89,10 @@ export default function ShoppingDetailScreen() {
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
   const [showListConfig, setShowListConfig] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showTicketSheet, setShowTicketSheet] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const ticketRef = useRef<View>(null);
+  const businessName = useCurrencyStore((state) => state.businessName);
 
   // Sync live rates if the active list was created before rates finished loading
   useEffect(() => {
@@ -115,7 +136,7 @@ export default function ShoppingDetailScreen() {
             className="mt-4 rounded-xl px-5 py-3 active:opacity-85"
             style={{ backgroundColor: COLORS.primary }}
           >
-            <Text className="text-sm font-bold text-white">Ir a Mis Compras</Text>
+            <Text className="text-sm font-medium text-white">Ir a Mis Compras</Text>
           </Pressable>
         </View>
       </View>
@@ -192,37 +213,57 @@ export default function ShoppingDetailScreen() {
           </Pressable>
         }
         rightElement={
-          isActive ? (
-            <Pressable
-              onPress={() => {
-                triggerSelectionHaptic();
-                setShowListConfig(true);
-              }}
-              hitSlop={8}
-              className="flex-row items-center gap-1 rounded-xl px-2.5 py-2 active:opacity-80"
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                borderCurve: 'continuous',
-              }}
-            >
-              <Settings2 size={15} color="#ffffff" />
-              <Text className="text-xs font-semibold text-white">Límite</Text>
-            </Pressable>
-          ) : (
-            <Pressable
-              onPress={handleReopenList}
-              hitSlop={8}
-              className="flex-row items-center gap-1 rounded-xl bg-white px-3 py-2 active:opacity-85"
-              style={{ borderCurve: 'continuous' }}
-            >
-              <Text
-                className="text-xs font-semibold"
-                style={{ color: COLORS.primary }}
+          <View className="flex-row items-center gap-1.5">
+            {list.items.length > 0 && (
+              <Pressable
+                onPress={() => {
+                  triggerSelectionHaptic();
+                  setShowTicketSheet(true);
+                }}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel="Compartir comprobante"
+                className="h-9 w-9 items-center justify-center rounded-xl active:opacity-80"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  borderCurve: 'continuous',
+                }}
               >
-                Editar
-              </Text>
-            </Pressable>
-          )
+                <Share2 size={15} color="#ffffff" />
+              </Pressable>
+            )}
+            {isActive ? (
+              <Pressable
+                onPress={() => {
+                  triggerSelectionHaptic();
+                  setShowListConfig(true);
+                }}
+                hitSlop={8}
+                className="flex-row items-center gap-1 rounded-xl px-2.5 py-2 active:opacity-80"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  borderCurve: 'continuous',
+                }}
+              >
+                <Settings2 size={15} color="#ffffff" />
+                <Text className="text-xs font-medium text-white">Límite</Text>
+              </Pressable>
+            ) : (
+              <Pressable
+                onPress={handleReopenList}
+                hitSlop={8}
+                className="flex-row items-center gap-1 rounded-xl bg-white px-3 py-2 active:opacity-85"
+                style={{ borderCurve: 'continuous' }}
+              >
+                <Text
+                  className="text-xs font-medium"
+                  style={{ color: COLORS.primary }}
+                >
+                  Editar
+                </Text>
+              </Pressable>
+            )}
+          </View>
         }
       >
         {/* Display Currency Selector */}
@@ -266,7 +307,7 @@ export default function ShoppingDetailScreen() {
               style={{ backgroundColor: 'rgba(255, 255, 255, 0.16)' }}
             >
               <Text
-                className="text-[11px] font-semibold text-white"
+                className="text-[11px] font-medium text-white"
                 style={{ fontVariant: ['tabular-nums'] }}
               >
                 {formatShoppingMoney(totals[code], code)}
@@ -416,7 +457,7 @@ export default function ShoppingDetailScreen() {
               style={{ borderCurve: 'continuous' }}
             >
               <Trash2 size={16} color={COLORS.danger} />
-              <Text className="text-sm font-semibold text-danger">
+              <Text className="text-sm font-medium text-danger">
                 Eliminar lista de compras
               </Text>
             </Pressable>
@@ -449,7 +490,7 @@ export default function ShoppingDetailScreen() {
               strokeWidth={2.4}
             />
             <Text
-              className="text-sm font-bold"
+              className="text-sm font-medium"
               style={{
                 color: list.items.length > 0 ? '#ffffff' : COLORS.textMuted,
               }}
@@ -484,6 +525,84 @@ export default function ShoppingDetailScreen() {
         }}
         onClose={() => setShowDeleteModal(false)}
       />
+
+      <AppSheet
+        visible={showTicketSheet}
+        title="Comprobante de compra"
+        subtitle="Comparte el ticket como imagen, PDF o texto"
+        onClose={() => setShowTicketSheet(false)}
+        footer={
+          <View className="gap-2">
+            <View className="flex-row gap-2">
+              <Pressable
+                onPress={async () => {
+                  if (isExporting) return;
+                  triggerImpactHaptic('light');
+                  setIsExporting(true);
+                  await shareViewAsImage(ticketRef, `Ticket - ${list.title}`);
+                  setIsExporting(false);
+                }}
+                disabled={isExporting}
+                className="flex-1 flex-row items-center justify-center gap-1.5 rounded-xl py-3 active:opacity-85"
+                style={{
+                  backgroundColor: COLORS.primary,
+                  borderCurve: 'continuous',
+                }}
+              >
+                <ImageIcon size={15} color="#ffffff" />
+                <Text className="text-xs font-medium text-white">
+                  Imagen (WhatsApp)
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={async () => {
+                  if (isExporting) return;
+                  triggerImpactHaptic('light');
+                  setIsExporting(true);
+                  await sharePdfFromHtml(
+                    buildShoppingTicketHtml(list, businessName),
+                    `PDF - ${list.title}`,
+                  );
+                  setIsExporting(false);
+                }}
+                disabled={isExporting}
+                className="flex-row items-center justify-center gap-1.5 rounded-xl border border-border bg-surface-elevated px-4 py-3 active:opacity-80"
+                style={{ borderCurve: 'continuous' }}
+              >
+                <FileText size={15} color={COLORS.primary} />
+                <Text className="text-xs font-medium text-text-primary">
+                  PDF
+                </Text>
+              </Pressable>
+            </View>
+
+            <Pressable
+              onPress={() => {
+                triggerSelectionHaptic();
+                void copyToClipboard(
+                  buildShoppingTicketText(list, businessName),
+                  'Resumen copiado para WhatsApp',
+                );
+              }}
+              className="flex-row items-center justify-center gap-1.5 rounded-xl border border-border bg-surface-elevated py-2.5 active:opacity-80"
+            >
+              <Copy size={14} color={COLORS.textSecondary} />
+              <Text className="text-xs font-medium text-text-secondary">
+                Copiar resumen en texto
+              </Text>
+            </Pressable>
+          </View>
+        }
+      >
+        {showTicketSheet && (
+          <ShoppingTicket
+            ref={ticketRef}
+            list={list}
+            businessName={businessName}
+          />
+        )}
+      </AppSheet>
     </KeyboardAvoidingView>
   );
 }

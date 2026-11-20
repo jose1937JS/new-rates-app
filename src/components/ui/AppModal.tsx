@@ -125,7 +125,7 @@ export function AppModal({
                 className="flex-1 items-center justify-center rounded-xl bg-surface-elevated py-3 active:opacity-80"
                 style={{ borderCurve: 'continuous' }}
               >
-                <Text className="text-sm font-semibold text-text-secondary">
+                <Text className="text-sm font-medium text-text-secondary">
                   {cancelText}
                 </Text>
               </Pressable>
@@ -144,7 +144,7 @@ export function AppModal({
               {loading ? (
                 <ThreeDotsLoader size={6} color="#ffffff" />
               ) : (
-                <Text className="text-sm font-semibold text-white">
+                <Text className="text-sm font-medium text-white">
                   {confirmText}
                 </Text>
               )}

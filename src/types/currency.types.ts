@@ -144,3 +144,116 @@ export interface ShoppingList {
   ratesSnapshot: ShoppingRatesSnapshot;
   items: ShoppingItem[];
 }
+
+// ----- Custom Rates & Fiscal Settings -----
+
+export type CustomRateMode = 'fixed' | 'average' | 'margin';
+export type CustomRateBase = 'BCV_USD' | 'BCV_EUR' | 'USDT';
+export type CustomRateRounding = 0 | 0.5 | 1 | 5 | 10;
+
+export interface CustomRateItem {
+  id: string;
+  emoji: string;
+  label: string;
+  enabled: boolean;
+  mode: CustomRateMode;
+  fixedRate?: number;
+  base: CustomRateBase;
+  marginPercent: number;
+  rounding: CustomRateRounding;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type RateSourceId = 'BCV_USD' | 'BCV_EUR' | 'USDT' | `CUSTOM:${string}`;
+
+export interface EffectiveRatesSnapshot extends ShoppingRatesSnapshot {
+  customRates: Array<{
+    id: string;
+    emoji: string;
+    label: string;
+    rateToVes: number;
+  }>;
+}
+
+export interface FiscalSettings {
+  ivaPercent: number;
+  igtfPercent: number;
+}
+
+// ----- Payment Templates -----
+
+export type PaymentMethodType =
+  | 'pago_movil'
+  | 'transferencia'
+  | 'binance'
+  | 'zelle'
+  | 'otro';
+
+export type IdDocPrefix = 'V' | 'E' | 'J' | 'G' | 'P';
+
+interface PaymentTemplateBase {
+  id: string;
+  alias: string;
+  type: PaymentMethodType;
+  holderName?: string;
+  isFavorite?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type PaymentTemplate =
+  | (PaymentTemplateBase & {
+      type: 'pago_movil';
+      bankCode: string;
+      phone: string;
+      idPrefix: IdDocPrefix;
+      idNumber: string;
+    })
+  | (PaymentTemplateBase & {
+      type: 'transferencia';
+      bankCode: string;
+      accountNumber: string;
+      idPrefix: IdDocPrefix;
+      idNumber: string;
+    })
+  | (PaymentTemplateBase & {
+      type: 'binance';
+      payId?: string;
+      email?: string;
+      username?: string;
+    })
+  | (PaymentTemplateBase & {
+      type: 'zelle';
+      email: string;
+    })
+  | (PaymentTemplateBase & {
+      type: 'otro';
+      freeText: string;
+    });
+
+// ----- Bill Splitter -----
+
+export interface SplitPerson {
+  id: string;
+  name: string;
+  customAmount?: number;
+  paid: boolean;
+  paidAt?: string;
+}
+
+export type SplitTipMode = 'none' | 'percent' | 'fixed';
+
+export interface BillSplit {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  total: number;
+  currency: CurrencyCode;
+  tipMode: SplitTipMode;
+  tipValue: number;
+  rateSource: RateSourceId;
+  ratesSnapshot: EffectiveRatesSnapshot;
+  people: SplitPerson[];
+}

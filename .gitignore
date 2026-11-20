@@ -41,6 +41,14 @@ example
 
 # generated native folders
 /ios
-/android
+android/.gradle/
+android/.kotlin/
+android/.idea/
+android/build/
+android/app/build/
+android/app/.cxx/
+android/local.properties
 android/keystore.properties
+*.apk
+*.aab
 *.keystore

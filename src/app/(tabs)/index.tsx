@@ -1,13 +1,15 @@
 import { useRouter } from 'expo-router';
-import { ArrowLeftRight } from 'lucide-react-native';
+import { ArrowLeftRight, SlidersHorizontal } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { FiscalToolsCard } from '@/components/converter/FiscalToolsCard';
 import { ShoppingEntryCard } from '@/components/shopping/ShoppingEntryCard';
 import { ConverterSkeleton } from '@/components/ui/ConverterSkeleton';
 import { CurrencyInput } from '@/components/ui/CurrencyInput';
+import { CustomRateCard } from '@/components/ui/CustomRateCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { OfflineBadge } from '@/components/ui/OfflineBadge';
 import { PullToRefreshScrollView } from '@/components/ui/PullToRefreshScrollView';
@@ -16,13 +18,15 @@ import { RatesHero } from '@/components/ui/RatesHero';
 import { ScreenHero } from '@/components/ui/ScreenHero';
 import { ThreeDotsLoader } from '@/components/ui/ThreeDotsLoader';
 import { convertAmount, useConversion } from '@/hooks/useConversion';
-import { useCurrencyRates } from '@/hooks/useCurrencyRates';
+import { useEffectiveRates } from '@/hooks/useEffectiveRates';
 import { useOfflineStatus } from '@/hooks/useOfflineStatus';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { useCurrencyStore } from '@/store/currencyStore';
 import { useShoppingStore } from '@/store/shoppingStore';
 import type { CurrencyCode } from '@/types/currency.types';
+import { computeFiscalBreakdown } from '@/utils/fiscalUtils';
 import { formatRelativeTime, parseFormattedNumber } from '@/utils/formatters';
+import { triggerSelectionHaptic } from '@/utils/haptics';
 import { snapshotFromUnifiedRates } from '@/utils/shoppingUtils';
 
 const ALL_CURRENCIES: CurrencyCode[] = ['USD', 'EUR', 'USDT', 'VES'];
@@ -30,25 +34,34 @@ const DEBOUNCE_MS = 300;
 
 export default function ConverterScreen() {
   const router = useRouter();
-  const { selectedCurrency, amount, setSelectedCurrency, setAmount } = useCurrencyStore();
+  const {
+    selectedCurrency,
+    amount,
+    fiscalSettings,
+    setSelectedCurrency,
+    setAmount,
+  } = useCurrencyStore();
   const shoppingLists = useShoppingStore((state) => state.lists);
   const createShoppingList = useShoppingStore((state) => state.createList);
   const activeShoppingList = shoppingLists.find((l) => l.status === 'active');
   const {
     rates,
+    enabledCustomRates,
     hasFallback,
     isLoading,
     isError,
     isFetching,
     refetch,
     dataUpdatedAt,
-  } = useCurrencyRates();
+  } = useEffectiveRates();
   const { isOnline } = useOfflineStatus();
   const COLORS = useThemeColors();
   const insets = useSafeAreaInsets();
 
   const [inputValue, setInputValue] = useState(amount);
   const [debouncedAmount, setDebouncedAmount] = useState(amount);
+  const [ivaActive, setIvaActive] = useState(false);
+  const [igtfActive, setIgtfActive] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(() => Boolean(rates));
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -102,7 +115,24 @@ export default function ConverterScreen() {
   }, [createShoppingList, rates, router]);
 
   const numericAmount = debouncedAmount ? parseFormattedNumber(debouncedAmount) : 0;
-  const conversions = useConversion(numericAmount, selectedCurrency, rates);
+  const fiscalBreakdown = computeFiscalBreakdown(
+    numericAmount,
+    { ivaActive, igtfActive },
+    fiscalSettings,
+  );
+  const conversions = useConversion(
+    fiscalBreakdown.totalAmount,
+    selectedCurrency,
+    rates,
+  );
+  const taxBadge =
+    ivaActive && igtfActive
+      ? 'c/IVA + IGTF'
+      : ivaActive
+        ? 'c/IVA'
+        : igtfActive
+          ? 'c/IGTF'
+          : undefined;
 
   // Always show all 4 currencies: active one in input, remaining 3 as cards
   const cardCurrencies: CurrencyCode[] =
@@ -226,6 +256,8 @@ export default function ConverterScreen() {
         isLoading={isLoading}
         isFetching={isFetching}
         isOnline={isOnline}
+        converterAmount={fiscalBreakdown.totalAmount}
+        converterCurrency={selectedCurrency}
       />
 
       <PullToRefreshScrollView
@@ -250,6 +282,30 @@ export default function ConverterScreen() {
             onClear={handleClearAmount}
           />
         </Animated.View>
+
+        {/* Fiscal toggles (IVA / IGTF) & Mixed payment shortcut */}
+        <FiscalToolsCard
+          currency={selectedCurrency}
+          fiscalSettings={fiscalSettings}
+          ivaActive={ivaActive}
+          igtfActive={igtfActive}
+          breakdown={fiscalBreakdown}
+          totalInVes={conversions.VES}
+          onToggleIva={() => setIvaActive((prev) => !prev)}
+          onToggleIgtf={() => setIgtfActive((prev) => !prev)}
+          onOpenMixedPayment={() =>
+            router.push({
+              pathname: '/tools/mixed-payment',
+              params: {
+                amount:
+                  fiscalBreakdown.totalAmount > 0
+                    ? fiscalBreakdown.totalAmount.toFixed(2)
+                    : '',
+                currency: selectedCurrency,
+              },
+            })
+          }
+        />
 
         <View className="flex-row items-center justify-between">
           <Text className="text-lg font-medium text-secondary dark:text-white">
@@ -276,9 +332,54 @@ export default function ConverterScreen() {
               onPress={() => handleCardPress(currency)}
               isSelected={false}
               index={index}
+              taxBadge={taxBadge}
             />
           ))}
         </View>
+
+        {/* Custom commercial rates */}
+        {enabledCustomRates.length > 0 && (
+          <View className="gap-2.5">
+            <View className="flex-row items-center justify-between px-0.5">
+              <Text className="text-sm font-semibold text-text-secondary">
+                Tasas personalizadas
+              </Text>
+              <Pressable
+                onPress={() => {
+                  triggerSelectionHaptic();
+                  router.push('/tools/custom-rate');
+                }}
+                className="flex-row items-center gap-1 rounded-lg px-2 py-1 active:opacity-75"
+              >
+                <SlidersHorizontal size={12} color={COLORS.primary} />
+                <Text
+                  className="text-xs font-medium"
+                  style={{ color: COLORS.primary }}
+                >
+                  Configurar
+                </Text>
+              </Pressable>
+            </View>
+
+            {enabledCustomRates.map(({ item, rateToVes }, index) => (
+              <CustomRateCard
+                key={item.id}
+                item={item}
+                rateToVes={rateToVes}
+                inputCurrency={selectedCurrency}
+                usdEquivalentAmount={
+                  selectedCurrency === 'USD'
+                    ? fiscalBreakdown.totalAmount
+                    : conversions.USD
+                }
+                vesAmount={conversions.VES}
+                rates={rates}
+                index={index}
+                taxBadge={taxBadge}
+              />
+            ))}
+          </View>
+        )}
 
         {/* Shopping Calculator Entry Card */}
         <Animated.View entering={FadeInDown.delay(250).duration(400)}>
@@ -289,7 +390,7 @@ export default function ConverterScreen() {
             onContinueActive={(listId) =>
               router.push({ pathname: '/shopping/[id]', params: { id: listId } })
             }
-            onOpenAllLists={() => router.push('/shopping')}
+            onOpenAllLists={() => router.navigate('/shopping')}
           />
         </Animated.View>
 

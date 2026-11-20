@@ -173,7 +173,7 @@ export function ShoppingEntryCard({
           ) : (
             <Plus size={15} color="#ffffff" strokeWidth={2.5} />
           )}
-          <Text className="text-xs font-semibold text-white">
+          <Text className="text-xs font-medium text-white">
             {activeList ? 'Continuar compra' : 'Nueva compra'}
           </Text>
         </Pressable>
@@ -187,7 +187,7 @@ export function ShoppingEntryCard({
           style={{ borderCurve: 'continuous' }}
         >
           <ListChecks size={15} color={COLORS.textPrimary} />
-          <Text className="text-xs font-semibold text-text-primary">
+          <Text className="text-xs font-medium text-text-primary">
             Mis listas{totalListsCount > 0 ? ` (${totalListsCount})` : ''}
           </Text>
         </Pressable>

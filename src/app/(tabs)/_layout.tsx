@@ -12,6 +12,7 @@ export default function TabLayout() {
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
+        animation: 'shift',
         sceneStyle: {
           backgroundColor: COLORS.surface,
         },
@@ -25,10 +26,24 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="shopping"
+        options={{
+          title: 'Compras',
+          tabBarLabel: 'Compras',
+        }}
+      />
+      <Tabs.Screen
         name="index"
         options={{
           title: 'Conversor',
           tabBarLabel: 'Conversor',
+        }}
+      />
+      <Tabs.Screen
+        name="tools"
+        options={{
+          title: 'Herramientas',
+          tabBarLabel: 'Herramientas',
         }}
       />
       <Tabs.Screen

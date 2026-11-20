@@ -68,7 +68,7 @@ export function ScreenHero({
                 />
               )}
               <Text
-                className="flex-1 text-xl font-bold text-white"
+                className="flex-1 text-xl font-semibold text-white"
                 numberOfLines={1}
               >
                 {title}

@@ -184,7 +184,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
           }}
         >
           <Text
-            className="text-xs font-semibold"
+            className="text-xs font-medium"
             style={{ color: skipTextColor }}
           >
             Saltar
@@ -236,7 +236,7 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
             },
           ]}
         >
-          <Text className="text-base font-bold text-white">
+          <Text className="text-base font-medium text-white">
             {isLastStep ? 'Entrar' : 'Siguiente'}
           </Text>
           <ArrowRight size={18} color="#ffffff" strokeWidth={2.5} />

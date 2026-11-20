@@ -27,6 +27,12 @@ export function formatNumber(value: number, decimals = 2): string {
   });
 }
 
+/** Format amount for bank transfer apps: comma decimal, no thousands separator ("3650,25"). */
+export function formatBankAmount(value: number): string {
+  if (!Number.isFinite(value) || value <= 0) return '0,00';
+  return value.toFixed(2).replace('.', ',');
+}
+
 /** "Hace 3 min" / "Hace 2 horas" */
 export function formatRelativeTime(date: Date | string): string {
   const d = typeof date === 'string' ? parseISO(date) : date;

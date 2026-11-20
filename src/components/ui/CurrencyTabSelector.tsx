@@ -115,7 +115,7 @@ export function CurrencyTabSelector({
               />
             )}
             <Text
-              className="text-sm font-semibold"
+              className="text-sm font-medium"
               style={{ color: isActive ? activeColor : inactiveColor }}
             >
               {currency}
@@ -193,7 +193,7 @@ export function PeriodSelector({
             style={{ width: PERIOD_ITEM_WIDTH, borderCurve: 'continuous' }}
           >
             <Text
-              className="text-xs font-semibold"
+              className="text-xs font-medium"
               style={{ color: isActive ? '#ffffff' : COLORS.textMuted }}
             >
               {period}

@@ -16,6 +16,7 @@ import {
   triggerImpactHaptic,
   triggerSelectionHaptic,
 } from '@/utils/haptics';
+import { singleLineInputStyle } from '@/utils/inputStyles';
 import {
   formatShoppingMoney,
   getItemSubtotal,
@@ -123,7 +124,7 @@ export function ProductFormCard({
             className="flex-row items-center gap-1 rounded-full bg-surface-elevated px-2.5 py-1 active:opacity-75"
           >
             <X size={12} color={COLORS.textSecondary} />
-            <Text className="text-[11px] font-semibold text-text-secondary">
+            <Text className="text-[11px] font-medium text-text-secondary">
               Cancelar
             </Text>
           </Pressable>
@@ -156,12 +157,14 @@ export function ProductFormCard({
               placeholder="0.00"
               placeholderTextColor={COLORS.textMuted}
               keyboardType="decimal-pad"
-              className="flex-1 text-lg font-bold text-text-primary"
-              style={{
-                paddingVertical: 0,
-                includeFontPadding: false,
-                fontVariant: ['tabular-nums'],
-              }}
+              className="flex-1"
+              style={singleLineInputStyle({
+                color: COLORS.textPrimary,
+                fontSize: 18,
+                height: 48,
+                weight: 'bold',
+                tabularNums: true,
+              })}
             />
             {priceText.length > 0 && (
               <Pressable
@@ -196,12 +199,14 @@ export function ProductFormCard({
               onChangeText={(t) => setQtyText(sanitizeDecimalInput(t, qtyText))}
               keyboardType="decimal-pad"
               textAlign="center"
-              className="w-10 text-center text-sm font-bold text-text-primary"
-              style={{
-                paddingVertical: 0,
-                includeFontPadding: false,
-                fontVariant: ['tabular-nums'],
-              }}
+              className="w-10 text-center"
+              style={singleLineInputStyle({
+                color: COLORS.textPrimary,
+                fontSize: 14,
+                height: 48,
+                weight: 'bold',
+                tabularNums: true,
+              })}
             />
             <Pressable
               onPress={() => stepQuantity(1)}
@@ -227,9 +232,19 @@ export function ProductFormCard({
         placeholderTextColor={COLORS.textMuted}
         returnKeyType="done"
         onSubmitEditing={handleSubmit}
-        className="mt-2.5 h-11 rounded-xl border bg-surface-elevated px-3 text-sm text-text-primary"
-        style={{ borderColor: COLORS.border, borderCurve: 'continuous' }}
+        className="mt-2.5 rounded-xl border bg-surface-elevated px-3"
+        style={[
+          { borderColor: COLORS.border, borderCurve: 'continuous' },
+          singleLineInputStyle({ color: COLORS.textPrimary }),
+        ]}
       />
+
+      {(priceText.length > 0 && numericPrice <= 0) ||
+      (qtyText.length > 0 && numericQty <= 0) ? (
+        <Text className="mt-2 text-xs font-medium text-danger">
+          El precio y la cantidad deben ser mayores a 0.
+        </Text>
+      ) : null}
 
       {/* Live subtotal preview & Submit button */}
       <View className="mt-3 flex-row items-center justify-between gap-3">
@@ -274,7 +289,7 @@ export function ProductFormCard({
             />
           )}
           <Text
-            className="text-xs font-bold"
+            className="text-xs font-medium"
             style={{ color: isValid ? '#ffffff' : COLORS.textMuted }}
           >
             {editingItem ? 'Guardar' : 'Agregar'}

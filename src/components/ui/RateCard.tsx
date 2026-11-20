@@ -22,6 +22,7 @@ interface RateCardProps {
   onPress: () => void;
   isSelected: boolean;
   index: number;
+  taxBadge?: string;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -34,6 +35,7 @@ export function RateCard({
   onPress,
   isSelected,
   index,
+  taxBadge,
 }: RateCardProps) {
   const scale = useSharedValue(1);
 
@@ -77,22 +79,34 @@ export function RateCard({
               {CURRENCY_NAMES[currency]}
             </Text>
           </View>
-          {currency !== 'VES' && (
-            <View
-              className={`rounded-full px-2 py-0.5 ${
-                isPositive ? 'bg-success/15' : 'bg-danger/15'
-              }`}
-            >
-              <Text
-                className={`text-xs font-semibold ${
-                  isPositive ? 'text-success' : 'text-danger'
-                }`}
-                style={{ fontVariant: ['tabular-nums'] }}
+          <View className="flex-row items-center gap-1.5">
+            {taxBadge ? (
+              <View
+                className="rounded-full px-2 py-0.5"
+                style={{ backgroundColor: 'rgba(255, 107, 38, 0.12)' }}
               >
-                {formatPercentage(changePercentage)}
-              </Text>
-            </View>
-          )}
+                <Text className="text-[10px] font-semibold text-primary">
+                  {taxBadge}
+                </Text>
+              </View>
+            ) : null}
+            {currency !== 'VES' && (
+              <View
+                className={`rounded-full px-2 py-0.5 ${
+                  isPositive ? 'bg-success/15' : 'bg-danger/15'
+                }`}
+              >
+                <Text
+                  className={`text-xs font-semibold ${
+                    isPositive ? 'text-success' : 'text-danger'
+                  }`}
+                  style={{ fontVariant: ['tabular-nums'] }}
+                >
+                  {formatPercentage(changePercentage)}
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
 
         {/* Converted amount */}

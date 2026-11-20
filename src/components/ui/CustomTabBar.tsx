@@ -228,8 +228,8 @@ function TabSlotButton({
         <IconComponent size={21} color={inactiveColor} strokeWidth={1.9} />
       </Animated.View>
       <Text
-        className={`text-[10px] ${
-          isFocused ? 'font-bold text-white' : 'font-medium'
+        className={`text-[10px] font-medium ${
+          isFocused ? 'text-white' : ''
         }`}
         style={isFocused ? undefined : { color: inactiveColor }}
         numberOfLines={1}

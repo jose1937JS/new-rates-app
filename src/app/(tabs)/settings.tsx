@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import {
   Check,
   ChevronRight,
@@ -10,9 +11,12 @@ import {
   Laptop,
   Moon,
   Palette,
+  Percent,
   RefreshCw,
   Server,
   Settings,
+  SlidersHorizontal,
+  Store,
   Sun,
   Tag,
   Trash2,
@@ -21,12 +25,23 @@ import {
   VibrateOff,
 } from 'lucide-react-native';
 import { useState } from 'react';
-import { Linking, Pressable, ScrollView, Switch, Text, View } from 'react-native';
+import {
+  Linking,
+  Pressable,
+  ScrollView,
+  Switch,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { singleLineInputStyle } from '@/utils/inputStyles';
 import { AppModal, type AppModalVariant } from '@/components/ui/AppModal';
+import { AppSheet } from '@/components/ui/AppSheet';
 import { Card } from '@/components/ui/Card';
+import { ClearInputButton } from '@/components/ui/ClearInputButton';
 import { ScreenHero } from '@/components/ui/ScreenHero';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import {
@@ -35,6 +50,7 @@ import {
   isNetworkOnline,
 } from '@/services/ratesApi';
 import { useCurrencyStore } from '@/store/currencyStore';
+import { useCustomRateStore } from '@/store/customRateStore';
 import type { PrimaryColorId, ThemeMode } from '@/types/currency.types';
 import {
   APP_NAME,
@@ -162,8 +178,8 @@ function ThemeOption({
       <View className="flex-row items-center gap-2.5">
         {icon}
         <Text
-          className={`text-sm ${
-            isActive ? 'font-semibold' : 'font-medium text-text-primary'
+          className={`text-sm font-medium ${
+            isActive ? '' : 'text-text-primary'
           }`}
           style={isActive ? { color: COLORS.primary } : undefined}
         >
@@ -188,6 +204,7 @@ function ThemeOption({
 }
 
 export default function SettingsScreen() {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const COLORS = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -198,9 +215,50 @@ export default function SettingsScreen() {
     setPrimaryColor,
     hapticsEnabled,
     setHapticsEnabled,
+    fiscalSettings,
+    setFiscalSettings,
+    businessName,
+    setBusinessName,
   } = useCurrencyStore();
+  const customRates = useCustomRateStore((state) => state.customRates);
+  const activeCustomCount = customRates.filter((r) => r.enabled).length;
 
   const [modalState, setModalState] = useState<ModalState>(CLOSED_MODAL);
+  const [commerceSheetVisible, setCommerceSheetVisible] = useState(false);
+  const [draftBizName, setDraftBizName] = useState(businessName);
+  const [draftIva, setDraftIva] = useState(String(fiscalSettings.ivaPercent));
+  const [draftIgtf, setDraftIgtf] = useState(String(fiscalSettings.igtfPercent));
+  const [commerceError, setCommerceError] = useState<string | null>(null);
+
+  const openCommerceSheet = () => {
+    triggerSelectionHaptic();
+    setCommerceError(null);
+    setDraftBizName(businessName);
+    setDraftIva(String(fiscalSettings.ivaPercent));
+    setDraftIgtf(String(fiscalSettings.igtfPercent));
+    setCommerceSheetVisible(true);
+  };
+
+  const saveCommerceSettings = () => {
+    const parsedIva = Number.parseFloat(draftIva.replace(',', '.'));
+    const parsedIgtf = Number.parseFloat(draftIgtf.replace(',', '.'));
+    if (!Number.isFinite(parsedIva) || parsedIva < 0 || parsedIva > 100) {
+      setCommerceError('El porcentaje de IVA debe estar entre 0% y 100%.');
+      return;
+    }
+    if (!Number.isFinite(parsedIgtf) || parsedIgtf < 0 || parsedIgtf > 100) {
+      setCommerceError('El porcentaje de IGTF debe estar entre 0% y 100%.');
+      return;
+    }
+
+    triggerImpactHaptic('light');
+    setBusinessName(draftBizName.trim());
+    setFiscalSettings({
+      ivaPercent: parsedIva,
+      igtfPercent: parsedIgtf,
+    });
+    setCommerceSheetVisible(false);
+  };
 
   const closeModal = () => setModalState(CLOSED_MODAL);
 
@@ -452,11 +510,43 @@ export default function SettingsScreen() {
           </Pressable>
         </SettingsGroup>
 
+        {/* Commerce, Taxes & Custom Rates */}
+        <SettingsGroup
+          title="Comercio e impuestos"
+          icon={<Store size={16} color={COLORS.primary} />}
+          index={4}
+        >
+          <SettingsRow
+            icon={<Store size={16} color={COLORS.textMuted} />}
+            label="Nombre del negocio (tickets)"
+            value={businessName || 'Sin definir'}
+            onPress={openCommerceSheet}
+          />
+          <SettingsRow
+            icon={<Percent size={16} color={COLORS.textMuted} />}
+            label="IVA / IGTF configurados"
+            value={`${fiscalSettings.ivaPercent}% / ${fiscalSettings.igtfPercent}%`}
+            onPress={openCommerceSheet}
+          />
+          <SettingsRow
+            icon={<SlidersHorizontal size={16} color={COLORS.textMuted} />}
+            label="Tasas personalizadas"
+            value={
+              activeCustomCount > 0 ? `${activeCustomCount} activas` : 'Gestionar'
+            }
+            onPress={() => {
+              triggerSelectionHaptic();
+              router.push('/tools/custom-rate');
+            }}
+            isLast
+          />
+        </SettingsGroup>
+
         {/* Data */}
         <SettingsGroup
           title="Datos"
           icon={<Database size={16} color={COLORS.primary} />}
-          index={4}
+          index={5}
         >
           <SettingsRow
             icon={<RefreshCw size={16} color={COLORS.textMuted} />}
@@ -515,6 +605,114 @@ export default function SettingsScreen() {
         onConfirm={modalState.onConfirm}
         onClose={closeModal}
       />
+
+      <AppSheet
+        visible={commerceSheetVisible}
+        title="Comercio e impuestos"
+        subtitle="Personaliza tus tickets y porcentajes fiscales"
+        onClose={() => setCommerceSheetVisible(false)}
+        footer={
+          <Pressable
+            onPress={saveCommerceSettings}
+            className="flex-row items-center justify-center gap-2 rounded-2xl py-3.5 active:opacity-85"
+            style={{
+              backgroundColor: COLORS.primary,
+              borderCurve: 'continuous',
+            }}
+          >
+            <Check size={17} color="#ffffff" strokeWidth={2.5} />
+            <Text className="text-sm font-medium text-white">
+              Guardar configuración
+            </Text>
+          </Pressable>
+        }
+      >
+        <View className="gap-4">
+          <View className="gap-1.5">
+            <Text className="text-xs font-semibold text-text-secondary">
+              Nombre del negocio o emprendimiento (aparece en tickets)
+            </Text>
+            <TextInput
+              value={draftBizName}
+              onChangeText={setDraftBizName}
+              placeholder="Ej. Bodega La Esquina, Mi Emprendimiento"
+              placeholderTextColor={COLORS.textMuted}
+              maxLength={40}
+              className="rounded-xl border border-border bg-surface-elevated px-3.5"
+              style={singleLineInputStyle({ color: COLORS.textPrimary })}
+            />
+          </View>
+
+          <View className="flex-row gap-3">
+            <View className="flex-1 gap-1.5">
+              <Text className="text-xs font-semibold text-text-secondary">
+                IVA (%)
+              </Text>
+              <View className="h-11 flex-row items-center gap-1.5 rounded-xl border border-border bg-surface-elevated px-3.5">
+                <TextInput
+                  value={draftIva}
+                  onChangeText={(txt) => {
+                    if (commerceError) setCommerceError(null);
+                    setDraftIva(txt.replace(/[^0-9.,]/g, ''));
+                  }}
+                  keyboardType="decimal-pad"
+                  placeholder="16"
+                  placeholderTextColor={COLORS.textMuted}
+                  className="flex-1"
+                  style={singleLineInputStyle({
+                    color: COLORS.textPrimary,
+                    weight: 'semibold',
+                    tabularNums: true,
+                  })}
+                />
+                <ClearInputButton
+                  visible={draftIva.length > 0}
+                  onPress={() => {
+                    if (commerceError) setCommerceError(null);
+                    setDraftIva('');
+                  }}
+                />
+              </View>
+            </View>
+            <View className="flex-1 gap-1.5">
+              <Text className="text-xs font-semibold text-text-secondary">
+                IGTF (%)
+              </Text>
+              <View className="h-11 flex-row items-center gap-1.5 rounded-xl border border-border bg-surface-elevated px-3.5">
+                <TextInput
+                  value={draftIgtf}
+                  onChangeText={(txt) => {
+                    if (commerceError) setCommerceError(null);
+                    setDraftIgtf(txt.replace(/[^0-9.,]/g, ''));
+                  }}
+                  keyboardType="decimal-pad"
+                  placeholder="3"
+                  placeholderTextColor={COLORS.textMuted}
+                  className="flex-1"
+                  style={singleLineInputStyle({
+                    color: COLORS.textPrimary,
+                    weight: 'semibold',
+                    tabularNums: true,
+                  })}
+                />
+                <ClearInputButton
+                  visible={draftIgtf.length > 0}
+                  onPress={() => {
+                    if (commerceError) setCommerceError(null);
+                    setDraftIgtf('');
+                  }}
+                />
+              </View>
+            </View>
+          </View>
+
+          {commerceError ? (
+            <Text className="text-xs font-medium text-danger">
+              {commerceError}
+            </Text>
+          ) : null}
+        </View>
+      </AppSheet>
     </View>
   );
 }

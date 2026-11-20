@@ -202,6 +202,28 @@ export function fetchRecentRates(
   );
 }
 
+const WIDGET_CACHE_TTL_MS = 1000 * 60 * 30; // 30 minutes
+
+/** Fetch today + recent rates for home screen widgets with 30m cache protection. */
+export async function fetchWidgetRates(forceRefresh = false): Promise<{
+  today: ApiTodayRatesResponse;
+  recent: ApiPaginatedRatesResponse;
+}> {
+  const [today, recent] = await Promise.all([
+    fetchWithCache(
+      'rates_today',
+      () => requestJson<ApiTodayRatesResponse>('/api/rates/today'),
+      { forceRefresh, ttlMs: WIDGET_CACHE_TTL_MS },
+    ),
+    fetchWithCache(
+      'rates_recent_7d',
+      () => requestJson<ApiPaginatedRatesResponse>('/api/rates?page=1&limit=60&days=7'),
+      { forceRefresh, ttlMs: WIDGET_CACHE_TTL_MS },
+    ),
+  ]);
+  return { today, recent };
+}
+
 /** GET /api/rates/:currency — Latest single rate for a specific currency */
 export function fetchLatestRateByCurrency(
   currency: ApiCurrency,

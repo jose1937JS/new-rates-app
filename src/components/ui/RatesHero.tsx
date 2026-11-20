@@ -1,9 +1,10 @@
-import { Info } from 'lucide-react-native';
+import { Info, Share2 } from 'lucide-react-native';
 import { useState } from 'react';
 import { Image, Pressable, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ShareRatesSheet } from '@/components/share/ShareRatesSheet';
 import { AppModal } from '@/components/ui/AppModal';
 import { CurrencyIcon } from '@/components/ui/CurrencyIcon';
 import { OfflineBadge } from '@/components/ui/OfflineBadge';
@@ -20,6 +21,8 @@ interface RatesHeroProps {
   isLoading: boolean;
   isFetching: boolean;
   isOnline: boolean;
+  converterAmount?: number;
+  converterCurrency?: CurrencyCode;
 }
 
 type HeroCurrencyCode = Extract<CurrencyCode, 'USD' | 'EUR' | 'USDT'>;
@@ -56,12 +59,15 @@ export function RatesHero({
   isLoading,
   isFetching,
   isOnline,
+  converterAmount = 0,
+  converterCurrency = 'USD',
 }: RatesHeroProps) {
   const COLORS = useThemeColors();
   const insets = useSafeAreaInsets();
   const [selectedInfo, setSelectedInfo] = useState<HeroCurrencyCode | null>(
     null,
   );
+  const [showShareSheet, setShowShareSheet] = useState(false);
 
   const items: HeroRateItem[] = [
     {
@@ -120,7 +126,20 @@ export function RatesHero({
             RATESVEN
           </Text>
         </View>
-        <View className="items-end">
+        <View className="flex-row items-center gap-2">
+          <Pressable
+            onPress={() => {
+              triggerSelectionHaptic();
+              setShowShareSheet(true);
+            }}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="Compartir tasas del día"
+            className="h-7 w-7 items-center justify-center rounded-full active:opacity-75"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+          >
+            <Share2 size={14} color="#ffffff" />
+          </Pressable>
           <OfflineBadge isOnline={isOnline} variant="hero" />
         </View>
       </View>
@@ -206,6 +225,13 @@ export function RatesHero({
         variant="info"
         confirmText="Entendido"
         onClose={() => setSelectedInfo(null)}
+      />
+
+      <ShareRatesSheet
+        visible={showShareSheet}
+        onClose={() => setShowShareSheet(false)}
+        initialAmount={converterAmount}
+        initialCurrency={converterCurrency}
       />
     </Animated.View>
   );
