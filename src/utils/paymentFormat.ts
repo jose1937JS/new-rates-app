@@ -208,9 +208,16 @@ export function buildPaymentShareMessage({
 
       if (currency === 'VES') {
         lines.push(`💵 Monto: ${vesText} Bs`);
-        if (includeEquivalents && conversions.USD > 0) {
+        if (includeEquivalents && sourceInfo.rateToVes > 0) {
+          const equivValue = amount / sourceInfo.rateToVes;
+          const equivSymbol =
+            rateSource === 'BCV_EUR'
+              ? '€'
+              : rateSource === 'USDT'
+                ? '₮'
+                : '$';
           lines.push(
-            `   (${formatNumber(conversions.USD)} $ • tasa ${sourceInfo.label})`,
+            `   (${formatNumber(equivValue)} ${equivSymbol} • tasa ${sourceInfo.label}: ${formatNumber(sourceInfo.rateToVes, 2)} Bs)`,
           );
         }
       } else {
@@ -219,7 +226,7 @@ export function buildPaymentShareMessage({
         );
         if (includeEquivalents && conversions.VES > 0) {
           lines.push(
-            `   Equivale a: ${vesText} Bs (tasa ${sourceInfo.label})`,
+            `   Equivale a: ${vesText} Bs (tasa ${sourceInfo.label}: ${formatNumber(sourceInfo.rateToVes, 2)} Bs)`,
           );
         }
       }

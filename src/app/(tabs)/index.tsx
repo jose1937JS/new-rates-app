@@ -195,7 +195,7 @@ export default function ConverterScreen() {
         style={{ backgroundColor: COLORS.surface }}
       >
         <ScreenHero
-          title="RATESVEN"
+          title="RatesVEN"
           subtitle="Tasas de cambio en Venezuela"
           showLogo
           icon={<ArrowLeftRight size={20} color="#ffffff" />}

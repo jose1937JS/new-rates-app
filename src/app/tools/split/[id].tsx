@@ -37,6 +37,7 @@ import { useThemeColors } from '@/hooks/useThemeColors';
 import { useBillSplitStore } from '@/store/billSplitStore';
 import type { SplitPerson } from '@/types/currency.types';
 import { CURRENCY_SYMBOLS } from '@/utils/constants';
+import { getDefaultRateSourceForCurrency } from '@/utils/customRateUtils';
 import { formatNumber, parseFormattedNumber } from '@/utils/formatters';
 import {
   triggerNotificationHaptic,
@@ -380,7 +381,14 @@ export default function BillSplitDetailScreen() {
 
             <CurrencyChipRow
               selected={split.currency}
-              onSelect={(code) => updateSplitMeta(split.id, { currency: code })}
+              onSelect={(code) =>
+                updateSplitMeta(split.id, {
+                  currency: code,
+                  ...(!split.rateSource.startsWith('CUSTOM:') && code !== 'VES'
+                    ? { rateSource: getDefaultRateSourceForCurrency(code) }
+                    : {}),
+                })
+              }
             />
 
             {/* Tip */}

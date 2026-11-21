@@ -1,6 +1,7 @@
 import { forwardRef } from 'react';
 import { Image, Text, View } from 'react-native';
 
+import { RatesVenTitle } from '@/components/ui/RatesVenTitle';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { ShoppingList } from '@/types/currency.types';
 import { formatFullDateTime, formatNumber } from '@/utils/formatters';
@@ -53,9 +54,13 @@ export const ShoppingTicket = forwardRef<View, ShoppingTicketProps>(
                 resizeMode="contain"
               />
             </View>
-            <Text className="text-sm font-bold uppercase tracking-wider text-slate-900">
-              {trimmedBiz || 'RATESVEN'}
-            </Text>
+            {trimmedBiz ? (
+              <Text className="text-sm font-bold uppercase tracking-wider text-slate-900">
+                {trimmedBiz}
+              </Text>
+            ) : (
+              <RatesVenTitle size="sm" variant="light" />
+            )}
           </View>
           <Text className="text-base font-semibold text-slate-900">
             {list.title}
@@ -169,7 +174,7 @@ export const ShoppingTicket = forwardRef<View, ShoppingTicketProps>(
             {formatNumber(list.ratesSnapshot.usdtToVes)} Bs
           </Text>
           <Text className="mt-1 text-[10px] font-semibold text-slate-400">
-            Generado con RatesVenApp
+            Generado con RatesVEN
           </Text>
         </View>
       </View>

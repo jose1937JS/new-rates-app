@@ -134,7 +134,7 @@ export function ShoppingEntryCard({
                 />
               </View>
               <Text
-                className="text-[11px] font-medium"
+                className="text-[11px] font-medium mt-0.5"
                 style={{ color: budgetColor }}
               >
                 {budget.status === 'exceeded'

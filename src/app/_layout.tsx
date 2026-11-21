@@ -135,12 +135,12 @@ export default function RootLayout() {
   }, [COLORS.surface]);
 
   useEffect(() => {
-    if (fontsLoaded) {
+    if (fontsLoaded && storeHydrated) {
       void SplashScreen.hideAsync();
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded, storeHydrated]);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded || !storeHydrated) {
     return null;
   }
 
@@ -151,7 +151,9 @@ export default function RootLayout() {
           client={queryClient}
           persistOptions={{ persister: asyncStoragePersister }}
         >
-          <StatusBar style={COLORS.isDark ? 'light' : 'dark'} />
+          <StatusBar
+            style={!splashDone ? 'light' : COLORS.isDark ? 'light' : 'dark'}
+          />
           {!storeHydrated ? null : !hasCompletedOnboarding ? (
             <OnboardingScreen onComplete={completeOnboarding} />
           ) : (

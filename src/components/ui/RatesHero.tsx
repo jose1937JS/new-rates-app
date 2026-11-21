@@ -1,6 +1,6 @@
 import { Info, Share2 } from 'lucide-react-native';
 import { useState } from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -8,13 +8,12 @@ import { ShareRatesSheet } from '@/components/share/ShareRatesSheet';
 import { AppModal } from '@/components/ui/AppModal';
 import { CurrencyIcon } from '@/components/ui/CurrencyIcon';
 import { OfflineBadge } from '@/components/ui/OfflineBadge';
+import { RatesVenTitle } from '@/components/ui/RatesVenTitle';
 import { ThreeDotsLoader } from '@/components/ui/ThreeDotsLoader';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { CurrencyCode, UnifiedRates } from '@/types/currency.types';
 import { formatNumber, formatPercentage } from '@/utils/formatters';
 import { triggerSelectionHaptic } from '@/utils/haptics';
-
-const APP_LOGO = require('@/assets/images/logo.webp');
 
 interface RatesHeroProps {
   rates: UnifiedRates | null;
@@ -112,19 +111,8 @@ export function RatesHero({
     >
       {/* Header row */}
       <View className="mb-4 flex-row items-center justify-between gap-2">
-        <View className="mb-2 flex-1 flex-row items-center gap-2">
-          <Image
-            source={APP_LOGO}
-            style={{ width: 40, height: 40, }}
-            resizeMode="contain"
-          />
-          <Text
-            className="flex-1 text-2xl font-bold text-white"
-            numberOfLines={1}
-            adjustsFontSizeToFit
-          >
-            RATESVEN
-          </Text>
+        <View className="mb-2 flex-1">
+          <RatesVenTitle size="lg" showLogo />
         </View>
         <View className="flex-row items-center gap-2">
           <Pressable

@@ -26,6 +26,7 @@ interface ActualPaidCardProps {
   actualPaidAmount?: number;
   actualPaidCurrency: CurrencyCode;
   ratesSnapshot: ShoppingRatesSnapshot;
+  readOnly?: boolean;
   onSaveActualPaid: (amount: number | undefined, currency: CurrencyCode) => void;
 }
 
@@ -35,6 +36,7 @@ export function ActualPaidCard({
   actualPaidAmount,
   actualPaidCurrency,
   ratesSnapshot,
+  readOnly = false,
   onSaveActualPaid,
 }: ActualPaidCardProps) {
   const COLORS = useThemeColors();
@@ -62,6 +64,7 @@ export function ActualPaidCard({
   );
 
   const handleSave = () => {
+    if (readOnly) return;
     if (amountText.trim().length > 0 && parsedInput <= 0) {
       setErrorMsg('Ingresa un monto cobrado mayor a 0 o limpia el campo.');
       return;
@@ -74,6 +77,7 @@ export function ActualPaidCard({
   };
 
   const handleClear = () => {
+    if (readOnly) return;
     setErrorMsg(null);
     triggerSelectionHaptic();
     setAmountText('');
@@ -86,6 +90,79 @@ export function ActualPaidCard({
       : comparison.state === 'under'
         ? COLORS.success
         : COLORS.success;
+
+  if (readOnly && !comparison.hasActualPaid) {
+    return null;
+  }
+
+  const comparisonSummary = comparison.hasActualPaid ? (
+    <View
+      className={`${readOnly ? 'mt-2' : 'mt-3'} rounded-xl border p-3`}
+      style={{
+        backgroundColor: `${diffColor}12`,
+        borderColor: `${diffColor}35`,
+        borderCurve: 'continuous',
+      }}
+    >
+      <View className="flex-row items-center justify-between">
+        <Text className="text-xs text-text-secondary">Total calculado</Text>
+        <Text
+          className="text-sm font-semibold text-text-primary"
+          style={{ fontVariant: ['tabular-nums'] }}
+        >
+          {formatShoppingMoney(
+            comparison.calculatedInDisplay,
+            displayCurrency,
+          )}
+        </Text>
+      </View>
+
+      <View className="mt-1 flex-row items-center justify-between">
+        <Text className="text-xs text-text-secondary">Real cobrado</Text>
+        <Text
+          className="text-sm font-semibold text-text-primary"
+          style={{ fontVariant: ['tabular-nums'] }}
+        >
+          {formatShoppingMoney(comparison.actualInDisplay, displayCurrency)}
+        </Text>
+      </View>
+
+      <View className="mt-2 flex-row items-center justify-between border-t border-border/40 pt-2">
+        <Text
+          className="text-xs font-medium"
+          style={{ color: diffColor }}
+        >
+          {comparison.state === 'exact'
+            ? 'Monto exacto'
+            : comparison.state === 'over'
+              ? 'Diferencia pagada de más'
+              : 'Ahorro frente al cálculo'}
+        </Text>
+        <Text
+          className="text-sm font-semibold"
+          style={{ color: diffColor, fontVariant: ['tabular-nums'] }}
+        >
+          {comparison.state === 'exact'
+            ? '0,00'
+            : `${comparison.diffInDisplay > 0 ? '+' : '-'}${formatShoppingMoney(
+                Math.abs(comparison.diffInDisplay),
+                displayCurrency,
+              )} (${formatPercentage(comparison.diffPercent)})`}
+        </Text>
+      </View>
+    </View>
+  ) : null;
+
+  if (readOnly) {
+    return (
+      <Card
+        title="Precio real cobrado"
+        icon={<Receipt size={16} color={COLORS.primary} />}
+      >
+        {comparisonSummary}
+      </Card>
+    );
+  }
 
   return (
     <Card
@@ -164,63 +241,7 @@ export function ActualPaidCard({
       </Pressable>
 
       {/* Comparison summary when saved */}
-      {comparison.hasActualPaid && (
-        <View
-          className="mt-3 rounded-xl border p-3"
-          style={{
-            backgroundColor: `${diffColor}12`,
-            borderColor: `${diffColor}35`,
-            borderCurve: 'continuous',
-          }}
-        >
-          <View className="flex-row items-center justify-between">
-            <Text className="text-xs text-text-secondary">Total calculado</Text>
-            <Text
-              className="text-sm font-semibold text-text-primary"
-              style={{ fontVariant: ['tabular-nums'] }}
-            >
-              {formatShoppingMoney(
-                comparison.calculatedInDisplay,
-                displayCurrency,
-              )}
-            </Text>
-          </View>
-
-          <View className="mt-1 flex-row items-center justify-between">
-            <Text className="text-xs text-text-secondary">Real cobrado</Text>
-            <Text
-              className="text-sm font-semibold text-text-primary"
-              style={{ fontVariant: ['tabular-nums'] }}
-            >
-              {formatShoppingMoney(comparison.actualInDisplay, displayCurrency)}
-            </Text>
-          </View>
-
-          <View className="mt-2 flex-row items-center justify-between border-t border-border/40 pt-2">
-            <Text
-              className="text-xs font-medium"
-              style={{ color: diffColor }}
-            >
-              {comparison.state === 'exact'
-                ? 'Monto exacto'
-                : comparison.state === 'over'
-                  ? 'Diferencia pagada de más'
-                  : 'Ahorro frente al cálculo'}
-            </Text>
-            <Text
-              className="text-sm font-semibold"
-              style={{ color: diffColor, fontVariant: ['tabular-nums'] }}
-            >
-              {comparison.state === 'exact'
-                ? '0,00'
-                : `${comparison.diffInDisplay > 0 ? '+' : '-'}${formatShoppingMoney(
-                    Math.abs(comparison.diffInDisplay),
-                    displayCurrency,
-                  )} (${formatPercentage(comparison.diffPercent)})`}
-            </Text>
-          </View>
-        </View>
-      )}
+      {comparisonSummary}
     </Card>
   );
 }

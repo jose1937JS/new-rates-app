@@ -1,3 +1,5 @@
+import { RatesVenTitle } from '@/components/ui/RatesVenTitle';
+import { useThemeColors } from '@/hooks/useThemeColors';
 import { useEffect, useState } from 'react';
 import { Image, Text, View } from 'react-native';
 import Animated, {
@@ -10,9 +12,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { APP_NAME, DEFAULT_PRIMARY_COLOR } from '@/utils/constants';
-
 const APP_LOGO = require('@/assets/images/logo.webp');
+const TRACK_WIDTH = 176;
 
 interface AnimatedSplashOverlayProps {
   isReady: boolean;
@@ -23,6 +24,7 @@ export function AnimatedSplashOverlay({
   isReady,
   onFinish,
 }: AnimatedSplashOverlayProps) {
+  const COLORS = useThemeColors();
   const [isClosing, setIsClosing] = useState(false);
 
   const logoScale = useSharedValue(1);
@@ -76,43 +78,49 @@ export function AnimatedSplashOverlay({
   }));
 
   const progressStyle = useAnimatedStyle(() => ({
-    width: `${Math.round(barProgress.get() * 100)}%`,
+    width: Math.round(barProgress.get() * TRACK_WIDTH),
   }));
 
   return (
     <Animated.View
       pointerEvents={isClosing ? 'none' : 'auto'}
       className="absolute inset-0 z-50 items-center justify-center px-8"
-      style={[containerStyle, { backgroundColor: DEFAULT_PRIMARY_COLOR }]}
+      style={[containerStyle, { backgroundColor: COLORS.primary }]}
     >
       <Animated.View style={logoStyle} className="items-center">
-        <View
-          className="mb-5 h-32 w-32 items-center justify-center rounded-full"
-          style={{ backgroundColor: 'rgba(255, 255, 255, 0.16)' }}
-        >
+        <View className="mb-5 h-32 w-32 items-center justify-center rounded-full">
           <Image
             source={APP_LOGO}
-            style={{ width: 108, height: 108 }}
+            style={{ width: 110, height: 110 }}
             resizeMode="contain"
           />
         </View>
       </Animated.View>
 
-      <Text className="text-3xl font-bold tracking-wide text-white">
-        {APP_NAME}
-      </Text>
-      <Text className="mt-1 text-xs font-medium text-white/85">
+      <RatesVenTitle size="xl" />
+      <Text className="mt-1.5 text-xs font-medium text-white/85">
         Tasas de cambio al instante
       </Text>
 
-      <View className="mt-12 w-44 items-center gap-3">
+      <View className="mt-12 items-center gap-3" style={{ width: TRACK_WIDTH }}>
         <View
-          className="h-1.5 w-full overflow-hidden rounded-full"
-          style={{ backgroundColor: 'rgba(255, 255, 255, 0.25)' }}
+          style={{
+            width: TRACK_WIDTH,
+            height: 6,
+            borderRadius: 999,
+            overflow: 'hidden',
+            backgroundColor: 'rgba(255, 255, 255, 0.3)',
+          }}
         >
           <Animated.View
-            className="h-full rounded-full bg-white"
-            style={progressStyle}
+            style={[
+              {
+                height: 6,
+                borderRadius: 999,
+                backgroundColor: '#ffffff',
+              },
+              progressStyle,
+            ]}
           />
         </View>
       </View>

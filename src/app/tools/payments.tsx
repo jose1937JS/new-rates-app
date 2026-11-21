@@ -19,14 +19,23 @@ import { PaymentTemplateSheet } from '@/components/tools/PaymentTemplateSheet';
 import { AppModal } from '@/components/ui/AppModal';
 import { Card } from '@/components/ui/Card';
 import { ScreenHero } from '@/components/ui/ScreenHero';
+import { useEffectiveRates } from '@/hooks/useEffectiveRates';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { usePaymentTemplatesStore } from '@/store/paymentTemplatesStore';
-import type { PaymentMethodType, PaymentTemplate } from '@/types/currency.types';
-import { triggerSelectionHaptic } from '@/utils/haptics';
+import type {
+  CurrencyCode,
+  PaymentMethodType,
+  PaymentTemplate,
+} from '@/types/currency.types';
+import { getDefaultRateSourceForCurrency } from '@/utils/customRateUtils';
+import { parseFormattedNumber } from '@/utils/formatters';
+import { triggerImpactHaptic, triggerSelectionHaptic } from '@/utils/haptics';
 import {
   PAYMENT_METHOD_LABELS,
+  buildPaymentShareMessage,
   getTemplateSummary,
 } from '@/utils/paymentFormat';
+import { copyToClipboard } from '@/utils/shareUtils';
 
 const METHOD_ICONS: Record<
   PaymentMethodType,
@@ -47,6 +56,7 @@ export default function PaymentTemplatesScreen() {
   }>();
   const COLORS = useThemeColors();
   const insets = useSafeAreaInsets();
+  const { snapshot } = useEffectiveRates();
 
   const {
     templates,
@@ -57,6 +67,28 @@ export default function PaymentTemplatesScreen() {
 
   const [sheetVisible, setSheetVisible] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<PaymentTemplate | null>(null);
+
+  const parsedParamAmount = params.amount ? parseFormattedNumber(params.amount) : 0;
+  const paramCurrency: CurrencyCode =
+    params.currency === 'USD' ||
+    params.currency === 'EUR' ||
+    params.currency === 'USDT' ||
+    params.currency === 'VES'
+      ? params.currency
+      : 'USD';
+
+  const handleQuickCopy = (item: PaymentTemplate) => {
+    triggerImpactHaptic('medium');
+    const message = buildPaymentShareMessage({
+      template: item,
+      amount: parsedParamAmount > 0 ? parsedParamAmount : 0,
+      currency: paramCurrency,
+      rateSource: getDefaultRateSourceForCurrency(paramCurrency),
+      snapshot,
+      includeEquivalents: true,
+    });
+    void copyToClipboard(message, `Datos de "${item.alias}" copiados`);
+  };
 
   const sorted = [...templates].sort((a, b) => {
     if (Boolean(a.isFavorite) !== Boolean(b.isFavorite)) {
@@ -176,6 +208,8 @@ export default function PaymentTemplatesScreen() {
               >
                 <Pressable
                   onPress={() => openDetail(item.id)}
+                  onLongPress={() => handleQuickCopy(item)}
+                  delayLongPress={350}
                   className="active:opacity-85"
                 >
                   <Card className="border border-border">
@@ -246,16 +280,21 @@ export default function PaymentTemplatesScreen() {
                       </View>
                     </View>
 
-                    <View className="mt-2.5 flex-row items-center justify-end gap-1">
-                      <Text
-                        className="text-xs font-medium"
-                        style={{ color: COLORS.primary }}
-                      >
-                        {params.amount
-                          ? 'Usar con este monto'
-                          : 'Copiar o incluir monto'}
+                    <View className="mt-2.5 flex-row items-center justify-between gap-2">
+                      <Text className="text-xs text-text-muted">
+                        Mantén presionado para copiar
                       </Text>
-                      <ArrowRight size={13} color={COLORS.primary} />
+                      <View className="flex-row items-center gap-1">
+                        <Text
+                          className="text-xs font-medium"
+                          style={{ color: COLORS.primary }}
+                        >
+                          {params.amount
+                            ? 'Usar con este monto'
+                            : 'Copiar o incluir monto'}
+                        </Text>
+                        <ArrowRight size={13} color={COLORS.primary} />
+                      </View>
                     </View>
                   </Card>
                 </Pressable>

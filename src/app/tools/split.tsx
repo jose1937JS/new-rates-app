@@ -182,12 +182,7 @@ export default function BillSplitsScreen() {
                   }}
                   className="active:opacity-85"
                 >
-                  <Card
-                    className="border"
-                    style={{
-                      borderColor: allPaid ? COLORS.success : COLORS.border,
-                    }}
-                  >
+                  <Card>
                     <View className="flex-row items-start justify-between gap-2">
                       <View className="flex-1">
                         <View className="flex-row items-center gap-2">
@@ -198,7 +193,7 @@ export default function BillSplitsScreen() {
                             {split.title}
                           </Text>
                           <View
-                            className="flex-row items-center gap-1 rounded-full px-2 py-0.5"
+                            className="flex-row items-center gap-1 rounded-full px-2.5 py-0.5"
                             style={{
                               backgroundColor: allPaid
                                 ? `${COLORS.success}1A`

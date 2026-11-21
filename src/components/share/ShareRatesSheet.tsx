@@ -101,7 +101,7 @@ export function ShareRatesStudio({
   );
 
   const buildPlainTextSummary = () => {
-    const lines = ['📊 *Tasas del día — RATESVEN*', ''];
+    const lines = ['📊 *Tasas del día — RatesVEN*', ''];
     if (selectedOfficial.includes('USD')) {
       lines.push(`🇺🇸 USD BCV: ${formatNumber(rates.usd.rateToVes)} Bs`);
     }

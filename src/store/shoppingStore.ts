@@ -52,7 +52,6 @@ interface ShoppingState {
     currency: CurrencyCode,
   ) => void;
   completeList: (listId: string) => void;
-  reopenList: (listId: string) => void;
   deleteList: (listId: string) => void;
 }
 
@@ -104,27 +103,38 @@ export const useShoppingStore = create<ShoppingState>()(
       updateListMeta: (listId, payload) => {
         const now = new Date().toISOString();
         set((state) => ({
-          lists: updateTargetList(state.lists, listId, (list) => ({
-            ...list,
-            title:
-              payload.title !== undefined
-                ? payload.title.trim() || list.title
-                : list.title,
-            budgetLimit:
-              payload.budgetLimit === null
-                ? undefined
-                : payload.budgetLimit !== undefined
-                  ? payload.budgetLimit > 0
-                    ? payload.budgetLimit
-                    : undefined
-                  : list.budgetLimit,
-            budgetCurrency: payload.budgetCurrency ?? list.budgetCurrency,
-            displayCurrency: payload.displayCurrency ?? list.displayCurrency,
-            defaultInputCurrency:
-              payload.defaultInputCurrency ?? list.defaultInputCurrency,
-            ratesSnapshot: payload.ratesSnapshot ?? list.ratesSnapshot,
-            updatedAt: now,
-          })),
+          lists: updateTargetList(state.lists, listId, (list) => {
+            if (list.status === 'completed') {
+              if (
+                payload.displayCurrency &&
+                payload.displayCurrency !== list.displayCurrency
+              ) {
+                return { ...list, displayCurrency: payload.displayCurrency };
+              }
+              return list;
+            }
+            return {
+              ...list,
+              title:
+                payload.title !== undefined
+                  ? payload.title.trim() || list.title
+                  : list.title,
+              budgetLimit:
+                payload.budgetLimit === null
+                  ? undefined
+                  : payload.budgetLimit !== undefined
+                    ? payload.budgetLimit > 0
+                      ? payload.budgetLimit
+                      : undefined
+                    : list.budgetLimit,
+              budgetCurrency: payload.budgetCurrency ?? list.budgetCurrency,
+              displayCurrency: payload.displayCurrency ?? list.displayCurrency,
+              defaultInputCurrency:
+                payload.defaultInputCurrency ?? list.defaultInputCurrency,
+              ratesSnapshot: payload.ratesSnapshot ?? list.ratesSnapshot,
+              updatedAt: now,
+            };
+          }),
         }));
       },
 
@@ -132,6 +142,7 @@ export const useShoppingStore = create<ShoppingState>()(
         const now = new Date().toISOString();
         set((state) => ({
           lists: updateTargetList(state.lists, listId, (list) => {
+            if (list.status === 'completed') return list;
             const cleanName =
               payload.name?.trim() || `Producto #${list.items.length + 1}`;
             const newItem: ShoppingItem = {
@@ -155,62 +166,74 @@ export const useShoppingStore = create<ShoppingState>()(
       updateItem: (listId, itemId, payload) => {
         const now = new Date().toISOString();
         set((state) => ({
-          lists: updateTargetList(state.lists, listId, (list) => ({
-            ...list,
-            updatedAt: now,
-            items: list.items.map((item) =>
-              item.id === itemId
-                ? {
-                    ...item,
-                    name: payload.name?.trim() || item.name,
-                    unitPrice: payload.unitPrice,
-                    currency: payload.currency,
-                    quantity: payload.quantity > 0 ? payload.quantity : 1,
-                  }
-                : item,
-            ),
-          })),
+          lists: updateTargetList(state.lists, listId, (list) => {
+            if (list.status === 'completed') return list;
+            return {
+              ...list,
+              updatedAt: now,
+              items: list.items.map((item) =>
+                item.id === itemId
+                  ? {
+                      ...item,
+                      name: payload.name?.trim() || item.name,
+                      unitPrice: payload.unitPrice,
+                      currency: payload.currency,
+                      quantity: payload.quantity > 0 ? payload.quantity : 1,
+                    }
+                  : item,
+              ),
+            };
+          }),
         }));
       },
 
       removeItem: (listId, itemId) => {
         const now = new Date().toISOString();
         set((state) => ({
-          lists: updateTargetList(state.lists, listId, (list) => ({
-            ...list,
-            updatedAt: now,
-            items: list.items.filter((item) => item.id !== itemId),
-          })),
+          lists: updateTargetList(state.lists, listId, (list) => {
+            if (list.status === 'completed') return list;
+            return {
+              ...list,
+              updatedAt: now,
+              items: list.items.filter((item) => item.id !== itemId),
+            };
+          }),
         }));
       },
 
       adjustItemQuantity: (listId, itemId, delta) => {
         const now = new Date().toISOString();
         set((state) => ({
-          lists: updateTargetList(state.lists, listId, (list) => ({
-            ...list,
-            updatedAt: now,
-            items: list.items.map((item) => {
-              if (item.id !== itemId) return item;
-              const nextQty = Math.round((item.quantity + delta) * 100) / 100;
-              return {
-                ...item,
-                quantity: Math.max(delta < 0 ? 1 : 0.01, nextQty),
-              };
-            }),
-          })),
+          lists: updateTargetList(state.lists, listId, (list) => {
+            if (list.status === 'completed') return list;
+            return {
+              ...list,
+              updatedAt: now,
+              items: list.items.map((item) => {
+                if (item.id !== itemId) return item;
+                const nextQty = Math.round((item.quantity + delta) * 100) / 100;
+                return {
+                  ...item,
+                  quantity: Math.max(delta < 0 ? 1 : 0.01, nextQty),
+                };
+              }),
+            };
+          }),
         }));
       },
 
       setActualPaid: (listId, amount, currency) => {
         const now = new Date().toISOString();
         set((state) => ({
-          lists: updateTargetList(state.lists, listId, (list) => ({
-            ...list,
-            actualPaidAmount: amount && amount > 0 ? amount : undefined,
-            actualPaidCurrency: currency,
-            updatedAt: now,
-          })),
+          lists: updateTargetList(state.lists, listId, (list) => {
+            if (list.status === 'completed') return list;
+            return {
+              ...list,
+              actualPaidAmount: amount && amount > 0 ? amount : undefined,
+              actualPaidCurrency: currency,
+              updatedAt: now,
+            };
+          }),
         }));
       },
 
@@ -221,17 +244,6 @@ export const useShoppingStore = create<ShoppingState>()(
             ...list,
             status: 'completed',
             completedAt: now,
-            updatedAt: now,
-          })),
-        }));
-      },
-
-      reopenList: (listId) => {
-        const now = new Date().toISOString();
-        set((state) => ({
-          lists: updateTargetList(state.lists, listId, (list) => ({
-            ...list,
-            status: 'active',
             updatedAt: now,
           })),
         }));

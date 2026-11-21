@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "RatesVenApp",
+    "name": "RatesVEN",
     "slug": "ratesvenapp",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "orientation": "portrait",
     "icon": "./assets/images/logo.webp",
     "scheme": "ratesvenapp",
@@ -16,7 +16,7 @@
     },
     "android": {
       "package": "com.devlopez.ratesvenapp",
-      "versionCode": 5,
+      "versionCode": 6,
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
         "foregroundImage": "./assets/images/logo.webp",
@@ -61,9 +61,9 @@
               "label": "RatesVen Completo",
               "description": "Tasas USD, EUR y USDT con variación del día",
               "minWidth": "250dp",
-              "minHeight": "110dp",
+              "minHeight": "60dp",
               "targetCellWidth": 4,
-              "targetCellHeight": 2,
+              "targetCellHeight": 1,
               "resizeMode": "horizontal|vertical",
               "updatePeriodMillis": 1800000,
               "previewImage": "./assets/images/widget-preview-medium.png"

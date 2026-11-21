@@ -28,6 +28,7 @@ import {
   RealtimeRatesSlide,
   ShoppingCalculatorSlide,
 } from '@/components/onboarding/OnboardingSlides';
+import { RatesVenTitle } from '@/components/ui/RatesVenTitle';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import {
   triggerNotificationHaptic,
@@ -164,12 +165,11 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
             style={{ width: 38, height: 38, marginTop: 2 }}
             resizeMode="contain"
           />
-          <Text
-            className="text-lg font-bold tracking-wide"
-            style={{ color: brandTextColor }}
-          >
-            RATESVEN
-          </Text>
+          <RatesVenTitle
+            size="md"
+            variant={isDark ? 'dark' : 'light'}
+            textColor={brandTextColor}
+          />
         </View>
 
         <Pressable

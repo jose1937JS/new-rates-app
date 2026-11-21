@@ -289,10 +289,8 @@ export default function CustomRatesScreen() {
                 entering={FadeInDown.delay(idx * 45).duration(280)}
               >
                 <Card
-                  className="border"
                   style={{
-                    borderColor: item.enabled ? COLORS.primary : COLORS.border,
-                    opacity: item.enabled ? 1 : 0.78,
+                    opacity: item.enabled ? 1 : 0.5,
                   }}
                 >
                   <View className="flex-row items-center justify-between gap-2">

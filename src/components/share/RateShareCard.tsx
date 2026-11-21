@@ -1,12 +1,12 @@
-import { forwardRef } from 'react';
-import { Image, Text, View } from 'react-native';
-
 import { CurrencyIcon } from '@/components/ui/CurrencyIcon';
+import { RatesVenTitle } from '@/components/ui/RatesVenTitle';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import type { CurrencyCode, CustomRateItem, UnifiedRates } from '@/types/currency.types';
-import { convertWithRateSource } from '@/utils/customRateUtils';
 import { CURRENCY_SYMBOLS } from '@/utils/constants';
+import { convertWithRateSource, getDefaultRateSourceForCurrency } from '@/utils/customRateUtils';
 import { formatFullDateTime, formatNumber, formatPercentage } from '@/utils/formatters';
+import { forwardRef } from 'react';
+import { Image, Text, View } from 'react-native';
 
 const APP_LOGO = require('@/assets/images/logo.webp');
 
@@ -110,7 +110,7 @@ export const RateShareCard = forwardRef<View, RateShareCardProps>(
     const highlightTarget = convertWithRateSource(
       highlightAmount,
       highlightCurrency,
-      'BCV_USD',
+      getDefaultRateSourceForCurrency(highlightCurrency),
       {
         usdToVes: rates.usd.rateToVes,
         eurToVes: rates.eur.rateToVes,
@@ -153,13 +153,18 @@ export const RateShareCard = forwardRef<View, RateShareCardProps>(
               />
             </View>
             <View>
-              <Text
-                className="text-base font-bold tracking-wide"
-                style={{ color: palette.title }}
-              >
-                RATESVEN
-              </Text>
-              <Text className="text-[11px]" style={{ color: palette.subtitle }}>
+              <RatesVenTitle
+                size="sm"
+                variant={
+                  theme === 'brand'
+                    ? 'hero'
+                    : theme === 'dark'
+                      ? 'dark'
+                      : 'light'
+                }
+                textColor={palette.title}
+              />
+              <Text className="mt-0.5 text-[11px]" style={{ color: palette.subtitle }}>
                 Tasas de cambio del día
               </Text>
             </View>
@@ -324,7 +329,7 @@ export const RateShareCard = forwardRef<View, RateShareCardProps>(
           className="mt-3.5 text-center text-[10px] font-medium"
           style={{ color: palette.subtitle }}
         >
-          Fuentes: BCV • Yadio • Compartido con RatesVenApp
+          Fuentes: BCV • Yadio • Compartido con RatesVEN
         </Text>
       </View>
     );

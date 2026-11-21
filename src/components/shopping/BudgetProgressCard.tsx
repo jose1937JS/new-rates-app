@@ -36,7 +36,7 @@ export function BudgetProgressBar({
     return (
       <Pressable
         onPress={onEditPress}
-        className="mt-3 flex-row items-center justify-between rounded-xl px-3 py-2 active:opacity-80"
+        className="mt-3 flex-row items-center justify-between rounded-xl px-3 py-2.5 active:opacity-80"
         style={{
           backgroundColor: 'rgba(255, 255, 255, 0.16)',
           borderCurve: 'continuous',
@@ -44,11 +44,11 @@ export function BudgetProgressBar({
       >
         <View className="flex-row items-center gap-2">
           <Wallet size={14} color="#ffffff" />
-          <Text className="text-xs font-medium text-white">
+          <Text className="text-[12px] font-medium text-white">
             Definir monto límite de compra
           </Text>
         </View>
-        <Text className="text-xs font-medium text-white">+ Límite</Text>
+        <Text className="text-[12px] font-medium text-white">+ Límite</Text>
       </Pressable>
     );
   }

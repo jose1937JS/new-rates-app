@@ -40,6 +40,68 @@ const DARK_PALETTE: WidgetPalette = {
   border: '#38383c',
 };
 
+function renderWidgetBrandTitle(
+  palette: WidgetPalette,
+  textSize: number,
+  badgeTextSize: number,
+) {
+  return (
+    <FlexWidget
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        flexGap: 3,
+      }}
+    >
+      <TextWidget
+        text="Rates"
+        style={{
+          fontSize: textSize,
+          fontWeight: 'bold',
+          color: palette.textPrimary,
+        }}
+      />
+      <FlexWidget
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: '#ffffff',
+          borderColor: palette.border,
+          borderWidth: 1,
+          borderRadius: 5,
+          paddingHorizontal: 4,
+          paddingVertical: 1,
+        }}
+      >
+        <TextWidget
+          text="V"
+          style={{
+            fontSize: badgeTextSize,
+            fontWeight: 'bold',
+            color: '#FFCC00',
+          }}
+        />
+        <TextWidget
+          text="E"
+          style={{
+            fontSize: badgeTextSize,
+            fontWeight: 'bold',
+            color: '#0d3fbd',
+          }}
+        />
+        <TextWidget
+          text="N"
+          style={{
+            fontSize: badgeTextSize,
+            fontWeight: 'bold',
+            color: '#CF142B',
+          }}
+        />
+      </FlexWidget>
+    </FlexWidget>
+  );
+}
+
 function renderEmptyWidget(palette: WidgetPalette) {
   return (
     <FlexWidget
@@ -54,14 +116,7 @@ function renderEmptyWidget(palette: WidgetPalette) {
         alignItems: 'center',
       }}
     >
-      <TextWidget
-        text="RATESVEN"
-        style={{
-          fontSize: 13,
-          fontWeight: 'bold',
-          color: palette.primary,
-        }}
-      />
+      {renderWidgetBrandTitle(palette, 13, 10)}
       <TextWidget
         text="Toca para cargar las tasas"
         style={{
@@ -91,8 +146,9 @@ function SmallWidgetContent({
         height: 'match_parent',
         width: 'match_parent',
         backgroundColor: palette.bg,
-        borderRadius: 20,
-        padding: 12,
+        borderRadius: 16,
+        paddingHorizontal: 10,
+        paddingVertical: 7,
         justifyContent: 'space-between',
       }}
     >
@@ -109,23 +165,16 @@ function SmallWidgetContent({
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            flexGap: 5,
+            flexGap: 4,
           }}
         >
           <ImageWidget
             image={APP_LOGO}
-            imageWidth={15}
-            imageHeight={15}
+            imageWidth={12}
+            imageHeight={12}
             resizeMode="contain"
           />
-          <TextWidget
-            text="RATESVEN"
-            style={{
-              fontSize: 11,
-              fontWeight: 'bold',
-              color: palette.primary,
-            }}
-          />
+          {renderWidgetBrandTitle(palette, 10, 8)}
         </FlexWidget>
 
         <TextWidget
@@ -133,16 +182,17 @@ function SmallWidgetContent({
           clickAction="REFRESH"
           accessibilityLabel="Actualizar tasas"
           style={{
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: 'bold',
             color: palette.textMuted,
-            paddingHorizontal: 4,
+            paddingHorizontal: 6,
+            paddingVertical: 1,
           }}
         />
       </FlexWidget>
 
-      {/* USD BCV & USDT */}
-      <FlexWidget style={{ width: 'match_parent', flexGap: 6 }}>
+      {/* USD & USDT */}
+      <FlexWidget style={{ width: 'match_parent', flexGap: 4 }}>
         <FlexWidget
           style={{
             width: 'match_parent',
@@ -150,15 +200,15 @@ function SmallWidgetContent({
             justifyContent: 'space-between',
             alignItems: 'center',
             backgroundColor: palette.cardBg,
-            borderRadius: 10,
-            paddingHorizontal: 9,
-            paddingVertical: 5,
+            borderRadius: 8,
+            paddingHorizontal: 8,
+            paddingVertical: 3,
           }}
         >
           <TextWidget
-            text="BCV $"
+            text="USD"
             style={{
-              fontSize: 11,
+              fontSize: 10,
               fontWeight: '600',
               color: palette.textMuted,
             }}
@@ -169,9 +219,11 @@ function SmallWidgetContent({
                 ? `${formatNumber(rates.usd.rateToVes, 2)} Bs`
                 : '--'
             }
+            maxLines={1}
             style={{
-              fontSize: 13,
+              fontSize: 11,
               fontWeight: 'bold',
+              adjustsFontSizeToFit: true,
               color: palette.textPrimary,
             }}
           />
@@ -184,15 +236,15 @@ function SmallWidgetContent({
             justifyContent: 'space-between',
             alignItems: 'center',
             backgroundColor: palette.cardBg,
-            borderRadius: 10,
-            paddingHorizontal: 9,
-            paddingVertical: 5,
+            borderRadius: 8,
+            paddingHorizontal: 8,
+            paddingVertical: 3,
           }}
         >
           <TextWidget
             text="USDT"
             style={{
-              fontSize: 11,
+              fontSize: 10,
               fontWeight: '600',
               color: palette.textMuted,
             }}
@@ -203,9 +255,11 @@ function SmallWidgetContent({
                 ? `${formatNumber(rates.usdt.rateToVes, 2)} Bs`
                 : '--'
             }
+            maxLines={1}
             style={{
-              fontSize: 13,
+              fontSize: 11,
               fontWeight: 'bold',
+              adjustsFontSizeToFit: true,
               color: palette.textPrimary,
             }}
           />
@@ -231,19 +285,16 @@ function MediumWidgetContent({
   const columns = [
     {
       label: 'USD',
-      source: 'BCV',
       rate: rates.usd.rateToVes,
       change: rates.usd.changePercentage,
     },
     {
       label: 'EUR',
-      source: 'BCV',
       rate: rates.eur.rateToVes,
       change: rates.eur.changePercentage,
     },
     {
       label: 'USDT',
-      source: 'Yadio',
       rate: rates.usdt.rateToVes,
       change: rates.usdt.changePercentage,
     },
@@ -257,8 +308,9 @@ function MediumWidgetContent({
         height: 'match_parent',
         width: 'match_parent',
         backgroundColor: palette.bg,
-        borderRadius: 22,
-        padding: 14,
+        borderRadius: 18,
+        paddingHorizontal: 10,
+        paddingVertical: 7,
         justifyContent: 'space-between',
       }}
     >
@@ -275,23 +327,16 @@ function MediumWidgetContent({
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            flexGap: 7,
+            flexGap: 5,
           }}
         >
           <ImageWidget
             image={APP_LOGO}
-            imageWidth={18}
-            imageHeight={18}
+            imageWidth={13}
+            imageHeight={13}
             resizeMode="contain"
           />
-          <TextWidget
-            text="RATESVEN"
-            style={{
-              fontSize: 13,
-              fontWeight: 'bold',
-              color: palette.primary,
-            }}
-          />
+          {renderWidgetBrandTitle(palette, 10, 8)}
         </FlexWidget>
 
         <FlexWidget
@@ -301,22 +346,22 @@ function MediumWidgetContent({
             flexDirection: 'row',
             alignItems: 'center',
             backgroundColor: palette.cardBg,
-            borderRadius: 10,
-            paddingHorizontal: 8,
-            paddingVertical: 4,
-            flexGap: 5,
+            borderRadius: 8,
+            paddingHorizontal: 6,
+            paddingVertical: 2,
+            flexGap: 4,
           }}
         >
           {updatedLabel ? (
             <TextWidget
               text={updatedLabel}
-              style={{ fontSize: 10, color: palette.textMuted }}
+              style={{ fontSize: 9, color: palette.textMuted }}
             />
           ) : null}
           <TextWidget
             text="↻"
             style={{
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: 'bold',
               color: palette.primary,
             }}
@@ -329,7 +374,9 @@ function MediumWidgetContent({
         style={{
           width: 'match_parent',
           flexDirection: 'row',
-          flexGap: 8,
+          flexGap: 6,
+          marginTop: 4,
+          flex: 1,
         }}
       >
         {columns.map((col) => {
@@ -339,11 +386,12 @@ function MediumWidgetContent({
               key={col.label}
               style={{
                 flex: 1,
+                height: 'match_parent',
                 backgroundColor: palette.cardBg,
-                borderRadius: 14,
-                paddingHorizontal: 8,
-                paddingVertical: 10,
-                justifyContent: 'space-between',
+                borderRadius: 10,
+                paddingHorizontal: 7,
+                paddingVertical: 5,
+                justifyContent: 'center',
               }}
             >
               <FlexWidget
@@ -357,16 +405,17 @@ function MediumWidgetContent({
                 <TextWidget
                   text={col.label}
                   style={{
-                    fontSize: 12,
+                    fontSize: 10,
                     fontWeight: 'bold',
                     color: palette.textPrimary,
                   }}
                 />
                 <TextWidget
-                  text={col.source}
+                  text={formatPercentage(col.change)}
                   style={{
                     fontSize: 9,
-                    color: palette.textMuted,
+                    fontWeight: '600',
+                    color: isPositive ? palette.success : palette.danger,
                   }}
                 />
               </FlexWidget>
@@ -375,21 +424,11 @@ function MediumWidgetContent({
                 text={col.rate > 0 ? `${formatNumber(col.rate, 2)} Bs` : '--'}
                 maxLines={1}
                 style={{
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: 'bold',
                   adjustsFontSizeToFit: true,
                   color: palette.textPrimary,
-                  marginTop: 6,
-                }}
-              />
-
-              <TextWidget
-                text={formatPercentage(col.change)}
-                style={{
-                  fontSize: 10,
-                  fontWeight: '600',
-                  color: isPositive ? palette.success : palette.danger,
-                  marginTop: 3,
+                  marginTop: 2,
                 }}
               />
             </FlexWidget>

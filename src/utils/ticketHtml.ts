@@ -74,7 +74,10 @@ export function buildShoppingTicketHtml(
     list.displayCurrency,
     list.ratesSnapshot,
   );
-  const headerName = businessName?.trim() || 'RATESVEN';
+  const trimmedBiz = businessName?.trim();
+  const headerHtml = trimmedBiz
+    ? escapeHtml(trimmedBiz)
+    : '<span style="text-transform:none;letter-spacing:0;color:#0f172a;">Rates<span style="display:inline-block;background:#ffffff;border:1px solid #cbd5e1;padding:0 5px;border-radius:5px;margin-left:3px;font-size:11px;vertical-align:middle;"><span style="color:#FFCC00;">V</span><span style="color:#0d3fbd;">E</span><span style="color:#CF142B;">N</span></span></span>';
 
   const itemsHtml = list.items
     .map((item) => {
@@ -121,7 +124,7 @@ export function buildShoppingTicketHtml(
 <body>
   <div class="ticket">
     <div class="header">
-      <div class="biz">${escapeHtml(headerName)}</div>
+      <div class="biz">${headerHtml}</div>
       <div class="title">${escapeHtml(list.title)}</div>
       <div class="date">${escapeHtml(formatFullDateTime(list.completedAt ?? list.createdAt))}</div>
     </div>
@@ -137,7 +140,7 @@ export function buildShoppingTicketHtml(
     ${actualHtml}
     <div class="footer">
       Tasas: USD ${formatNumber(list.ratesSnapshot.usdToVes)} Bs &bull; EUR ${formatNumber(list.ratesSnapshot.eurToVes)} Bs &bull; USDT ${formatNumber(list.ratesSnapshot.usdtToVes)} Bs<br/>
-      Generado con RatesVenApp
+      Generado con RatesVEN
     </div>
   </div>
 </body>

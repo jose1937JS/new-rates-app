@@ -20,6 +20,7 @@ export const CUSTOM_RATE_EMOJI_PRESETS = [
   '🛒',
   '💎',
   '⭐',
+  '💰',
 ] as const;
 
 export const CUSTOM_RATE_ROUNDING_OPTIONS: Array<{
@@ -178,7 +179,15 @@ export function getRateForSource(
   return { rateToVes: snapshot.usdToVes, label: 'BCV Dólar' };
 }
 
-/** Convert an amount from any CurrencyCode to all 4 currencies using a chosen USD-based rate source when custom, or official snapshot otherwise. */
+export function getDefaultRateSourceForCurrency(
+  currency: CurrencyCode,
+): RateSourceId {
+  if (currency === 'EUR') return 'BCV_EUR';
+  if (currency === 'USDT') return 'USDT';
+  return 'BCV_USD';
+}
+
+/** Convert an amount from any CurrencyCode to all 4 currencies using the selected rate source. */
 export function convertWithRateSource(
   amount: number,
   fromCurrency: CurrencyCode,
@@ -190,41 +199,26 @@ export function convertWithRateSource(
   }
 
   const chosen = getRateForSource(sourceId, snapshot);
-  const customRate = sourceId.startsWith('CUSTOM:') ? chosen.rateToVes : 0;
-
-  // Use chosen custom rate for VES <-> USD conversions; fall back to snapshot for EUR/USDT
-  const effectiveUsdRate = customRate > 0 ? customRate : snapshot.usdToVes;
-  const effectiveEurRate =
-    sourceId === 'BCV_EUR' && snapshot.eurToVes > 0
+  const fallbackRate =
+    fromCurrency === 'EUR'
       ? snapshot.eurToVes
-      : snapshot.eurToVes;
-  const effectiveUsdtRate =
-    sourceId === 'USDT' && snapshot.usdtToVes > 0
-      ? snapshot.usdtToVes
-      : snapshot.usdtToVes;
+      : fromCurrency === 'USDT'
+        ? snapshot.usdtToVes
+        : snapshot.usdToVes;
+  const appliedRate = chosen.rateToVes > 0 ? chosen.rateToVes : fallbackRate;
 
-  let amountInVes = 0;
-  switch (fromCurrency) {
-    case 'VES':
-      amountInVes = amount;
-      break;
-    case 'USD':
-      amountInVes = amount * (sourceId === 'BCV_EUR' ? snapshot.usdToVes : chosen.rateToVes || snapshot.usdToVes);
-      break;
-    case 'EUR':
-      amountInVes = amount * (effectiveEurRate || chosen.rateToVes);
-      break;
-    case 'USDT':
-      amountInVes = amount * (customRate > 0 ? customRate : effectiveUsdtRate);
-      break;
-  }
+  const isCustom = sourceId.startsWith('CUSTOM:');
+  const effectiveUsdRate = isCustom
+    ? appliedRate
+    : snapshot.usdToVes || appliedRate;
+  const effectiveEurRate = snapshot.eurToVes;
+  const effectiveUsdtRate = snapshot.usdtToVes;
+
+  const amountInVes = fromCurrency === 'VES' ? amount : amount * appliedRate;
 
   return {
     VES: amountInVes,
-    USD:
-      (sourceId === 'BCV_USD' || customRate > 0 ? effectiveUsdRate : chosen.rateToVes || effectiveUsdRate) > 0
-        ? amountInVes / (customRate > 0 ? customRate : chosen.rateToVes || effectiveUsdRate)
-        : 0,
+    USD: effectiveUsdRate > 0 ? amountInVes / effectiveUsdRate : 0,
     EUR: effectiveEurRate > 0 ? amountInVes / effectiveEurRate : 0,
     USDT: effectiveUsdtRate > 0 ? amountInVes / effectiveUsdtRate : 0,
   };

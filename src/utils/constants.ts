@@ -128,6 +128,26 @@ export const PRIMARY_COLOR_OPTIONS: PrimaryColorOption[] = [
     rgbLight: '234 179 8',
     rgbDark: '161 98 7',
   },
+  {
+    id: 'graphite',
+    label: 'Grafito',
+    primary: '#334155',
+    primaryLight: '#64748b',
+    primaryDark: '#475569',
+    rgb: '51 65 85',
+    rgbLight: '100 116 139',
+    rgbDark: '71 85 105',
+  },
+  {
+    id: 'silver',
+    label: 'Gris claro',
+    primary: '#717d8e',
+    primaryLight: '#94a3b8',
+    primaryDark: '#64748b',
+    rgb: '113 125 142',
+    rgbLight: '148 163 184',
+    rgbDark: '100 116 139',
+  },
 ];
 
 export const THEME_COLORS = {
@@ -163,5 +183,5 @@ export const THEME_COLORS = {
 
 // ----- App -----
 
-export const APP_NAME = Constants.expoConfig?.name ?? 'RatesVenApp';
-export const APP_VERSION = Constants.expoConfig?.version ?? '1.0.1';
+export const APP_NAME = Constants.expoConfig?.name ?? 'RatesVEN';
+export const APP_VERSION = Constants.expoConfig?.version ?? '1.2.1';

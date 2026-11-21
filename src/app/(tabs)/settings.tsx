@@ -37,11 +37,11 @@ import {
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { singleLineInputStyle } from '@/utils/inputStyles';
 import { AppModal, type AppModalVariant } from '@/components/ui/AppModal';
 import { AppSheet } from '@/components/ui/AppSheet';
 import { Card } from '@/components/ui/Card';
 import { ClearInputButton } from '@/components/ui/ClearInputButton';
+import { RatesVenTitle } from '@/components/ui/RatesVenTitle';
 import { ScreenHero } from '@/components/ui/ScreenHero';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import {
@@ -53,7 +53,6 @@ import { useCurrencyStore } from '@/store/currencyStore';
 import { useCustomRateStore } from '@/store/customRateStore';
 import type { PrimaryColorId, ThemeMode } from '@/types/currency.types';
 import {
-  APP_NAME,
   APP_VERSION,
   PRIMARY_COLOR_OPTIONS,
 } from '@/utils/constants';
@@ -62,6 +61,7 @@ import {
   triggerNotificationHaptic,
   triggerSelectionHaptic,
 } from '@/utils/haptics';
+import { singleLineInputStyle } from '@/utils/inputStyles';
 
 interface ModalState {
   visible: boolean;
@@ -365,8 +365,8 @@ export default function SettingsScreen() {
           <SettingsRow
             icon={<Globe size={16} color={COLORS.textMuted} />}
             label="Sitio Web"
-            value="devlopez.vercel.app"
-            onPress={() => Linking.openURL('https://devlopez.vercel.app')}
+            value="joselopez.vercel.app"
+            onPress={() => Linking.openURL('https://joselopez.vercel.app')}
           />
           <SettingsRow
             icon={<Tag size={16} color={COLORS.textMuted} />}
@@ -430,7 +430,15 @@ export default function SettingsScreen() {
         >
             {/* Primary Color Picker */}
           <View className="pt-3">
-            <View className="flex-row flex-wrap items-center justify-between">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{
+                gap: 14,
+                paddingVertical: 4,
+                paddingHorizontal: 2,
+              }}
+            >
               {PRIMARY_COLOR_OPTIONS.map((option) => {
                 const isSelected = option.id === primaryColor;
                 return (
@@ -438,7 +446,7 @@ export default function SettingsScreen() {
                     key={option.id}
                     onPress={() => handlePrimaryColorChange(option.id)}
                     accessibilityLabel={`Color ${option.label}`}
-                    className="items-center gap-1 active:opacity-80"
+                    className="min-w-[54px] items-center gap-1.5 active:opacity-80"
                   >
                     <View
                       className="h-9 w-9 items-center justify-center rounded-full border-2"
@@ -448,7 +456,7 @@ export default function SettingsScreen() {
                           : option.primary,
                         borderColor: isSelected
                           ? COLORS.textPrimary
-                          : 'transparent',
+                          : COLORS.border,
                       }}
                     >
                       {isSelected && (
@@ -456,17 +464,20 @@ export default function SettingsScreen() {
                       )}
                     </View>
                     <Text
-                      className="text-[10px]"
+                      className="text-[10px] font-medium"
                       style={{
-                        color: isSelected ? COLORS.primary : COLORS.textMuted,
+                        color: isSelected
+                          ? COLORS.textPrimary
+                          : COLORS.textMuted,
                       }}
+                      numberOfLines={1}
                     >
                       {option.label}
                     </Text>
                   </Pressable>
                 );
               })}
-            </View>
+            </ScrollView>
           </View>
         </SettingsGroup>
 
@@ -586,9 +597,13 @@ export default function SettingsScreen() {
           entering={FadeInDown.delay(350).duration(350)}
           className="items-center pt-2"
         >
-          <Text className="text-xs text-text-muted">
-            {APP_NAME} v{APP_VERSION}
-          </Text>
+          <View className="flex-row items-center gap-1.5">
+            <RatesVenTitle
+              size="xs"
+              variant={COLORS.isDark ? 'dark' : 'light'}
+            />
+            <Text className="text-xs text-text-muted">v{APP_VERSION}</Text>
+          </View>
           <Text className="mt-1 text-xs text-text-muted">
             Datos desde Rates Cloudflare API
           </Text>

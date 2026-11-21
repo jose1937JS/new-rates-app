@@ -94,7 +94,9 @@ export type PrimaryColorId =
   | 'emerald'
   | 'violet'
   | 'rose'
-  | 'gold';
+  | 'gold'
+  | 'graphite'
+  | 'silver';
 
 export interface PrimaryColorOption {
   id: PrimaryColorId;

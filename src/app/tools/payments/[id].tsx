@@ -31,15 +31,15 @@ import { useEffectiveRates } from '@/hooks/useEffectiveRates';
 import { useThemeColors } from '@/hooks/useThemeColors';
 import { usePaymentTemplatesStore } from '@/store/paymentTemplatesStore';
 import type { CurrencyCode, RateSourceId } from '@/types/currency.types';
-import { singleLineInputStyle } from '@/utils/inputStyles';
 import { CURRENCY_SYMBOLS } from '@/utils/constants';
-import { convertWithRateSource } from '@/utils/customRateUtils';
+import { convertWithRateSource, getDefaultRateSourceForCurrency } from '@/utils/customRateUtils';
 import {
   formatBankAmount,
   formatNumber,
   parseFormattedNumber,
 } from '@/utils/formatters';
 import { triggerImpactHaptic, triggerSelectionHaptic } from '@/utils/haptics';
+import { singleLineInputStyle } from '@/utils/inputStyles';
 import {
   PAYMENT_METHOD_LABELS,
   buildPaymentShareMessage,
@@ -115,10 +115,19 @@ export default function PaymentTemplateDetailScreen() {
 
   const [amountText, setAmountText] = useState(params.amount ?? '');
   const [currency, setCurrency] = useState<CurrencyCode>(initialCurrency);
-  const [rateSource, setRateSource] = useState<RateSourceId>('BCV_USD');
+  const [rateSource, setRateSource] = useState<RateSourceId>(() =>
+    getDefaultRateSourceForCurrency(initialCurrency),
+  );
   const [includeEquivalents, setIncludeEquivalents] = useState(true);
   const [showEditSheet, setShowEditSheet] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const handleCurrencyChange = (nextCurrency: CurrencyCode) => {
+    setCurrency(nextCurrency);
+    if (!rateSource.startsWith('CUSTOM:') && nextCurrency !== 'VES') {
+      setRateSource(getDefaultRateSourceForCurrency(nextCurrency));
+    }
+  };
 
   if (!template) {
     return (
@@ -229,7 +238,10 @@ export default function PaymentTemplateDetailScreen() {
         {/* Optional Amount & Conversion */}
         <Card title="Monto opcional a incluir">
           <View className="gap-3">
-            <CurrencyChipRow selected={currency} onSelect={setCurrency} />
+            <CurrencyChipRow
+              selected={currency}
+              onSelect={handleCurrencyChange}
+            />
             <View className="h-12 flex-row items-center gap-2 rounded-xl border border-border bg-surface-elevated px-3.5">
               <Text
                 className="text-lg font-bold"
@@ -282,6 +294,9 @@ export default function PaymentTemplateDetailScreen() {
                     style={{ fontVariant: ['tabular-nums'] }}
                   >
                     {formatNumber(conversions.USD)} $ •{' '}
+                    {currency === 'EUR' || rateSource === 'BCV_EUR'
+                      ? `${formatNumber(conversions.EUR)} € • `
+                      : ''}
                     {formatNumber(conversions.USDT)} ₮ •{' '}
                     {formatNumber(conversions.VES)} Bs
                   </Text>

@@ -82,12 +82,12 @@ export default function ShoppingDetailScreen() {
     adjustItemQuantity,
     setActualPaid,
     completeList,
-    reopenList,
     deleteList,
   } = useShoppingStore();
 
   const [editingItem, setEditingItem] = useState<ShoppingItem | null>(null);
   const [showListConfig, setShowListConfig] = useState(false);
+  const [showFinishModal, setShowFinishModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showTicketSheet, setShowTicketSheet] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -173,12 +173,9 @@ export default function ShoppingDetailScreen() {
   const handleFinishList = () => {
     triggerNotificationHaptic('success');
     setEditingItem(null);
+    setShowListConfig(false);
+    setShowFinishModal(false);
     completeList(list.id);
-  };
-
-  const handleReopenList = () => {
-    triggerSelectionHaptic();
-    reopenList(list.id);
   };
 
   return (
@@ -248,21 +245,7 @@ export default function ShoppingDetailScreen() {
                 <Settings2 size={15} color="#ffffff" />
                 <Text className="text-xs font-medium text-white">Límite</Text>
               </Pressable>
-            ) : (
-              <Pressable
-                onPress={handleReopenList}
-                hitSlop={8}
-                className="flex-row items-center gap-1 rounded-xl bg-white px-3 py-2 active:opacity-85"
-                style={{ borderCurve: 'continuous' }}
-              >
-                <Text
-                  className="text-xs font-medium"
-                  style={{ color: COLORS.primary }}
-                >
-                  Editar
-                </Text>
-              </Pressable>
-            )}
+            ) : null}
           </View>
         }
       >
@@ -389,16 +372,30 @@ export default function ShoppingDetailScreen() {
                 ))
               )}
             </Card>
+
+            {list.items.length > 0 && (
+              <ActualPaidCard
+                totals={totals}
+                displayCurrency={list.displayCurrency}
+                actualPaidAmount={list.actualPaidAmount}
+                actualPaidCurrency={list.actualPaidCurrency}
+                ratesSnapshot={list.ratesSnapshot}
+                onSaveActualPaid={(amount, currency) =>
+                  setActualPaid(list.id, amount, currency)
+                }
+              />
+            )}
           </>
         ) : (
           <>
-            {/* Actual Paid Price Card */}
+            {/* Actual Paid Price Card (Read-only after completion) */}
             <ActualPaidCard
               totals={totals}
               displayCurrency={list.displayCurrency}
               actualPaidAmount={list.actualPaidAmount}
               actualPaidCurrency={list.actualPaidCurrency}
               ratesSnapshot={list.ratesSnapshot}
+              readOnly
               onSaveActualPaid={(amount, currency) =>
                 setActualPaid(list.id, amount, currency)
               }
@@ -475,7 +472,10 @@ export default function ShoppingDetailScreen() {
           }}
         >
           <Pressable
-            onPress={handleFinishList}
+            onPress={() => {
+              triggerSelectionHaptic();
+              setShowFinishModal(true);
+            }}
             disabled={list.items.length === 0}
             className="flex-row items-center justify-center gap-2 rounded-2xl py-3.5 active:opacity-85"
             style={{
@@ -502,13 +502,23 @@ export default function ShoppingDetailScreen() {
       )}
 
       <ListSettingsModal
-        visible={showListConfig}
+        visible={isActive && showListConfig}
         initialTitle={list.title}
         initialBudgetLimit={list.budgetLimit}
         initialBudgetCurrency={list.budgetCurrency}
         confirmLabel="Guardar cambios"
         onSave={(payload) => updateListMeta(list.id, payload)}
         onClose={() => setShowListConfig(false)}
+      />
+
+      <AppModal
+        visible={showFinishModal}
+        title="Finalizar y guardar compra"
+        message="Una vez finalizada, no podrás editar los productos, el límite ni el monto real cobrado."
+        confirmText="Finalizar"
+        cancelText="Cancelar"
+        onConfirm={handleFinishList}
+        onClose={() => setShowFinishModal(false)}
       />
 
       <AppModal
@@ -551,7 +561,7 @@ export default function ShoppingDetailScreen() {
               >
                 <ImageIcon size={15} color="#ffffff" />
                 <Text className="text-xs font-medium text-white">
-                  Imagen (WhatsApp)
+                  Imagen
                 </Text>
               </Pressable>
 
