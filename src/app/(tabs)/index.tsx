@@ -265,7 +265,7 @@ export default function ConverterScreen() {
         refreshing={isFetching && !isLoading}
         onRefresh={refetch}
         contentContainerStyle={{
-          paddingHorizontal: 16,
+          marginHorizontal: 16,
           paddingTop: 0,
           paddingBottom: 104 + insets.bottom,
           gap: 16,

@@ -1,9 +1,13 @@
 import {
   Ban,
   Calendar,
+  CreditCard,
+  Percent,
   Receipt,
   ShoppingBasket,
+  SlidersHorizontal,
   Sparkles,
+  Users,
   Wallet,
   WifiOff,
 } from 'lucide-react-native';
@@ -388,44 +392,84 @@ export function PersonalizationHistorySlide({ isActive }: SlideProps) {
           className="text-right font-bold"
           style={{
             color: titleColor,
-            fontSize: 38,
-            lineHeight: 44,
+            fontSize: 34,
+            lineHeight: 40,
             letterSpacing: -0.8,
           }}
           numberOfLines={2}
           adjustsFontSizeToFit
         >
-          Historial y tema{'\n'}
+          Historial y herramientas{'\n'}
           <Text style={{ color: accent }}>a tu medida</Text>
         </Text>
 
         <Text
-          className="mt-3.5 text-right text-base font-medium leading-6"
-          style={{ color: bodyColor, maxWidth: 310 }}
+          className="mt-3 text-right text-sm font-medium leading-5"
+          style={{ color: bodyColor, maxWidth: 325 }}
         >
-          Explora gráficas históricas hasta 30 días y personaliza tu color y
-          modo oscuro.
+          Gráficas de 30 días, tasas propias, pago mixto con IGTF, plantillas
+          bancarias, divisor de cuentas, widgets y tema a tu gusto.
         </Text>
 
-        <View className="mt-5 flex-row flex-wrap items-center justify-end gap-2">
+        <View className="mt-4 flex-row flex-wrap items-center justify-end gap-2">
           <View
-            className="flex-row items-center gap-1.5 rounded-full border px-3 py-1.5"
+            className="flex-row items-center gap-1.5 rounded-full border px-2.5 py-1"
             style={{ backgroundColor: chipBg, borderColor: chipBorder }}
           >
-            <Calendar size={13} color={accent} />
-            <Text className="text-xs font-semibold" style={{ color: chipText }}>
-              1d • 7d • 30d
+            <Calendar size={12} color={accent} />
+            <Text className="text-[11px] font-semibold" style={{ color: chipText }}>
+              Historial 30d
             </Text>
           </View>
 
           <View
-            className="flex-row items-center gap-1.5 rounded-full border px-3 py-1.5"
+            className="flex-row items-center gap-1.5 rounded-full border px-2.5 py-1"
+            style={{ backgroundColor: chipBg, borderColor: chipBorder }}
+          >
+            <SlidersHorizontal size={12} color={accent} />
+            <Text className="text-[11px] font-semibold" style={{ color: chipText }}>
+              Tasas propias
+            </Text>
+          </View>
+
+          <View
+            className="flex-row items-center gap-1.5 rounded-full border px-2.5 py-1"
+            style={{ backgroundColor: chipBg, borderColor: chipBorder }}
+          >
+            <CreditCard size={12} color={accent} />
+            <Text className="text-[11px] font-semibold" style={{ color: chipText }}>
+              Plantillas
+            </Text>
+          </View>
+
+          <View
+            className="flex-row items-center gap-1.5 rounded-full border px-2.5 py-1"
+            style={{ backgroundColor: chipBg, borderColor: chipBorder }}
+          >
+            <Percent size={12} color={accent} />
+            <Text className="text-[11px] font-semibold" style={{ color: chipText }}>
+              Pago mixto
+            </Text>
+          </View>
+
+          <View
+            className="flex-row items-center gap-1.5 rounded-full border px-2.5 py-1"
+            style={{ backgroundColor: chipBg, borderColor: chipBorder }}
+          >
+            <Users size={12} color={accent} />
+            <Text className="text-[11px] font-semibold" style={{ color: chipText }}>
+              Divisor
+            </Text>
+          </View>
+
+          <View
+            className="flex-row items-center gap-1.5 rounded-full border px-2.5 py-1"
             style={{ backgroundColor: chipBg, borderColor: chipBorder }}
           >
             {PRIMARY_COLOR_OPTIONS.map((option) => (
               <View
                 key={option.id}
-                className="h-3.5 w-3.5 rounded-full"
+                className="h-3 w-3 rounded-full"
                 style={{
                   backgroundColor: isDark
                     ? option.primaryDark

@@ -9,10 +9,12 @@ export default function TabLayout() {
   return (
     <Tabs
       initialRouteName="index"
+      detachInactiveScreens={false}
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
         animation: 'shift',
+        freezeOnBlur: false,
         sceneStyle: {
           backgroundColor: COLORS.surface,
         },
